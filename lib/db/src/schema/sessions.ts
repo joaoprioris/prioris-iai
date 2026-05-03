@@ -1,4 +1,4 @@
-import { integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { organizationsTable } from "./organizations";
@@ -12,6 +12,8 @@ export const sessionsTable = pgTable("sessions", {
   context: jsonb("context").default({}),
   exchangeCount: integer("exchange_count").default(0),
   status: text("status").default("active"),
+  incident: boolean("incident").default(false),
+  incidentReason: text("incident_reason"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

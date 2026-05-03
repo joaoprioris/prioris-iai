@@ -15,6 +15,22 @@ const CLOSE_SIGNAL = "[ENCERRAR]";
 const CLOSING_MESSAGE =
   "Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar.";
 
+const CORRECTION_PREFIX =
+  "Parece que o que você precisa agora é diferente do que comecei abordando. Me conta mais sobre o que está acontecendo.\n\n";
+
+// Confidence thresholds
+const DISAMBIGUATION_THRESHOLD = 0.5; // below this → ask clarifying question
+const LOW_CONFIDENCE_THRESHOLD = 0.6; // below this → flag lowConfidence
+
+// Frustration signals (Rule 3) — checked as substrings, case-insensitive
+const FRUSTRATION_SIGNALS = [
+  "não é isso",
+  "você não entendeu",
+  "não era o que eu precisava",
+  "errado",
+  "não",
+];
+
 // Replit AI Integration proxy with fallback
 const baseURL = process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL;
 const apiKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "";
@@ -58,6 +74,8 @@ function composeLenses(agentType: string): string[] {
   return entries.map((e) => getLensText(e.agent, e.intensity));
 }
 
+// ── Schema enums ──────────────────────────────────────────────────────────────
+
 const DEBT_VALUES = [
   "EVITACAO_CONFLITO", "AUTORIDADE_FRAGILIZADA", "COMUNICACAO_AMBIGUA",
   "ACCOUNTABILITY_DILUIDA", "DECISAO_POSTERGADA", "CONFIANCA_EROSIONADA",
@@ -71,6 +89,8 @@ const CONTEXT_TYPE_VALUES = [
 
 const ACTOR_VALUES = ["LIDERADO", "PAR", "CHEFE", "CLIENTE", "TIME", "OUTRO"] as const;
 const MOMENT_PHASE_VALUES = ["BEFORE", "DURING", "AFTER"] as const;
+
+// ── SED validation ────────────────────────────────────────────────────────────
 
 interface SedRaw {
   debt_primary: string;
@@ -111,6 +131,8 @@ function validateSed(raw: unknown): SedRaw | null {
   };
 }
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -121,19 +143,23 @@ interface SessionContext {
   agentType: string | null;
   debtPrimary: string | null;
   debtAdjacent: string | null;
+  // Disambiguation state (Rule 1 & 2)
+  disambiguationPending: boolean;
+  originalFirstMessage: string | null;
+  // Frustration / re-classification tracking (Rule 3 & 4)
+  reclassificationCount: number;
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function getSystemPrompt(agentType: string, exchangeCount: number): string {
-  // 1. Agent core prompt
   const key = `PROMPT_${agentType}`;
   const corePrompt =
     process.env[key] ??
     `Você é o agente de suporte à decisão executiva IAí (${AGENT_LABELS[agentType as AgentType] ?? agentType}). Ajude o líder de forma direta, objetiva e respeitosa. Máximo de ${MAX_EXCHANGES} trocas por sessão.`;
 
-  // 2. Active lenses (from permissions matrix + env vars)
   const lensTexts = composeLenses(agentType);
 
-  // 3. Session context (rules + wrap-up)
   const sessionContext = [
     `REGRA OBRIGATÓRIA: Nunca escreva a frase "${CLOSING_MESSAGE}" — ela será adicionada automaticamente pelo sistema na última troca. Se você a escrever, ela aparecerá duplicada.`,
     `ENCERRAMENTO ANTECIPADO: Se você perceber que o líder já alcançou clareza suficiente antes de ${MAX_EXCHANGES} trocas, você pode encerrar a conversa mais cedo. Para isso, termine sua resposta com exatamente "${CLOSE_SIGNAL}" na última linha. O sistema removerá esse marcador e adicionará a mensagem de encerramento automaticamente. Não use "${CLOSE_SIGNAL}" se a conversa ainda precisar continuar.`,
@@ -142,11 +168,9 @@ function getSystemPrompt(agentType: string, exchangeCount: number): string {
       : []),
   ].join("\n\n");
 
-  // Compose: [core] + [lens 1] + [lens 2] + ... + [session context]
   const parts = [corePrompt, ...lensTexts, sessionContext];
   const composed = parts.join("\n\n");
 
-  // Log approximate token count for monitoring (≈ chars / 4)
   const approxTokens = Math.ceil(composed.length / 4);
   logger.info(
     { agentType, exchangeCount, lensCount: lensTexts.length, approxTokens },
@@ -182,6 +206,31 @@ async function classifyWithHaiku(content: string): Promise<{
   } catch {
     return { agent_type: "MNT", debt_primary: "decisao-estrategica", debt_adjacent: null, confidence: 0.3 };
   }
+}
+
+// Rule 1: Generate a single clarifying question in Portuguese
+async function generateClarifyingQuestion(content: string): Promise<string> {
+  try {
+    const message = await anthropic.messages.create({
+      model: MODEL_HAIKU,
+      max_tokens: 128,
+      messages: [{
+        role: "user",
+        content: `Leader said: ${content}. Ask ONE short warm clarifying question in Brazilian Portuguese.\nExample: Isso está acontecendo agora ou você está se preparando?`,
+      }],
+    });
+    return message.content[0].type === "text"
+      ? message.content[0].text.trim()
+      : "Pode me contar um pouco mais sobre o que está acontecendo?";
+  } catch {
+    return "Pode me contar um pouco mais sobre o que está acontecendo?";
+  }
+}
+
+// Rule 3: Detect frustration signals in user message
+function detectFrustration(content: string): boolean {
+  const lower = content.toLowerCase();
+  return FRUSTRATION_SIGNALS.some((signal) => lower.includes(signal));
 }
 
 async function generateAndSaveSed(
@@ -242,6 +291,8 @@ async function generateAndSaveSed(
   }
 }
 
+// ── Route ─────────────────────────────────────────────────────────────────────
+
 router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, res): Promise<void> => {
   const user = req.user!;
   const { sessionId, content } = req.body;
@@ -268,20 +319,59 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
     return;
   }
 
-  const ctx = (session.context as SessionContext | null) ?? {
+  // Initialise context with defaults for new fields so old sessions don't break
+  const ctx: SessionContext = {
     messages: [],
     agentType: null,
     debtPrimary: null,
     debtAdjacent: null,
+    disambiguationPending: false,
+    originalFirstMessage: null,
+    reclassificationCount: 0,
+    ...((session.context as Partial<SessionContext> | null) ?? {}),
   };
 
   let agentType = ctx.agentType ?? session.agentType;
   let debtPrimary = ctx.debtPrimary;
   let debtAdjacent = ctx.debtAdjacent;
   let lowConfidence = false;
+  let disambiguationPending = ctx.disambiguationPending;
+  let originalFirstMessage = ctx.originalFirstMessage;
+  let reclassificationCount = ctx.reclassificationCount;
+  let isFrustrated = false;
+  let askingClarification = false; // true when we short-circuit with a clarifying Q
 
-  // Step 1 & 2: Classify on first exchange
-  if (exchangeCount === 0) {
+  // ── Step 1: Classification / disambiguation / frustration ─────────────────
+
+  if (disambiguationPending) {
+    // Rule 1 follow-up: re-classify with combined input
+    const combined = `${originalFirstMessage ?? ""}\n\n${content.trim()}`;
+    try {
+      const classification = await classifyWithHaiku(combined);
+      if (classification.confidence < DISAMBIGUATION_THRESHOLD) {
+        // Rule 2: still not confident → safe fallback to CTN
+        agentType = "CTN";
+        debtPrimary = "EVITACAO_CONFLITO";
+        debtAdjacent = null;
+        lowConfidence = true;
+        req.log.info({ sessionId }, "Disambiguation still low confidence — routing to CTN");
+      } else {
+        agentType = classification.agent_type;
+        debtPrimary = classification.debt_primary;
+        debtAdjacent = classification.debt_adjacent;
+        lowConfidence = classification.confidence < LOW_CONFIDENCE_THRESHOLD;
+        req.log.info({ agentType, confidence: classification.confidence }, "Disambiguation resolved");
+      }
+    } catch (err) {
+      logger.warn({ err }, "Falha na re-classificação de disambiguação, usando CTN");
+      agentType = "CTN";
+      lowConfidence = true;
+    }
+    disambiguationPending = false;
+    originalFirstMessage = null;
+
+  } else if (exchangeCount === 0) {
+    // First exchange: library match then haiku
     const [libraryMatch] = await db
       .select()
       .from(momentLibraryTable)
@@ -296,11 +386,21 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
     } else {
       try {
         const classification = await classifyWithHaiku(content);
-        agentType = classification.agent_type;
-        debtPrimary = classification.debt_primary;
-        debtAdjacent = classification.debt_adjacent;
-        lowConfidence = classification.confidence < 0.6;
-        req.log.info({ agentType, confidence: classification.confidence, source: "haiku" }, "Agente classificado via IA");
+        req.log.info({ confidence: classification.confidence, agent: classification.agent_type }, "Haiku classification");
+
+        if (classification.confidence < DISAMBIGUATION_THRESHOLD) {
+          // Rule 1: confidence too low → ask clarifying question
+          askingClarification = true;
+          disambiguationPending = true;
+          originalFirstMessage = content.trim();
+          req.log.info({ sessionId, confidence: classification.confidence }, "Low confidence — asking clarifying question");
+        } else {
+          agentType = classification.agent_type;
+          debtPrimary = classification.debt_primary;
+          debtAdjacent = classification.debt_adjacent;
+          lowConfidence = classification.confidence < LOW_CONFIDENCE_THRESHOLD;
+          req.log.info({ agentType, source: "haiku" }, "Agente classificado via IA");
+        }
       } catch (err) {
         logger.warn({ err }, "Falha na classificação haiku, usando padrão MNT");
         agentType = "MNT";
@@ -308,17 +408,43 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
         lowConfidence = true;
       }
     }
+
+  } else {
+    // Exchange > 0 and not in disambiguation: check frustration (Rule 3)
+    if (detectFrustration(content)) {
+      isFrustrated = true;
+      // Re-classify with first user message + correction
+      const firstUserMsg = ctx.messages.find((m) => m.role === "user")?.content ?? content;
+      const combined = `${firstUserMsg}\n\n[Correção do usuário]: ${content.trim()}`;
+      try {
+        const classification = await classifyWithHaiku(combined);
+        agentType = classification.agent_type;
+        debtPrimary = classification.debt_primary;
+        debtAdjacent = classification.debt_adjacent;
+        lowConfidence = classification.confidence < LOW_CONFIDENCE_THRESHOLD;
+        reclassificationCount += 1;
+        req.log.info(
+          { agentType, reclassificationCount, sessionId },
+          "Frustration detected — agent re-classified",
+        );
+
+        // Rule 4: flag incident after 2+ re-classifications
+        if (reclassificationCount >= 2) {
+          req.log.warn({ sessionId, reclassificationCount }, "Incident: repeated reclassification");
+          await db
+            .update(sessionsTable)
+            .set({ incident: true, incidentReason: "repeated reclassification" })
+            .where(eq(sessionsTable.id, sessionId));
+        }
+      } catch (err) {
+        logger.warn({ err }, "Falha na re-classificação de frustração");
+        // Keep existing agentType
+      }
+    }
   }
 
-  // Step 3: Load system prompt (with wrap-up injection at exchange 8+)
-  const systemPrompt = getSystemPrompt(agentType ?? "MNT", exchangeCount);
+  // ── Step 2: Start SSE stream ──────────────────────────────────────────────
 
-  // Step 4: Build conversation history
-  const history: Message[] = ctx.messages ?? [];
-  const userMessage: Message = { role: "user", content: content.trim() };
-  const messagesForClaude = [...history, userMessage];
-
-  // Start SSE stream
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -329,9 +455,59 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
     res.write(`data: ${JSON.stringify(data)}\n\n`);
   };
 
+  const newCount = exchangeCount + 1;
+
+  // ── Step 3a: Clarifying question short-circuit (Rule 1) ───────────────────
+
+  if (askingClarification) {
+    try {
+      const question = await generateClarifyingQuestion(content);
+      sendEvent({ type: "token", content: question });
+
+      const userMessage: Message = { role: "user", content: content.trim() };
+      const assistantMessage: Message = { role: "assistant", content: question };
+
+      await db
+        .update(sessionsTable)
+        .set({
+          agentType: agentType ?? "MNT",
+          context: {
+            ...ctx,
+            messages: [...ctx.messages, userMessage, assistantMessage],
+            disambiguationPending: true,
+            originalFirstMessage,
+            reclassificationCount,
+          } as unknown as Record<string, unknown>,
+          exchangeCount: newCount,
+          status: "active",
+        })
+        .where(eq(sessionsTable.id, sessionId));
+
+      sendEvent({ type: "done", exchangeCount: newCount, maxExchanges: MAX_EXCHANGES, status: "active", lowConfidence: true });
+    } catch (err) {
+      logger.error({ err }, "Erro ao gerar pergunta de clarificação");
+      sendEvent({ type: "error", error: "Erro ao processar sua mensagem." });
+    }
+    res.end();
+    return;
+  }
+
+  // ── Step 3b: Main agent call ──────────────────────────────────────────────
+
+  const systemPrompt = getSystemPrompt(agentType ?? "MNT", exchangeCount);
+  const history: Message[] = ctx.messages ?? [];
+  const userMessage: Message = { role: "user", content: content.trim() };
+  const messagesForClaude = [...history, userMessage];
+
   let fullResponse = "";
 
   try {
+    // Rule 3: prepend correction message before streaming agent response
+    if (isFrustrated) {
+      fullResponse += CORRECTION_PREFIX;
+      sendEvent({ type: "token", content: CORRECTION_PREFIX });
+    }
+
     const stream = anthropic.messages.stream({
       model: MODEL_SONNET,
       system: systemPrompt,
@@ -349,30 +525,25 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
 
     await stream.finalMessage();
 
-    // Detect early-close signal from the model
+    // Detect early-close signal
     const trimmed = fullResponse.trimEnd();
     const earlyClose = trimmed.endsWith(CLOSE_SIGNAL);
 
     if (earlyClose) {
-      // Strip the signal from what was sent — need to send a correction token
       fullResponse = trimmed.slice(0, -CLOSE_SIGNAL.length).trimEnd();
-      // Send a negative-length correction isn't possible in SSE; instead we
-      // send the closing suffix which will be appended after [ENCERRAR] in the
-      // client buffer. We handle this by sending a special replace event.
       sendEvent({ type: "replace_last", content: fullResponse });
     }
 
-    const newCount = exchangeCount + 1;
     const isClosing = earlyClose || newCount >= MAX_EXCHANGES;
 
-    // Append closing message on final exchange (early or limit-reached)
     if (isClosing) {
       const closingSuffix = "\n\n" + CLOSING_MESSAGE;
       fullResponse += closingSuffix;
       sendEvent({ type: "token", content: closingSuffix });
     }
 
-    // Step 5: Update session in DB
+    // ── Step 4: Persist session ─────────────────────────────────────────────
+
     const newMessages: Message[] = [
       ...messagesForClaude,
       { role: "assistant", content: fullResponse },
@@ -399,6 +570,9 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
             agentType,
             debtPrimary,
             debtAdjacent,
+            disambiguationPending,
+            originalFirstMessage,
+            reclassificationCount,
           } as unknown as Record<string, unknown>,
           exchangeCount: newCount,
           status: "active",
