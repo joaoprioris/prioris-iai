@@ -33,3 +33,15 @@ externalPort = 80
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+LENS_IMP_LIGHT = "Also consider the human impact on the people involved."
+LENS_IMP_MODERATE = "Also consider the human impact on the people involved."
+LENS_CTN_LIGHT = "Also consider the human impact on the people involved."
+LENS_CTN_MODERATE = "Also consider the human impact on the people involved."
+LENS_CTN_STRONG = "Also consider the human impact on the people involved."
+LENS_PRF_MODERATE = "Also consider the human impact on the people involved."
+LENS_MNT_LIGHT = "Also consider the human impact on the people involved."
+LENS_FBK_LIGHT = "Also consider the human impact on the people involved."
