@@ -101,6 +101,11 @@ function getSystemPrompt(agentType: string, exchangeCount: number): string {
     process.env[key] ??
     `Você é o agente de suporte à decisão executiva IAí (${AGENT_LABELS[agentType as AgentType] ?? agentType}). Ajude o líder de forma direta, objetiva e respeitosa. Máximo de ${MAX_EXCHANGES} trocas por sessão.`;
 
+  // Closing sentence is always appended server-side on the final exchange only.
+  // The model must NEVER generate it.
+  prompt +=
+    `\n\nREGRA OBRIGATÓRIA: Nunca escreva a frase "${CLOSING_MESSAGE}" — ela será adicionada automaticamente pelo sistema apenas na última troca. Se você a escrever, ela aparecerá duplicada.`;
+
   if (exchangeCount >= WRAP_UP_AT) {
     prompt +=
       "\n\nIMPORTANT: Begin wrapping up. Guide toward conclusion. 2 exchanges left.";
