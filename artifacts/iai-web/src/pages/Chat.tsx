@@ -25,12 +25,10 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Create session on mount
   useEffect(() => {
     createSession();
   }, []);
@@ -82,11 +80,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
     setSending(true);
     setError("");
 
-    // Add user message
     const userMsg: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
 
-    // Add placeholder for assistant
     const assistantMsg: Message = { role: "assistant", content: "", streaming: true };
     setMessages((prev) => [...prev, assistantMsg]);
 
@@ -194,11 +190,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
         </span>
 
         <div className="flex items-center gap-4">
-          {/* Exchange counter */}
           <span className="text-xs tabular-nums" style={{ color: "#555" }}>
             {exchangeCount}/{MAX_EXCHANGES}
           </span>
-
           <button
             onClick={onLogout}
             className="text-xs transition-colors"
@@ -228,7 +222,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className="max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed"
+                className="max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
                 style={
                   msg.role === "user"
                     ? { background: "#1e1e1e", color: "#F2F2F2" }
@@ -247,18 +241,25 @@ export default function Chat({ user, onLogout }: ChatProps) {
           ))}
 
           {sessionClosed && (
-            <div className="text-center py-4">
-              <p className="text-xs mb-3" style={{ color: "#444" }}>
-                Limite de trocas atingido.
-              </p>
+            <div className="text-center py-6">
               <button
                 onClick={handleNewSession}
-                className="text-xs px-4 py-2 rounded transition-colors"
-                style={{ background: "#1a1a1a", color: "#888", border: "1px solid #2a2a2a" }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#444")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
+                className="text-sm px-6 py-2.5 rounded-xl transition-colors"
+                style={{
+                  background: "#1a1a1a",
+                  color: "#D4D4D4",
+                  border: "1px solid #2a2a2a",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#444";
+                  e.currentTarget.style.color = "#F2F2F2";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#2a2a2a";
+                  e.currentTarget.style.color = "#D4D4D4";
+                }}
               >
-                Nova sessão
+                Nova Conversa
               </button>
             </div>
           )}
@@ -312,13 +313,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-30"
                 style={{ background: "#F2F2F2" }}
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M2 8L14 8M14 8L9 3M14 8L9 13"
                     stroke="#0D0D0D"

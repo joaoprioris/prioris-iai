@@ -1,20 +1,22 @@
 import { Router, type IRouter } from "express";
 import { eq, and, ilike } from "drizzle-orm";
 import Anthropic from "@anthropic-ai/sdk";
-import { db, sessionsTable, momentLibraryTable } from "@workspace/db";
+import { db, sessionsTable, momentLibraryTable, sedsTable } from "@workspace/db";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 const MAX_EXCHANGES = 10;
+const WRAP_UP_AT = 8;
 
-// Use Replit AI Integration proxy if available, otherwise fall back to direct API key
+const CLOSING_MESSAGE =
+  "Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar.";
+
+// Replit AI Integration proxy with fallback
 const baseURL = process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL;
 const apiKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "";
-
 const anthropic = new Anthropic({ apiKey, ...(baseURL ? { baseURL } : {}) });
 
-// Models available via Replit AI Integration proxy
 const MODEL_HAIKU = "claude-haiku-4-5";
 const MODEL_SONNET = "claude-sonnet-4-5";
 
@@ -31,6 +33,56 @@ const AGENT_LABELS: Record<AgentType, string> = {
   PRF: "padrões",
 };
 
+const DEBT_VALUES = [
+  "EVITACAO_CONFLITO", "AUTORIDADE_FRAGILIZADA", "COMUNICACAO_AMBIGUA",
+  "ACCOUNTABILITY_DILUIDA", "DECISAO_POSTERGADA", "CONFIANCA_EROSIONADA",
+  "APRENDIZADO_BLOQUEADO", "ALINHAMENTO_SIMBOLICO", "ENERGIA_EMOCIONAL", "MATURIDADE_POLITICA",
+] as const;
+
+const CONTEXT_TYPE_VALUES = [
+  "FEEDBACK", "DECISAO", "CONFLITO", "ALINHAMENTO", "CRISE", "DELEGACAO",
+  "POLITICA", "COMUNICACAO", "GESTAO_TIME", "CLIENTE", "PARES", "CHEFE", "CARREIRA", "OUTRO",
+] as const;
+
+const ACTOR_VALUES = ["LIDERADO", "PAR", "CHEFE", "CLIENTE", "TIME", "OUTRO"] as const;
+const MOMENT_PHASE_VALUES = ["BEFORE", "DURING", "AFTER"] as const;
+
+interface SedRaw {
+  debt_primary: string;
+  debt_adjacent?: string | null;
+  context_type: string;
+  actor: string;
+  moment_phase: string;
+  intensity: number;
+  confidence: number;
+  timestamp: string;
+}
+
+function validateSed(raw: unknown): SedRaw | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+
+  if (!DEBT_VALUES.includes(r.debt_primary as typeof DEBT_VALUES[number])) return null;
+  if (r.debt_adjacent != null && !DEBT_VALUES.includes(r.debt_adjacent as typeof DEBT_VALUES[number])) return null;
+  if (!CONTEXT_TYPE_VALUES.includes(r.context_type as typeof CONTEXT_TYPE_VALUES[number])) return null;
+  if (!ACTOR_VALUES.includes(r.actor as typeof ACTOR_VALUES[number])) return null;
+  if (!MOMENT_PHASE_VALUES.includes(r.moment_phase as typeof MOMENT_PHASE_VALUES[number])) return null;
+  if (typeof r.intensity !== "number" || !Number.isInteger(r.intensity) || r.intensity < 1 || r.intensity > 5) return null;
+  if (typeof r.confidence !== "number" || r.confidence < 0 || r.confidence > 1) return null;
+  if (typeof r.timestamp !== "string") return null;
+
+  return {
+    debt_primary: r.debt_primary as string,
+    debt_adjacent: (r.debt_adjacent as string | null) ?? null,
+    context_type: r.context_type as string,
+    actor: r.actor as string,
+    moment_phase: r.moment_phase as string,
+    intensity: r.intensity as number,
+    confidence: r.confidence as number,
+    timestamp: r.timestamp as string,
+  };
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -43,12 +95,18 @@ interface SessionContext {
   debtAdjacent: string | null;
 }
 
-function getSystemPrompt(agentType: string): string {
+function getSystemPrompt(agentType: string, exchangeCount: number): string {
   const key = `PROMPT_${agentType}`;
-  return (
+  let prompt =
     process.env[key] ??
-    `Você é o agente de suporte à decisão executiva IAí (${AGENT_LABELS[agentType as AgentType] ?? agentType}). Ajude o líder de forma direta, objetiva e respeitosa. Máximo de ${MAX_EXCHANGES} trocas por sessão.`
-  );
+    `Você é o agente de suporte à decisão executiva IAí (${AGENT_LABELS[agentType as AgentType] ?? agentType}). Ajude o líder de forma direta, objetiva e respeitosa. Máximo de ${MAX_EXCHANGES} trocas por sessão.`;
+
+  if (exchangeCount >= WRAP_UP_AT) {
+    prompt +=
+      "\n\nIMPORTANT: Begin wrapping up. Guide toward conclusion. 2 exchanges left.";
+  }
+
+  return prompt;
 }
 
 async function classifyWithHaiku(content: string): Promise<{
@@ -79,6 +137,54 @@ async function classifyWithHaiku(content: string): Promise<{
   }
 }
 
+async function generateAndSaveSed(
+  sessionId: string,
+  organizationId: string,
+  messages: Message[],
+  lowConfidence: boolean,
+): Promise<void> {
+  const transcript = messages
+    .map((m) => `${m.role === "user" ? "Líder" : "IAí"}: ${m.content}`)
+    .join("\n\n");
+
+  try {
+    const response = await anthropic.messages.create({
+      model: MODEL_HAIKU,
+      max_tokens: 512,
+      system:
+        'Analyze this conversation. Return ONLY JSON with these exact fields: debt_primary (one of: EVITACAO_CONFLITO, AUTORIDADE_FRAGILIZADA, COMUNICACAO_AMBIGUA, ACCOUNTABILITY_DILUIDA, DECISAO_POSTERGADA, CONFIANCA_EROSIONADA, APRENDIZADO_BLOQUEADO, ALINHAMENTO_SIMBOLICO, ENERGIA_EMOCIONAL, MATURIDADE_POLITICA), debt_adjacent (same enum or null), context_type (FEEDBACK|DECISAO|CONFLITO|ALINHAMENTO|CRISE|DELEGACAO|POLITICA|COMUNICACAO|GESTAO_TIME|CLIENTE|PARES|CHEFE|CARREIRA|OUTRO), actor (LIDERADO|PAR|CHEFE|CLIENTE|TIME|OUTRO), moment_phase (BEFORE|DURING|AFTER), intensity (INTEGER 1 to 5, where 1=minimal and 5=critical), confidence (float 0 to 1), timestamp (ISO 8601 datetime string, ex: 2026-05-03T14:32:00Z)',
+      messages: [{ role: "user", content: transcript }],
+    });
+
+    const rawText = response.content[0].type === "text" ? response.content[0].text : "{}";
+    const parsed = JSON.parse(rawText.replace(/```json\n?|\n?```/g, "").trim());
+    const validated = validateSed(parsed);
+
+    if (!validated) {
+      logger.error({ parsed }, "SED inválido: falha na validação do schema");
+      return;
+    }
+
+    await db.insert(sedsTable).values({
+      sessionId,
+      organizationId,
+      debtPrimary: validated.debt_primary,
+      debtAdjacent: validated.debt_adjacent ?? undefined,
+      contextType: validated.context_type,
+      actor: validated.actor,
+      momentPhase: validated.moment_phase,
+      intensity: validated.intensity,
+      confidence: validated.confidence,
+      lowConfidence,
+      timestamp: new Date(validated.timestamp),
+    });
+
+    logger.info({ sessionId }, "SED salvo com sucesso");
+  } catch (err) {
+    logger.error({ err, sessionId }, "Erro ao gerar ou salvar SED");
+  }
+}
+
 router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, res): Promise<void> => {
   const user = req.user!;
   const { sessionId, content } = req.body;
@@ -101,7 +207,7 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
   const exchangeCount = session.exchangeCount ?? 0;
 
   if (session.status === "closed" || exchangeCount >= MAX_EXCHANGES) {
-    res.status(400).json({ error: "Limite de trocas atingido. Inicie uma nova sessão." });
+    res.status(400).json({ error: "Session closed. Start a new conversation." });
     return;
   }
 
@@ -119,7 +225,6 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
 
   // Step 1 & 2: Classify on first exchange
   if (exchangeCount === 0) {
-    // Step 1: Try moment_library match
     const [libraryMatch] = await db
       .select()
       .from(momentLibraryTable)
@@ -132,7 +237,6 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
       debtAdjacent = libraryMatch.debtAdjacent ?? null;
       req.log.info({ agentType, source: "moment_library" }, "Agente classificado via biblioteca");
     } else {
-      // Step 2: Haiku classification
       try {
         const classification = await classifyWithHaiku(content);
         agentType = classification.agent_type;
@@ -149,8 +253,8 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
     }
   }
 
-  // Step 3: Load system prompt
-  const systemPrompt = getSystemPrompt(agentType ?? "MNT");
+  // Step 3: Load system prompt (with wrap-up injection at exchange 8+)
+  const systemPrompt = getSystemPrompt(agentType ?? "MNT", exchangeCount);
 
   // Step 4: Build conversation history
   const history: Message[] = ctx.messages ?? [];
@@ -171,7 +275,6 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
   let fullResponse = "";
 
   try {
-    // Step 5: Stream from Claude Sonnet
     const stream = anthropic.messages.stream({
       model: MODEL_SONNET,
       system: systemPrompt,
@@ -180,10 +283,7 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
     });
 
     for await (const event of stream) {
-      if (
-        event.type === "content_block_delta" &&
-        event.delta.type === "text_delta"
-      ) {
+      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
         const token = event.delta.text;
         fullResponse += token;
         sendEvent({ type: "token", content: token });
@@ -192,34 +292,57 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
 
     await stream.finalMessage();
 
-    // Update session in DB
+    const newCount = exchangeCount + 1;
+    const isClosing = newCount >= MAX_EXCHANGES;
+
+    // Append closing message on final exchange
+    if (isClosing) {
+      const closingSuffix = "\n\n" + CLOSING_MESSAGE;
+      fullResponse += closingSuffix;
+      sendEvent({ type: "token", content: closingSuffix });
+    }
+
+    // Step 5: Update session in DB
     const newMessages: Message[] = [
       ...messagesForClaude,
       { role: "assistant", content: fullResponse },
     ];
-    const newCount = exchangeCount + 1;
-    const newStatus = newCount >= MAX_EXCHANGES ? "closed" : "active";
 
-    await db
-      .update(sessionsTable)
-      .set({
-        agentType: agentType ?? "MNT",
-        context: {
-          messages: newMessages,
-          agentType,
-          debtPrimary,
-          debtAdjacent,
-        } as unknown as Record<string, unknown>,
-        exchangeCount: newCount,
-        status: newStatus,
-      })
-      .where(eq(sessionsTable.id, sessionId));
+    if (isClosing) {
+      // Save SED then clear context for privacy
+      await generateAndSaveSed(sessionId, user.organizationId, newMessages, lowConfidence);
+
+      await db
+        .update(sessionsTable)
+        .set({
+          agentType: agentType ?? "MNT",
+          context: null,
+          exchangeCount: newCount,
+          status: "closed",
+        })
+        .where(eq(sessionsTable.id, sessionId));
+    } else {
+      await db
+        .update(sessionsTable)
+        .set({
+          agentType: agentType ?? "MNT",
+          context: {
+            messages: newMessages,
+            agentType,
+            debtPrimary,
+            debtAdjacent,
+          } as unknown as Record<string, unknown>,
+          exchangeCount: newCount,
+          status: "active",
+        })
+        .where(eq(sessionsTable.id, sessionId));
+    }
 
     sendEvent({
       type: "done",
       exchangeCount: newCount,
       maxExchanges: MAX_EXCHANGES,
-      status: newStatus,
+      status: isClosing ? "closed" : "active",
       lowConfidence,
     });
   } catch (err) {
