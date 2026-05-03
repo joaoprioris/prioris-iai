@@ -41,7 +41,7 @@ export default function SurveyCard({ question, sessionId, onDismiss }: SurveyCar
         body: JSON.stringify({ questionId: question.id, answerValue: value, sessionId }),
       });
     } catch {
-      // silent — survey failure should never block the user
+      // silent — survey failure must never block the user
     }
     setAnswered(true);
     setSubmitting(false);
@@ -50,62 +50,95 @@ export default function SurveyCard({ question, sessionId, onDismiss }: SurveyCar
 
   return (
     <div
-      className="max-w-2xl mx-auto mt-4"
+      style={{
+        background: "#1A1030",
+        border: "1px solid rgba(123,79,191,0.5)",
+        borderRadius: "12px",
+        padding: "16px",
+        marginTop: "4px",
+      }}
     >
-      <div
-        className="rounded-2xl px-5 py-4"
-        style={{ background: "#141414", border: "1px solid #242424" }}
-      >
-        {answered ? (
-          <p className="text-sm text-center py-1" style={{ color: "#555" }}>
-            Obrigado pelo seu feedback.
+      {answered ? (
+        <p
+          style={{
+            color: "rgba(242,242,242,0.4)",
+            fontSize: "13px",
+            textAlign: "center",
+            margin: 0,
+            padding: "4px 0",
+          }}
+        >
+          Obrigado pelo seu feedback.
+        </p>
+      ) : (
+        <>
+          <p
+            style={{
+              color: "#F2F2F2",
+              fontSize: "14px",
+              lineHeight: 1.55,
+              margin: "0 0 14px 0",
+            }}
+          >
+            {question.text}
           </p>
-        ) : (
-          <>
-            <p className="text-sm mb-4" style={{ color: "#999" }}>
-              {question.text}
-            </p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => submit(opt.value)}
-                  disabled={submitting}
-                  className="text-xs px-3 py-1.5 rounded-lg transition-all disabled:opacity-40"
-                  style={{
-                    background: selected === opt.value ? "#2a2a2a" : "#1a1a1a",
-                    color: selected === opt.value ? "#F2F2F2" : "#888",
-                    border: `1px solid ${selected === opt.value ? "#444" : "#242424"}`,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!submitting) {
-                      e.currentTarget.style.borderColor = "#444";
-                      e.currentTarget.style.color = "#D4D4D4";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selected !== opt.value) {
-                      e.currentTarget.style.borderColor = "#242424";
-                      e.currentTarget.style.color = "#888";
-                    }
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={onDismiss}
-              className="text-xs transition-colors"
-              style={{ color: "#333" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#555")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
-            >
-              pular
-            </button>
-          </>
-        )}
-      </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
+            {OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => submit(opt.value)}
+                disabled={submitting}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "20px",
+                  fontSize: "12px",
+                  border: "1px solid rgba(123,79,191,0.4)",
+                  background: selected === opt.value ? "#7B4FBF" : "transparent",
+                  color: selected === opt.value ? "#F2F2F2" : "rgba(242,242,242,0.8)",
+                  cursor: submitting ? "not-allowed" : "pointer",
+                  opacity: submitting && selected !== opt.value ? 0.4 : 1,
+                  transition: "background 0.15s, color 0.15s, border-color 0.15s",
+                  fontFamily: "inherit",
+                  minHeight: "32px",
+                }}
+                onMouseEnter={(e) => {
+                  if (!submitting && selected !== opt.value) {
+                    e.currentTarget.style.borderColor = "rgba(123,79,191,0.8)";
+                    e.currentTarget.style.color = "#F2F2F2";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selected !== opt.value) {
+                    e.currentTarget.style.borderColor = "rgba(123,79,191,0.4)";
+                    e.currentTarget.style.color = "rgba(242,242,242,0.8)";
+                  }
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={onDismiss}
+            style={{
+              background: "none",
+              border: "none",
+              color: "rgba(242,242,242,0.4)",
+              fontSize: "12px",
+              cursor: "pointer",
+              padding: 0,
+              fontFamily: "inherit",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(242,242,242,0.65)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(242,242,242,0.4)")}
+          >
+            pular
+          </button>
+        </>
+      )}
     </div>
   );
 }

@@ -1,0 +1,85 @@
+Now apply the final visual design to the IAí app.
+The app has a premium dark interface — like a high-end mobile app for executives.
+
+COLOR PALETTE (use exactly these hex codes):
+- Background: #0D0D0D (main), #130D22 (cards and agent messages)
+- Text: #F2F2F2 (primary), rgba(242,242,242,0.65) (secondary/muted)
+- Accent: #7B4FBF (buttons, active borders, interactive elements)
+- Accent light: #EDE8FA (hover states only — never as main background)
+- Alert: #8B0000 (errors and warnings only)
+- Gold #B8953F: ONLY in the 'by PRIORIS' endorsement text — nowhere else
+
+GLOBAL STYLES:
+- Font: system-ui or Inter, weight 400 for body, 600 for headings
+- No rounded corners larger than 12px
+- No gradients except a subtle radial glow at bottom of screen:
+  radial-gradient at bottom center, from rgba(123,79,191,0.15) to transparent
+  This creates the subtle purple ambient light seen in the app mockups.
+- No shadows except a subtle inner glow on active input
+
+HEADER:
+- Centered wordmark 'IAí' in white, weight 700, size 20px
+- Below wordmark: tagline 'by PRIORIS' in gold (#B8953F), size 10px, letter-spacing 0.12em
+- No logo image — text only for now
+- Header background: #0D0D0D, no border, no shadow
+- Height: 56px
+
+CHAT AREA:
+- Background: #0D0D0D
+- User messages: aligned right, background #1E1A2E, text #F2F2F2,
+  border-radius 12px 12px 2px 12px, padding 12px 16px
+- Agent messages: aligned left, background #130D22, text #F2F2F2,
+  border: 1px solid rgba(123,79,191,0.3), border-radius 12px 12px 12px 2px,
+  padding 12px 16px
+- Message spacing: 12px between messages
+- Typing indicator: three dots pulsing in #7B4FBF
+
+EXCHANGE COUNTER:
+- Position: top right of chat area
+- Format: '7 restantes' (not '7/10')
+- Color: rgba(242,242,242,0.45) normally
+- Color: #8B0000 when 2 or fewer exchanges remain
+- Font size: 11px
+
+INPUT AREA:
+- Background: #130D22
+- Border top: 1px solid rgba(123,79,191,0.2)
+- Text input: background transparent, text #F2F2F2, placeholder rgba(242,242,242,0.35)
+- No visible input border normally. On focus: border-bottom 1px solid #7B4FBF
+- Send button: circle 36px, background #7B4FBF, icon white arrow
+- On hover: background #9B6FDF
+
+CLOSING STATE:
+- Closing message appears in a card: background #130D22,
+  border: 1px solid rgba(123,79,191,0.4), border-radius 12px
+- 'Nova Conversa' button: full width, background #7B4FBF,
+  text white weight 600, border-radius 8px, height 48px
+
+SURVEY CARD (micro-question):
+- Background: #1A1030, border: 1px solid rgba(123,79,191,0.5)
+- Question text: #F2F2F2, size 14px
+- Answer buttons: 5 pills in a row, background transparent,
+  border: 1px solid rgba(123,79,191,0.4), text rgba(242,242,242,0.8)
+- Selected state: background #7B4FBF, text white
+- Skip link below: 'pular', color rgba(242,242,242,0.4), size 12px
+
+SPLASH / LOADING:
+- Full screen #0D0D0D
+- Centered 'IAí' wordmark in white, size 32px, weight 700
+- Below: 'by PRIORIS' in #B8953F, size 11px
+- Subtle fade-in animation on load
+
+MOBILE FIRST:
+- Max width 420px centered on desktop
+- Full height on mobile (height: 100dvh)
+- Safe area insets for iOS notch and home bar
+- Touch targets minimum 44px
+
+WHAT TO AVOID:
+- No white backgrounds anywhere in the app
+- No blue, green, orange or any color outside the palette
+- No card shadows (use border instead)
+- No decorative icons or illustrations
+- No rounded corners above 12px
+- No gradient text
+- Do not display agent names anywhere in the interface

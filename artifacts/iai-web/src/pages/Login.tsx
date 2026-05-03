@@ -32,7 +32,6 @@ export default function Login({ onLogin }: LoginProps) {
         return;
       }
 
-      // Dev mode: token returned directly
       if (data.token) {
         setDevToken(data.token);
         await verifyAndLogin(data.token);
@@ -70,35 +69,67 @@ export default function Login({ onLogin }: LoginProps) {
     await verifyAndLogin(tokenInput.trim());
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    background: "#130D22",
+    color: "#F2F2F2",
+    border: "1px solid rgba(123,79,191,0.25)",
+    borderRadius: "8px",
+    padding: "14px 16px",
+    fontSize: "14px",
+    outline: "none",
+    transition: "border-color 0.15s",
+    fontFamily: "inherit",
+  };
+
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "#0D0D0D" }}
+      className="fade-in"
+      style={{
+        minHeight: "100dvh",
+        background: "#0D0D0D",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px 24px",
+        paddingTop: "calc(24px + env(safe-area-inset-top, 0px))",
+        paddingBottom: "calc(24px + env(safe-area-inset-bottom, 0px))",
+      }}
     >
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold tracking-tight" style={{ color: "#F2F2F2" }}>
+      <div style={{ width: "100%", maxWidth: "360px" }}>
+        {/* Wordmark */}
+        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+          <div style={{ color: "#F2F2F2", fontSize: "28px", fontWeight: 700, lineHeight: 1.1 }}>
             IAí
-          </h1>
-          <p className="mt-1 text-sm" style={{ color: "#666" }}>
-            Suporte à decisão executiva
-          </p>
+          </div>
+          <div style={{ color: "#B8953F", fontSize: "10px", letterSpacing: "0.12em", marginTop: "4px" }}>
+            by PRIORIS
+          </div>
         </div>
 
+        {/* Error */}
         {error && (
           <div
-            className="mb-4 px-4 py-3 rounded text-sm"
-            style={{ background: "#1a0a0a", color: "#ff6b6b", border: "1px solid #3a1a1a" }}
+            style={{
+              marginBottom: "16px",
+              padding: "12px 14px",
+              borderRadius: "8px",
+              background: "rgba(139,0,0,0.12)",
+              border: "1px solid rgba(139,0,0,0.4)",
+              color: "#F2F2F2",
+              fontSize: "13px",
+            }}
           >
             {error}
           </div>
         )}
 
+        {/* Email step */}
         {(step === "email" || step === "loading") && (
-          <form onSubmit={handleRequestLink} className="space-y-4">
+          <form onSubmit={handleRequestLink} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div>
-              <label className="block text-sm mb-1.5" style={{ color: "#999" }}>
+              <label style={{ display: "block", fontSize: "12px", color: "rgba(242,242,242,0.5)", marginBottom: "8px" }}>
                 E-mail
               </label>
               <input
@@ -108,30 +139,39 @@ export default function Login({ onLogin }: LoginProps) {
                 placeholder="seu@email.com"
                 required
                 disabled={step === "loading"}
-                className="w-full px-4 py-3 rounded outline-none transition-colors text-sm"
-                style={{
-                  background: "#1a1a1a",
-                  color: "#F2F2F2",
-                  border: "1px solid #2a2a2a",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#444")}
-                onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                style={{ ...inputStyle, opacity: step === "loading" ? 0.5 : 1 }}
+                onFocus={(e) => (e.target.style.borderColor = "#7B4FBF")}
+                onBlur={(e) => (e.target.style.borderColor = "rgba(123,79,191,0.25)")}
               />
             </div>
             <button
               type="submit"
               disabled={step === "loading" || !email}
-              className="w-full py-3 rounded text-sm font-medium transition-opacity disabled:opacity-40"
-              style={{ background: "#F2F2F2", color: "#0D0D0D" }}
+              style={{
+                height: "48px",
+                background: "#7B4FBF",
+                color: "#F2F2F2",
+                fontWeight: 600,
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "none",
+                cursor: step === "loading" || !email ? "not-allowed" : "pointer",
+                opacity: step === "loading" || !email ? 0.4 : 1,
+                transition: "opacity 0.15s, background 0.15s",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.background = "#9B6FDF"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "#7B4FBF"; }}
             >
               {step === "loading" ? "Aguarde..." : "Entrar"}
             </button>
           </form>
         )}
 
+        {/* Token step */}
         {step === "token" && (
-          <form onSubmit={handleVerifyToken} className="space-y-4">
-            <p className="text-sm" style={{ color: "#888" }}>
+          <form onSubmit={handleVerifyToken} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <p style={{ color: "rgba(242,242,242,0.55)", fontSize: "13px", lineHeight: 1.5, margin: 0 }}>
               Verifique seu e-mail e cole o token de acesso abaixo.
             </p>
             <input
@@ -141,36 +181,63 @@ export default function Login({ onLogin }: LoginProps) {
               placeholder="Cole o token aqui"
               required
               autoFocus
-              className="w-full px-4 py-3 rounded outline-none text-sm font-mono"
-              style={{
-                background: "#1a1a1a",
-                color: "#F2F2F2",
-                border: "1px solid #2a2a2a",
-              }}
+              style={{ ...inputStyle, fontFamily: "'Menlo', monospace", letterSpacing: "0.05em" }}
+              onFocus={(e) => (e.target.style.borderColor = "#7B4FBF")}
+              onBlur={(e) => (e.target.style.borderColor = "rgba(123,79,191,0.25)")}
             />
             <button
               type="submit"
               disabled={!tokenInput.trim()}
-              className="w-full py-3 rounded text-sm font-medium disabled:opacity-40"
-              style={{ background: "#F2F2F2", color: "#0D0D0D" }}
+              style={{
+                height: "48px",
+                background: "#7B4FBF",
+                color: "#F2F2F2",
+                fontWeight: 600,
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "none",
+                cursor: !tokenInput.trim() ? "not-allowed" : "pointer",
+                opacity: !tokenInput.trim() ? 0.4 : 1,
+                transition: "opacity 0.15s, background 0.15s",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.background = "#9B6FDF"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "#7B4FBF"; }}
             >
               Verificar
             </button>
             <button
               type="button"
               onClick={() => setStep("email")}
-              className="w-full py-2 text-sm"
-              style={{ color: "#666" }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "rgba(242,242,242,0.35)",
+                fontSize: "13px",
+                cursor: "pointer",
+                padding: "8px",
+                fontFamily: "inherit",
+              }}
             >
               Voltar
             </button>
           </form>
         )}
 
+        {/* Dev token display */}
         {devToken && (
           <div
-            className="mt-4 px-3 py-2 rounded text-xs font-mono break-all"
-            style={{ background: "#111", color: "#555", border: "1px solid #1e1e1e" }}
+            style={{
+              marginTop: "16px",
+              padding: "10px 12px",
+              borderRadius: "6px",
+              background: "#130D22",
+              color: "rgba(242,242,242,0.3)",
+              fontSize: "11px",
+              fontFamily: "'Menlo', monospace",
+              wordBreak: "break-all",
+              border: "1px solid rgba(123,79,191,0.15)",
+            }}
           >
             dev: {devToken}
           </div>
