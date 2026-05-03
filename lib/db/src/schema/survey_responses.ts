@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { organizationsTable } from "./organizations";
+import { sessionsTable } from "./sessions";
 
 export const surveyResponsesTable = pgTable(
   "survey_responses",
@@ -10,6 +11,7 @@ export const surveyResponsesTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     organizationId: uuid("organization_id").notNull().references(() => organizationsTable.id),
     questionId: uuid("question_id").notNull(),
+    sessionId: uuid("session_id").references(() => sessionsTable.id),
     answerValue: integer("answer_value").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
   },

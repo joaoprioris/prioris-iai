@@ -1,10 +1,17 @@
 import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from "react";
 import { getToken, AuthUser } from "../hooks/useAuth";
+import SurveyCard from "../components/SurveyCard";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   streaming?: boolean;
+}
+
+interface SurveyQuestion {
+  id: string;
+  text: string;
+  debtId: string;
 }
 
 interface ChatProps {
@@ -22,12 +29,14 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const [sessionClosed, setSessionClosed] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [surveyQuestion, setSurveyQuestion] = useState<SurveyQuestion | null>(null);
+  const [surveyDismissed, setSurveyDismissed] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, surveyQuestion]);
 
   useEffect(() => {
     createSession();
@@ -64,6 +73,8 @@ export default function Chat({ user, onLogout }: ChatProps) {
     setMessages([]);
     setExchangeCount(0);
     setSessionClosed(false);
+    setSurveyQuestion(null);
+    setSurveyDismissed(false);
     setError("");
     await createSession();
   };
@@ -138,7 +149,6 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 return updated;
               });
             } else if (event.type === "replace_last") {
-              // Server stripped the [ENCERRAR] signal — replace content entirely
               setMessages((prev) => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
@@ -162,6 +172,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 }
                 return updated;
               });
+              if (event.surveyQuestion) {
+                setSurveyQuestion(event.surveyQuestion);
+              }
             } else if (event.type === "error") {
               setError(event.error ?? "Erro no agente.");
               setMessages((prev) => prev.slice(0, -1));
@@ -254,6 +267,14 @@ export default function Chat({ user, onLogout }: ChatProps) {
             </div>
           ))}
 
+          {/* Survey card — shown after closing when eligible and not dismissed */}
+          {sessionClosed && surveyQuestion && !surveyDismissed && (
+            <SurveyCard
+              question={surveyQuestion}
+              sessionId={sessionId}
+              onDismiss={() => setSurveyDismissed(true)}
+            />
+          )}
 
           {error && (
             <div className="text-center">

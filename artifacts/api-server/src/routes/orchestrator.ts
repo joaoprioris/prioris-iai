@@ -1,9 +1,9 @@
 import { Router, type IRouter } from "express";
-import { eq, and, ilike } from "drizzle-orm";
+import { eq, and, ilike, gte } from "drizzle-orm";
 import { readFileSync } from "fs";
 import { join } from "path";
 import Anthropic from "@anthropic-ai/sdk";
-import { db, sessionsTable, momentLibraryTable, sedsTable } from "@workspace/db";
+import { db, sessionsTable, momentLibraryTable, sedsTable, surveyTrackingTable, questionsTable } from "@workspace/db";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 
@@ -289,6 +289,76 @@ async function generateAndSaveSed(
   } catch (err) {
     logger.error({ err, sessionId }, "Erro ao gerar ou salvar SED");
   }
+}
+
+// ── Survey eligibility ────────────────────────────────────────────────────────
+
+interface SurveyQuestionResult {
+  id: string;
+  text: string;
+  debtId: string;
+}
+
+async function checkSurveyEligibility(
+  userId: string,
+  debtPrimary: string | null,
+  finalExchangeCount: number,
+): Promise<SurveyQuestionResult | null> {
+  // Condition 4: session must have reached at least 5 exchanges
+  if (finalExchangeCount < 5) return null;
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // Condition 1: user has not been shown any question in the last 7 days
+  const [recentShown] = await db
+    .select({ id: surveyTrackingTable.id })
+    .from(surveyTrackingTable)
+    .where(and(eq(surveyTrackingTable.userId, userId), gte(surveyTrackingTable.shownAt, sevenDaysAgo)))
+    .limit(1);
+  if (recentShown) return null;
+
+  // Condition 2: user has been shown fewer than 4 questions this month
+  const monthlyShown = await db
+    .select({ id: surveyTrackingTable.id })
+    .from(surveyTrackingTable)
+    .where(and(eq(surveyTrackingTable.userId, userId), gte(surveyTrackingTable.shownAt, firstOfMonth)));
+  if (monthlyShown.length >= 4) return null;
+
+  // Condition 3 (enforced by filtering): collect questions already seen by this user
+  const previouslyShown = await db
+    .select({ questionId: surveyTrackingTable.questionId })
+    .from(surveyTrackingTable)
+    .where(eq(surveyTrackingTable.userId, userId));
+  const shownIds = new Set(previouslyShown.map((r) => r.questionId));
+
+  // Question selection: prefer debt match, fall back to random unshown active
+  let chosen: { id: string; text: string; debtId: string } | null = null;
+
+  if (debtPrimary) {
+    const debtMatches = await db
+      .select({ id: questionsTable.id, text: questionsTable.text, debtId: questionsTable.debtId })
+      .from(questionsTable)
+      .where(and(eq(questionsTable.debtId, debtPrimary), eq(questionsTable.active, true)));
+    chosen = debtMatches.find((q) => !shownIds.has(q.id)) ?? null;
+  }
+
+  if (!chosen) {
+    const allActive = await db
+      .select({ id: questionsTable.id, text: questionsTable.text, debtId: questionsTable.debtId })
+      .from(questionsTable)
+      .where(eq(questionsTable.active, true));
+    const unshown = allActive.filter((q) => !shownIds.has(q.id));
+    if (unshown.length === 0) return null;
+    chosen = unshown[Math.floor(Math.random() * unshown.length)];
+  }
+
+  // Record the showing (conditions 1, 2, 3 all depend on this table)
+  await db.insert(surveyTrackingTable).values({ userId, questionId: chosen.id });
+
+  logger.info({ userId, questionId: chosen.id, debtPrimary }, "Survey question selected");
+  return chosen;
 }
 
 // ── Route ─────────────────────────────────────────────────────────────────────
@@ -580,12 +650,23 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
         .where(eq(sessionsTable.id, sessionId));
     }
 
+    // Check survey eligibility when session closes
+    let surveyQuestion: SurveyQuestionResult | null = null;
+    if (isClosing) {
+      try {
+        surveyQuestion = await checkSurveyEligibility(user.id, debtPrimary, newCount);
+      } catch (err) {
+        logger.warn({ err }, "Survey eligibility check failed — skipping");
+      }
+    }
+
     sendEvent({
       type: "done",
       exchangeCount: newCount,
       maxExchanges: MAX_EXCHANGES,
       status: isClosing ? "closed" : "active",
       lowConfidence,
+      ...(surveyQuestion ? { surveyQuestion } : {}),
     });
   } catch (err) {
     logger.error({ err }, "Erro no streaming do agente");
