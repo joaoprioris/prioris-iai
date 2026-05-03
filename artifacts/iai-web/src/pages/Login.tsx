@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { AuthUser } from "../hooks/useAuth";
 import IaiIcon from "../components/IaiIcon";
 
@@ -12,6 +12,18 @@ export default function Login({ onLogin }: LoginProps) {
   const [devToken, setDevToken] = useState("");
   const [tokenInput, setTokenInput] = useState("");
   const [error, setError] = useState("");
+
+  // Auto-verify magic link token from URL (?token=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get("token");
+    if (urlToken) {
+      // Clean the token from the URL immediately so it isn't re-used on refresh
+      window.history.replaceState({}, "", window.location.pathname);
+      setStep("loading");
+      verifyAndLogin(urlToken);
+    }
+  }, []);
 
   const handleRequestLink = async (e: FormEvent) => {
     e.preventDefault();
@@ -110,6 +122,13 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
         </div>
 
+        {/* Auto-verifying state */}
+        {step === "loading" && !error && (
+          <p style={{ color: "rgba(242,242,242,0.4)", fontSize: "13px", textAlign: "center" }}>
+            Verificando acesso...
+          </p>
+        )}
+
         {/* Error */}
         {error && (
           <div
@@ -128,7 +147,7 @@ export default function Login({ onLogin }: LoginProps) {
         )}
 
         {/* Email step */}
-        {(step === "email" || step === "loading") && (
+        {(step === "email" || (step === "loading" && !error && !tokenInput)) && step !== "loading" && (
           <form onSubmit={handleRequestLink} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div>
               <label style={{ display: "block", fontSize: "12px", color: "rgba(242,242,242,0.5)", marginBottom: "8px" }}>
@@ -140,15 +159,14 @@ export default function Login({ onLogin }: LoginProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
                 required
-                disabled={step === "loading"}
-                style={{ ...inputStyle, opacity: step === "loading" ? 0.5 : 1 }}
+                style={inputStyle}
                 onFocus={(e) => (e.target.style.borderColor = "#7B4FBF")}
                 onBlur={(e) => (e.target.style.borderColor = "rgba(123,79,191,0.25)")}
               />
             </div>
             <button
               type="submit"
-              disabled={step === "loading" || !email}
+              disabled={!email}
               style={{
                 height: "48px",
                 background: "#7B4FBF",
@@ -157,15 +175,15 @@ export default function Login({ onLogin }: LoginProps) {
                 fontSize: "14px",
                 borderRadius: "8px",
                 border: "none",
-                cursor: step === "loading" || !email ? "not-allowed" : "pointer",
-                opacity: step === "loading" || !email ? 0.4 : 1,
+                cursor: !email ? "not-allowed" : "pointer",
+                opacity: !email ? 0.4 : 1,
                 transition: "opacity 0.15s, background 0.15s",
                 fontFamily: "inherit",
               }}
               onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.background = "#9B6FDF"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "#7B4FBF"; }}
             >
-              {step === "loading" ? "Aguarde..." : "Entrar"}
+              Entrar
             </button>
           </form>
         )}
