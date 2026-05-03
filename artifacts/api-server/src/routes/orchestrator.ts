@@ -1,7 +1,5 @@
 import { Router, type IRouter } from "express";
 import { eq, and, ilike, gte } from "drizzle-orm";
-import { readFileSync } from "fs";
-import { join } from "path";
 import Anthropic from "@anthropic-ai/sdk";
 import { db, sessionsTable, momentLibraryTable, sedsTable, surveyTrackingTable, questionsTable } from "@workspace/db";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
@@ -60,9 +58,7 @@ type LensMatrix = Record<string, LensEntry[]>;
 
 const LENS_PLACEHOLDER = "Also consider the human impact on the people involved.";
 
-const lensMatrix: LensMatrix = JSON.parse(
-  readFileSync(join(process.cwd(), "lenses-matrix.json"), "utf-8"),
-);
+const lensMatrix: LensMatrix = {};
 
 function getLensText(agent: string, intensity: LensIntensity): string {
   const envKey = `LENS_${agent}_${intensity.toUpperCase()}`;
