@@ -137,6 +137,20 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 }
                 return updated;
               });
+            } else if (event.type === "replace_last") {
+              // Server stripped the [ENCERRAR] signal — replace content entirely
+              setMessages((prev) => {
+                const updated = [...prev];
+                const last = updated[updated.length - 1];
+                if (last?.role === "assistant") {
+                  updated[updated.length - 1] = {
+                    ...last,
+                    content: event.content,
+                    streaming: true,
+                  };
+                }
+                return updated;
+              });
             } else if (event.type === "done") {
               setExchangeCount(event.exchangeCount);
               setSessionClosed(event.status === "closed");
@@ -240,29 +254,6 @@ export default function Chat({ user, onLogout }: ChatProps) {
             </div>
           ))}
 
-          {sessionClosed && (
-            <div className="text-center py-6">
-              <button
-                onClick={handleNewSession}
-                className="text-sm px-6 py-2.5 rounded-xl transition-colors"
-                style={{
-                  background: "#1a1a1a",
-                  color: "#D4D4D4",
-                  border: "1px solid #2a2a2a",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "#444";
-                  e.currentTarget.style.color = "#F2F2F2";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#2a2a2a";
-                  e.currentTarget.style.color = "#D4D4D4";
-                }}
-              >
-                Nova Conversa
-              </button>
-            </div>
-          )}
 
           {error && (
             <div className="text-center">

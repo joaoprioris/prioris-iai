@@ -19,6 +19,7 @@ export const sedsTable = pgTable(
     momentPhase: text("moment_phase"),
     intensity: integer("intensity"),
     confidence: doublePrecision("confidence"),
+    agentSelfAssessment: text("agent_self_assessment"),
     lowConfidence: boolean("low_confidence").default(false),
     timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow(),
     createdAt: timestamp("created_at").defaultNow(),

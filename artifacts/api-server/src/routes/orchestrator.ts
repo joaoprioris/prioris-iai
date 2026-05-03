@@ -8,6 +8,7 @@ import { logger } from "../lib/logger";
 const router: IRouter = Router();
 const MAX_EXCHANGES = 10;
 const WRAP_UP_AT = 8;
+const CLOSE_SIGNAL = "[ENCERRAR]";
 
 const CLOSING_MESSAGE =
   "Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar.";
@@ -55,6 +56,7 @@ interface SedRaw {
   moment_phase: string;
   intensity: number;
   confidence: number;
+  self_assessment: string;
   timestamp: string;
 }
 
@@ -69,6 +71,7 @@ function validateSed(raw: unknown): SedRaw | null {
   if (!MOMENT_PHASE_VALUES.includes(r.moment_phase as typeof MOMENT_PHASE_VALUES[number])) return null;
   if (typeof r.intensity !== "number" || !Number.isInteger(r.intensity) || r.intensity < 1 || r.intensity > 5) return null;
   if (typeof r.confidence !== "number" || r.confidence < 0 || r.confidence > 1) return null;
+  if (typeof r.self_assessment !== "string" || !r.self_assessment.trim()) return null;
   if (typeof r.timestamp !== "string") return null;
 
   return {
@@ -79,6 +82,7 @@ function validateSed(raw: unknown): SedRaw | null {
     moment_phase: r.moment_phase as string,
     intensity: r.intensity as number,
     confidence: r.confidence as number,
+    self_assessment: r.self_assessment as string,
     timestamp: r.timestamp as string,
   };
 }
@@ -102,9 +106,13 @@ function getSystemPrompt(agentType: string, exchangeCount: number): string {
     `Você é o agente de suporte à decisão executiva IAí (${AGENT_LABELS[agentType as AgentType] ?? agentType}). Ajude o líder de forma direta, objetiva e respeitosa. Máximo de ${MAX_EXCHANGES} trocas por sessão.`;
 
   // Closing sentence is always appended server-side on the final exchange only.
-  // The model must NEVER generate it.
+  // The model must NEVER generate it independently.
   prompt +=
-    `\n\nREGRA OBRIGATÓRIA: Nunca escreva a frase "${CLOSING_MESSAGE}" — ela será adicionada automaticamente pelo sistema apenas na última troca. Se você a escrever, ela aparecerá duplicada.`;
+    `\n\nREGRA OBRIGATÓRIA: Nunca escreva a frase "${CLOSING_MESSAGE}" — ela será adicionada automaticamente pelo sistema na última troca. Se você a escrever, ela aparecerá duplicada.`;
+
+  // Allow early closing: if the leader already has clarity, end the session now.
+  prompt +=
+    `\n\nENCERRAMENTO ANTECIPADO: Se você perceber que o líder já alcançou clareza suficiente antes de ${MAX_EXCHANGES} trocas, você pode encerrar a conversa mais cedo. Para isso, termine sua resposta com exatamente "${CLOSE_SIGNAL}" na última linha. O sistema removerá esse marcador e adicionará a mensagem de encerramento automaticamente. Não use "${CLOSE_SIGNAL}" se a conversa ainda precisar continuar.`;
 
   if (exchangeCount >= WRAP_UP_AT) {
     prompt +=
@@ -155,9 +163,18 @@ async function generateAndSaveSed(
   try {
     const response = await anthropic.messages.create({
       model: MODEL_HAIKU,
-      max_tokens: 512,
+      max_tokens: 768,
       system:
-        'Analyze this conversation. Return ONLY JSON with these exact fields: debt_primary (one of: EVITACAO_CONFLITO, AUTORIDADE_FRAGILIZADA, COMUNICACAO_AMBIGUA, ACCOUNTABILITY_DILUIDA, DECISAO_POSTERGADA, CONFIANCA_EROSIONADA, APRENDIZADO_BLOQUEADO, ALINHAMENTO_SIMBOLICO, ENERGIA_EMOCIONAL, MATURIDADE_POLITICA), debt_adjacent (same enum or null), context_type (FEEDBACK|DECISAO|CONFLITO|ALINHAMENTO|CRISE|DELEGACAO|POLITICA|COMUNICACAO|GESTAO_TIME|CLIENTE|PARES|CHEFE|CARREIRA|OUTRO), actor (LIDERADO|PAR|CHEFE|CLIENTE|TIME|OUTRO), moment_phase (BEFORE|DURING|AFTER), intensity (INTEGER 1 to 5, where 1=minimal and 5=critical), confidence (float 0 to 1), timestamp (ISO 8601 datetime string, ex: 2026-05-03T14:32:00Z)',
+        'You are an analyst that reads leadership coaching conversations and extracts a structured record. Return ONLY valid JSON with these exact fields:\n' +
+        '- debt_primary: one of EVITACAO_CONFLITO | AUTORIDADE_FRAGILIZADA | COMUNICACAO_AMBIGUA | ACCOUNTABILITY_DILUIDA | DECISAO_POSTERGADA | CONFIANCA_EROSIONADA | APRENDIZADO_BLOQUEADO | ALINHAMENTO_SIMBOLICO | ENERGIA_EMOCIONAL | MATURIDADE_POLITICA\n' +
+        '- debt_adjacent: same enum or null\n' +
+        '- context_type: one of FEEDBACK | DECISAO | CONFLITO | ALINHAMENTO | CRISE | DELEGACAO | POLITICA | COMUNICACAO | GESTAO_TIME | CLIENTE | PARES | CHEFE | CARREIRA | OUTRO\n' +
+        '- actor: one of LIDERADO | PAR | CHEFE | CLIENTE | TIME | OUTRO\n' +
+        '- moment_phase: one of BEFORE | DURING | AFTER\n' +
+        '- intensity: integer 1–5 (1=minimal, 5=critical)\n' +
+        '- confidence: float 0–1 — your numerical confidence in this classification\n' +
+        '- self_assessment: string — 1-2 sentences explaining your confidence level and any uncertainties (this will be used to measure classification accuracy over time)\n' +
+        '- timestamp: ISO 8601 datetime string (current time)',
       messages: [{ role: "user", content: transcript }],
     });
 
@@ -180,6 +197,7 @@ async function generateAndSaveSed(
       momentPhase: validated.moment_phase,
       intensity: validated.intensity,
       confidence: validated.confidence,
+      agentSelfAssessment: validated.self_assessment,
       lowConfidence,
       timestamp: new Date(validated.timestamp),
     });
@@ -297,10 +315,23 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
 
     await stream.finalMessage();
 
-    const newCount = exchangeCount + 1;
-    const isClosing = newCount >= MAX_EXCHANGES;
+    // Detect early-close signal from the model
+    const trimmed = fullResponse.trimEnd();
+    const earlyClose = trimmed.endsWith(CLOSE_SIGNAL);
 
-    // Append closing message on final exchange
+    if (earlyClose) {
+      // Strip the signal from what was sent — need to send a correction token
+      fullResponse = trimmed.slice(0, -CLOSE_SIGNAL.length).trimEnd();
+      // Send a negative-length correction isn't possible in SSE; instead we
+      // send the closing suffix which will be appended after [ENCERRAR] in the
+      // client buffer. We handle this by sending a special replace event.
+      sendEvent({ type: "replace_last", content: fullResponse });
+    }
+
+    const newCount = exchangeCount + 1;
+    const isClosing = earlyClose || newCount >= MAX_EXCHANGES;
+
+    // Append closing message on final exchange (early or limit-reached)
     if (isClosing) {
       const closingSuffix = "\n\n" + CLOSING_MESSAGE;
       fullResponse += closingSuffix;
@@ -314,9 +345,7 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
     ];
 
     if (isClosing) {
-      // Save SED then clear context for privacy
       await generateAndSaveSed(sessionId, user.organizationId, newMessages, lowConfidence);
-
       await db
         .update(sessionsTable)
         .set({
