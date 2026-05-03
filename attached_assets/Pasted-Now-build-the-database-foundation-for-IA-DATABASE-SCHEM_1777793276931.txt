@@ -1,0 +1,85 @@
+Now build the database foundation for IAí.
+
+DATABASE SCHEMA: Create these tables with the exact column names below.
+
+Table: organizations
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+  name TEXT NOT NULL
+  plan TEXT DEFAULT 'free'
+  created_at TIMESTAMP DEFAULT NOW()
+
+Table: users
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+  organization_id UUID NOT NULL REFERENCES organizations(id)
+  email TEXT UNIQUE NOT NULL
+  role TEXT DEFAULT 'leader'
+  auth_token TEXT
+  created_at TIMESTAMP DEFAULT NOW()
+
+Table: sessions
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+  user_id UUID NOT NULL REFERENCES users(id)
+  organization_id UUID NOT NULL REFERENCES organizations(id)
+  agent_type TEXT NOT NULL
+  context JSONB DEFAULT '{}'
+  exchange_count INTEGER DEFAULT 0
+  status TEXT DEFAULT 'active'
+  created_at TIMESTAMP DEFAULT NOW()
+
+Table: seds
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+  session_id UUID NOT NULL REFERENCES sessions(id)
+  organization_id UUID NOT NULL REFERENCES organizations(id)
+  debt_primary TEXT NOT NULL
+  debt_adjacent TEXT
+  context_type TEXT NOT NULL
+  actor TEXT
+  moment_code TEXT
+  moment_phase TEXT
+  intensity INTEGER CHECK (intensity BETWEEN 1 AND 5)
+  confidence FLOAT
+  low_confidence BOOLEAN DEFAULT FALSE
+  timestamp TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW()
+
+Table: survey_responses
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+  organization_id UUID NOT NULL REFERENCES organizations(id)
+  question_id UUID NOT NULL
+  answer_value INTEGER NOT NULL CHECK (answer_value BETWEEN 0 AND 4)
+  created_at TIMESTAMP DEFAULT NOW()
+  NOTE: No user_id column — responses are anonymous by design.
+
+Table: questions
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+  debt_id TEXT NOT NULL
+  text TEXT NOT NULL
+  weight_type TEXT NOT NULL CHECK (weight_type IN ('I_PLUS', 'I', 'R'))
+  active BOOLEAN DEFAULT TRUE
+
+Table: moment_library
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+  moment_code TEXT UNIQUE NOT NULL
+  agent TEXT NOT NULL
+  moment_name TEXT NOT NULL
+  description TEXT
+  debt_primary TEXT NOT NULL
+  debt_adjacent TEXT
+  context_type TEXT NOT NULL
+  trigger_phase TEXT
+  example_input TEXT
+  response_notes TEXT
+  status TEXT DEFAULT 'draft'
+
+CONSTRAINTS:
+- Every table except 'questions' and 'moment_library' must have organization_id.
+- The seds table must NEVER store free text from the user.
+- seds.intensity is INTEGER 1-5, not text labels.
+- seds.timestamp stores ISO 8601 datetime of session end.
+
+AUTHENTICATION: Simple email + magic link auth.
+Associate each user with their organization on login.
+
+SEED: Create test organization 'Prioris Test' and one test user.
+
+Do NOT build frontend yet. Database, auth and API only.
