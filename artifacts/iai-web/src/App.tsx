@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuth } from "./hooks/useAuth";
 import Login from "./pages/Login";
 import Chat from "./pages/Chat";
+import IaiIcon from "./components/IaiIcon";
 
 const queryClient = new QueryClient();
 
@@ -19,13 +20,15 @@ function Splash() {
         gap: "0",
       }}
     >
+      <IaiIcon width={56} height={66} />
       <div
         style={{
           color: "#F2F2F2",
-          fontSize: "32px",
+          fontSize: "28px",
           fontWeight: 700,
           lineHeight: 1.1,
           letterSpacing: "-0.01em",
+          marginTop: "12px",
         }}
       >
         IAí

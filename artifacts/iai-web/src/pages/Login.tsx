@@ -1,5 +1,6 @@
 import { useState, FormEvent } from "react";
 import { AuthUser } from "../hooks/useAuth";
+import IaiIcon from "../components/IaiIcon";
 
 interface LoginProps {
   onLogin: (token: string, user: AuthUser) => void;
@@ -99,8 +100,9 @@ export default function Login({ onLogin }: LoginProps) {
     >
       <div style={{ width: "100%", maxWidth: "360px" }}>
         {/* Wordmark */}
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <div style={{ color: "#F2F2F2", fontSize: "28px", fontWeight: 700, lineHeight: 1.1 }}>
+        <div style={{ textAlign: "center", marginBottom: "48px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <IaiIcon width={40} height={47} />
+          <div style={{ color: "#F2F2F2", fontSize: "22px", fontWeight: 700, lineHeight: 1.1, marginTop: "12px" }}>
             IAí
           </div>
           <div style={{ color: "#B8953F", fontSize: "10px", letterSpacing: "0.12em", marginTop: "4px" }}>

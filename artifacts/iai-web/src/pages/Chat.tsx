@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from "react";
 import { getToken, AuthUser } from "../hooks/useAuth";
 import SurveyCard from "../components/SurveyCard";
+import IaiIcon from "../components/IaiIcon";
 
 interface Message {
   role: "user" | "assistant";
@@ -234,8 +235,11 @@ export default function Chat({ user, onLogout }: ChatProps) {
           justifyContent: "center",
         }}
       >
-        <div style={{ textAlign: "center", lineHeight: 1.15 }}>
-          <div style={{ color: "#F2F2F2", fontSize: "20px", fontWeight: 700 }}>IAí</div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <IaiIcon width={28} height={33} />
+            <span style={{ color: "#F2F2F2", fontSize: "18px", fontWeight: 700, lineHeight: 1 }}>IAí</span>
+          </div>
           <div style={{ color: "#B8953F", fontSize: "10px", letterSpacing: "0.12em", fontWeight: 400 }}>
             by PRIORIS
           </div>
