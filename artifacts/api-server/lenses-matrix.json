@@ -1,0 +1,33 @@
+{
+  "MNT": [
+    { "agent": "IMP", "intensity": "light" },
+    { "agent": "CTN", "intensity": "light" },
+    { "agent": "PRF", "intensity": "moderate" }
+  ],
+  "IMP": [
+    { "agent": "MNT", "intensity": "light" },
+    { "agent": "CTN", "intensity": "moderate" },
+    { "agent": "PRF", "intensity": "moderate" }
+  ],
+  "FBK": [
+    { "agent": "MNT", "intensity": "light" },
+    { "agent": "IMP", "intensity": "moderate" },
+    { "agent": "CTN", "intensity": "light" }
+  ],
+  "OTO": [
+    { "agent": "IMP", "intensity": "light" },
+    { "agent": "FBK", "intensity": "light" },
+    { "agent": "CTN", "intensity": "moderate" }
+  ],
+  "CTN": [
+    { "agent": "IMP", "intensity": "light" }
+  ],
+  "CRS": [
+    { "agent": "CTN", "intensity": "strong" },
+    { "agent": "IMP", "intensity": "light" }
+  ],
+  "PRF": [
+    { "agent": "MNT", "intensity": "light" },
+    { "agent": "IMP", "intensity": "light" }
+  ]
+}

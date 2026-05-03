@@ -1,5 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, and, ilike } from "drizzle-orm";
+import { readFileSync } from "fs";
+import { join } from "path";
 import Anthropic from "@anthropic-ai/sdk";
 import { db, sessionsTable, momentLibraryTable, sedsTable } from "@workspace/db";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
@@ -33,6 +35,28 @@ const AGENT_LABELS: Record<AgentType, string> = {
   CRS: "crise",
   PRF: "padrões",
 };
+
+// ── Lens system ───────────────────────────────────────────────────────────────
+
+type LensIntensity = "light" | "moderate" | "strong";
+interface LensEntry { agent: string; intensity: LensIntensity; }
+type LensMatrix = Record<string, LensEntry[]>;
+
+const LENS_PLACEHOLDER = "Also consider the human impact on the people involved.";
+
+const lensMatrix: LensMatrix = JSON.parse(
+  readFileSync(join(process.cwd(), "lenses-matrix.json"), "utf-8"),
+);
+
+function getLensText(agent: string, intensity: LensIntensity): string {
+  const envKey = `LENS_${agent}_${intensity.toUpperCase()}`;
+  return process.env[envKey] ?? LENS_PLACEHOLDER;
+}
+
+function composeLenses(agentType: string): string[] {
+  const entries = lensMatrix[agentType] ?? [];
+  return entries.map((e) => getLensText(e.agent, e.intensity));
+}
 
 const DEBT_VALUES = [
   "EVITACAO_CONFLITO", "AUTORIDADE_FRAGILIZADA", "COMUNICACAO_AMBIGUA",
@@ -100,26 +124,36 @@ interface SessionContext {
 }
 
 function getSystemPrompt(agentType: string, exchangeCount: number): string {
+  // 1. Agent core prompt
   const key = `PROMPT_${agentType}`;
-  let prompt =
+  const corePrompt =
     process.env[key] ??
     `Você é o agente de suporte à decisão executiva IAí (${AGENT_LABELS[agentType as AgentType] ?? agentType}). Ajude o líder de forma direta, objetiva e respeitosa. Máximo de ${MAX_EXCHANGES} trocas por sessão.`;
 
-  // Closing sentence is always appended server-side on the final exchange only.
-  // The model must NEVER generate it independently.
-  prompt +=
-    `\n\nREGRA OBRIGATÓRIA: Nunca escreva a frase "${CLOSING_MESSAGE}" — ela será adicionada automaticamente pelo sistema na última troca. Se você a escrever, ela aparecerá duplicada.`;
+  // 2. Active lenses (from permissions matrix + env vars)
+  const lensTexts = composeLenses(agentType);
 
-  // Allow early closing: if the leader already has clarity, end the session now.
-  prompt +=
-    `\n\nENCERRAMENTO ANTECIPADO: Se você perceber que o líder já alcançou clareza suficiente antes de ${MAX_EXCHANGES} trocas, você pode encerrar a conversa mais cedo. Para isso, termine sua resposta com exatamente "${CLOSE_SIGNAL}" na última linha. O sistema removerá esse marcador e adicionará a mensagem de encerramento automaticamente. Não use "${CLOSE_SIGNAL}" se a conversa ainda precisar continuar.`;
+  // 3. Session context (rules + wrap-up)
+  const sessionContext = [
+    `REGRA OBRIGATÓRIA: Nunca escreva a frase "${CLOSING_MESSAGE}" — ela será adicionada automaticamente pelo sistema na última troca. Se você a escrever, ela aparecerá duplicada.`,
+    `ENCERRAMENTO ANTECIPADO: Se você perceber que o líder já alcançou clareza suficiente antes de ${MAX_EXCHANGES} trocas, você pode encerrar a conversa mais cedo. Para isso, termine sua resposta com exatamente "${CLOSE_SIGNAL}" na última linha. O sistema removerá esse marcador e adicionará a mensagem de encerramento automaticamente. Não use "${CLOSE_SIGNAL}" se a conversa ainda precisar continuar.`,
+    ...(exchangeCount >= WRAP_UP_AT
+      ? ["IMPORTANT: Begin wrapping up. Guide toward conclusion. 2 exchanges left."]
+      : []),
+  ].join("\n\n");
 
-  if (exchangeCount >= WRAP_UP_AT) {
-    prompt +=
-      "\n\nIMPORTANT: Begin wrapping up. Guide toward conclusion. 2 exchanges left.";
-  }
+  // Compose: [core] + [lens 1] + [lens 2] + ... + [session context]
+  const parts = [corePrompt, ...lensTexts, sessionContext];
+  const composed = parts.join("\n\n");
 
-  return prompt;
+  // Log approximate token count for monitoring (≈ chars / 4)
+  const approxTokens = Math.ceil(composed.length / 4);
+  logger.info(
+    { agentType, exchangeCount, lensCount: lensTexts.length, approxTokens },
+    "System prompt composed",
+  );
+
+  return composed;
 }
 
 async function classifyWithHaiku(content: string): Promise<{
