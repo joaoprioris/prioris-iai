@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { db, sessionsTable } from "@workspace/db";
 import {
   CreateSessionBody,
@@ -23,7 +23,7 @@ router.get("/sessions", requireAuth, async (req: AuthenticatedRequest, res): Pro
         eq(sessionsTable.organizationId, user.organizationId),
       ),
     )
-    .orderBy(sessionsTable.createdAt);
+    .orderBy(sql`${sessionsTable.createdAt} desc`);
 
   res.json(ListSessionsResponse.parse(rows));
 });
