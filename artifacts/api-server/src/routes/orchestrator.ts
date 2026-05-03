@@ -8,9 +8,15 @@ import { logger } from "../lib/logger";
 const router: IRouter = Router();
 const MAX_EXCHANGES = 10;
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Use Replit AI Integration proxy if available, otherwise fall back to direct API key
+const baseURL = process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL;
+const apiKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "";
+
+const anthropic = new Anthropic({ apiKey, ...(baseURL ? { baseURL } : {}) });
+
+// Models available via Replit AI Integration proxy
+const MODEL_HAIKU = "claude-haiku-4-5";
+const MODEL_SONNET = "claude-sonnet-4-5";
 
 const AGENT_TYPES = ["MNT", "IMP", "FBK", "OTO", "CTN", "CRS", "PRF"] as const;
 type AgentType = (typeof AGENT_TYPES)[number];
@@ -52,7 +58,7 @@ async function classifyWithHaiku(content: string): Promise<{
   confidence: number;
 }> {
   const message = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: MODEL_HAIKU,
     max_tokens: 256,
     system:
       "You are a router. Classify this leader message into one of: MNT (strategic decision), IMP (human impact), FBK (feedback), OTO (live conversation), CTN (containment), CRS (crisis), PRF (patterns). Return ONLY JSON: {agent_type, debt_primary, debt_adjacent, confidence}",
@@ -126,7 +132,7 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
       debtAdjacent = libraryMatch.debtAdjacent ?? null;
       req.log.info({ agentType, source: "moment_library" }, "Agente classificado via biblioteca");
     } else {
-      // Step 2: Claude haiku classification
+      // Step 2: Haiku classification
       try {
         const classification = await classifyWithHaiku(content);
         agentType = classification.agent_type;
@@ -166,10 +172,10 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
 
   try {
     // Step 5: Stream from Claude Sonnet
-    const stream = await anthropic.messages.stream({
-      model: "claude-sonnet-4-20250514",
+    const stream = anthropic.messages.stream({
+      model: MODEL_SONNET,
       system: systemPrompt,
-      max_tokens: 1024,
+      max_tokens: 8192,
       messages: messagesForClaude,
     });
 
