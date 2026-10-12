@@ -1,0 +1,3 @@
+export {usersTable,organizationsTable} from '../lib/db/src/schema/index.ts';
+export const state:any={queue:[],writes:[]};
+export const db:any={select:()=>({from:()=>({where:async()=>state.queue.shift()??[]})}),insert:()=>({values:(v:any)=>{state.writes.push(v);return{returning:async()=>[{id:'11111111-1111-4111-8111-111111111111'}]}}}),update:()=>{throw Error('SESSION_CREDENTIAL_MUST_NOT_BE_REPLACED')}};

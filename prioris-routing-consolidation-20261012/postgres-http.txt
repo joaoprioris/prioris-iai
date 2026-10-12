@@ -1,0 +1,24 @@
+PASS another owner cannot read session
+PASS another tenant cannot read session
+PASS history defaults disabled
+PASS database rejects enabled history with null notice
+PASS composite foreign key rejects incorrect organization
+PASS disabled history commits operational context only
+PASS latest retry does not call model or increment
+PASS older retry cannot be processed twice
+PASS enabled history requires accepted notice
+PASS enabled history records owned turn
+PASS history cannot reference another user session
+PASS opt out blocks retrieval and new records
+PASS revision change prevents concurrent re-save
+PASS compare-and-swap rejects stale count
+PASS model outage produces no database success
+PASS erase clears owned data and closes only owned sessions
+PASS HTTP rejects untrusted origin
+PASS HTTP enforces owner scope
+PASS HTTP rejects missing request identifier
+PASS HTTP delivers SSE only after persisted success
+PASS HTTP cannot enable history without notice
+PASS HTTP requires explicit erase intent
+{"checks":22,"passed":22,"fatal":false}
+POSTGRES_TEMPORARIO_ENCERRADO true

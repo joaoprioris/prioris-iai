@@ -69,6 +69,7 @@ router.get("/sessions/:id", requireAuth, async (req: AuthenticatedRequest, res):
     .where(
       and(
         eq(sessionsTable.id, params.data.id),
+        eq(sessionsTable.userId, user.id),
         eq(sessionsTable.organizationId, user.organizationId),
       ),
     );

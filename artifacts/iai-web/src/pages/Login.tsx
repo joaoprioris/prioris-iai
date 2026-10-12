@@ -9,14 +9,12 @@ interface LoginProps {
 export default function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"email" | "token" | "loading">("email");
-  const [devToken, setDevToken] = useState("");
   const [tokenInput, setTokenInput] = useState("");
   const [error, setError] = useState("");
 
   // Auto-verify magic link token from URL (?token=...)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlToken = params.get("token");
+    const urlToken = new URLSearchParams(window.location.hash.slice(1)).get("token") ?? new URLSearchParams(window.location.search).get("token");
     if (urlToken) {
       // Clean the token from the URL immediately so it isn't re-used on refresh
       window.history.replaceState({}, "", window.location.pathname);
@@ -45,30 +43,27 @@ export default function Login({ onLogin }: LoginProps) {
         return;
       }
 
-      if (data.token) {
-        setDevToken(data.token);
-        await verifyAndLogin(data.token);
-      } else {
-        setStep("token");
-      }
+      if (data.token) { setError("Este formato de acesso não é mais permitido."); setStep("email"); return; }
+      setStep("token");
     } catch {
-      setError("Erro de conexão. Tente novamente.");
+      setError("Não foi possível acessar o serviço. Tente novamente mais tarde.");
       setStep("email");
     }
   };
 
   const verifyAndLogin = async (t: string) => {
     try {
-      const res = await fetch(`/api/auth/verify?token=${encodeURIComponent(t)}`);
+      const res = await fetch("/api/auth/verify", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: t }) });
       const data = await res.json();
 
       if (!res.ok) {
-        setError("Token inválido ou expirado.");
+        setError("O acesso venceu ou já foi utilizado. Solicite outro e-mail.");
         setStep("token");
         return;
       }
 
-      onLogin(t, data);
+      if (!["id", "email", "role", "organizationId", "organizationName"].every(key => typeof data[key] === "string")) { setError("Não foi possível confirmar o acesso. Tente novamente."); setStep("email"); return; }
+      onLogin("cookie", data);
     } catch {
       setError("Erro ao verificar token.");
       setStep("token");
@@ -192,13 +187,13 @@ export default function Login({ onLogin }: LoginProps) {
         {step === "token" && (
           <form onSubmit={handleVerifyToken} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <p style={{ color: "rgba(242,242,242,0.55)", fontSize: "13px", lineHeight: 1.5, margin: 0 }}>
-              Verifique seu e-mail e cole o token de acesso abaixo.
+              Confira seu e-mail e clique no link de acesso. Se preferir, cole o código abaixo.
             </p>
             <input
               type="text"
               value={tokenInput}
               onChange={(e) => setTokenInput(e.target.value)}
-              placeholder="Cole o token aqui"
+              placeholder="Cole o código aqui"
               required
               autoFocus
               style={{ ...inputStyle, fontFamily: "'Menlo', monospace", letterSpacing: "0.05em" }}
@@ -244,24 +239,6 @@ export default function Login({ onLogin }: LoginProps) {
           </form>
         )}
 
-        {/* Dev token display */}
-        {devToken && (
-          <div
-            style={{
-              marginTop: "16px",
-              padding: "10px 12px",
-              borderRadius: "6px",
-              background: "#130D22",
-              color: "rgba(242,242,242,0.3)",
-              fontSize: "11px",
-              fontFamily: "'Menlo', monospace",
-              wordBreak: "break-all",
-              border: "1px solid rgba(123,79,191,0.15)",
-            }}
-          >
-            dev: {devToken}
-          </div>
-        )}
       </div>
     </div>
   );

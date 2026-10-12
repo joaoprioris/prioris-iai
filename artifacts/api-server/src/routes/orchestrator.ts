@@ -371,7 +371,7 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
   const [session] = await db
     .select()
     .from(sessionsTable)
-    .where(and(eq(sessionsTable.id, sessionId), eq(sessionsTable.organizationId, user.organizationId)));
+    .where(and(eq(sessionsTable.id, sessionId), eq(sessionsTable.organizationId, user.organizationId), eq(sessionsTable.userId, user.id)));
 
   if (!session) {
     res.status(404).json({ error: "Sessão não encontrada." });

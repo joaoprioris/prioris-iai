@@ -1,0 +1,96 @@
+{
+  "synthetic": true,
+  "database": "PostgreSQL isolated schema",
+  "model": "fixtures",
+  "authentication": "injected fictitious scope",
+  "checks": [
+    {
+      "name": "another owner cannot read session",
+      "pass": true
+    },
+    {
+      "name": "another tenant cannot read session",
+      "pass": true
+    },
+    {
+      "name": "history defaults disabled",
+      "pass": true
+    },
+    {
+      "name": "database rejects enabled history with null notice",
+      "pass": true
+    },
+    {
+      "name": "composite foreign key rejects incorrect organization",
+      "pass": true
+    },
+    {
+      "name": "disabled history commits operational context only",
+      "pass": true
+    },
+    {
+      "name": "latest retry does not call model or increment",
+      "pass": true
+    },
+    {
+      "name": "older retry cannot be processed twice",
+      "pass": true
+    },
+    {
+      "name": "enabled history requires accepted notice",
+      "pass": true
+    },
+    {
+      "name": "enabled history records owned turn",
+      "pass": true
+    },
+    {
+      "name": "history cannot reference another user session",
+      "pass": true
+    },
+    {
+      "name": "opt out blocks retrieval and new records",
+      "pass": true
+    },
+    {
+      "name": "revision change prevents concurrent re-save",
+      "pass": true
+    },
+    {
+      "name": "compare-and-swap rejects stale count",
+      "pass": true
+    },
+    {
+      "name": "model outage produces no database success",
+      "pass": true
+    },
+    {
+      "name": "erase clears owned data and closes only owned sessions",
+      "pass": true
+    },
+    {
+      "name": "HTTP rejects untrusted origin",
+      "pass": true
+    },
+    {
+      "name": "HTTP enforces owner scope",
+      "pass": true
+    },
+    {
+      "name": "HTTP rejects missing request identifier",
+      "pass": true
+    },
+    {
+      "name": "HTTP delivers SSE only after persisted success",
+      "pass": true
+    },
+    {
+      "name": "HTTP cannot enable history without notice",
+      "pass": true
+    },
+    {
+      "name": "HTTP requires explicit erase intent",
+      "pass": true
+    }
+  ]
+}

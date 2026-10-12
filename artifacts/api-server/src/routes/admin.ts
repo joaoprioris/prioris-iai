@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { eq } from "drizzle-orm";
-import { randomBytes } from "crypto";
+import { timingSafeEqual } from "crypto";
 import { db, usersTable, organizationsTable } from "@workspace/db";
 import { logger } from "../lib/logger";
 
@@ -23,7 +23,9 @@ function requireAdminToken(req: Request, res: Response, next: () => void): void 
   const authHeader = req.headers.authorization ?? "";
   const provided = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
 
-  if (!provided || provided !== adminToken) {
+  const expectedBytes = Buffer.from(adminToken);
+  const providedBytes = Buffer.from(provided);
+  if (!provided || providedBytes.length !== expectedBytes.length || !timingSafeEqual(providedBytes, expectedBytes)) {
     res.status(401).json({ error: "Token de administrador inválido." });
     return;
   }
@@ -37,7 +39,8 @@ router.post(
   "/admin/users",
   requireAdminToken as unknown as Parameters<typeof router.post>[1],
   async (req: Request, res: Response): Promise<void> => {
-    const { email, organization_id } = req.body ?? {};
+    const { email: suppliedEmail, organization_id } = req.body ?? {};
+    const email = typeof suppliedEmail === "string" ? suppliedEmail.trim().toLowerCase() : suppliedEmail;
 
     if (typeof email !== "string" || !EMAIL_RE.test(email)) {
       res.status(400).json({ error: "E-mail inválido." });
@@ -60,37 +63,28 @@ router.post(
     }
 
     // Upsert user — create if new, or refresh token if already registered
-    const token = randomBytes(32).toString("hex");
+    // CREDENTIAL_ISSUING_REMOVED: normal email login issues expiring hashed credentials.
 
     const [existing] = await db
-      .select({ id: usersTable.id, email: usersTable.email, role: usersTable.role })
+      .select({ id: usersTable.id, email: usersTable.email, role: usersTable.role, organizationId: usersTable.organizationId })
       .from(usersTable)
       .where(eq(usersTable.email, email));
 
     let userId: string;
 
     if (existing) {
-      await db
-        .update(usersTable)
-        .set({ authToken: token })
-        .where(eq(usersTable.id, existing.id));
-
+      if (existing.organizationId !== organization_id) { res.status(409).json({ error: "Este e-mail já pertence a outra organização." }); return; }
       userId = existing.id;
-      req.log.info({ userId, email, orgId: organization_id }, "Admin: token renovado para usuário existente");
+      req.log.info({ userId }, "Admin: usuário já cadastrado; credencial preservada");
     } else {
       const [created] = await db
         .insert(usersTable)
-        .values({ email, organizationId: organization_id, authToken: token, role: "leader" })
+        .values({ email, organizationId: organization_id, authToken: null, role: "leader" })
         .returning({ id: usersTable.id });
 
       userId = created.id;
-      req.log.info({ userId, email, orgId: organization_id }, "Admin: novo usuário criado");
+      req.log.info({ userId }, "Admin: novo usuário criado");
     }
-
-    // Build the magic link using the public domain when available
-    const domain = process.env.REPLIT_DOMAINS?.split(",")[0]?.trim();
-    const baseUrl = domain ? `https://${domain}` : `${req.protocol}://${req.get("host")}`;
-    const magicLink = `${baseUrl}/?token=${token}`;
 
     res.status(existing ? 200 : 201).json({
       user: {
@@ -100,8 +94,7 @@ router.post(
         organizationName: org.name,
         isNew: !existing,
       },
-      token,
-      magicLink,
+      loginRequired: true,
     });
   },
 );

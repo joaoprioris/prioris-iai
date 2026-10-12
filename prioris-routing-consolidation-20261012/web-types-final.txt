@@ -1,0 +1,4 @@
+
+> @workspace/iai-web@0.0.0 typecheck /home/runner/workspace/artifacts/iai-web
+> tsc -p tsconfig.json --noEmit
+

@@ -1,0 +1,13 @@
+
+> @workspace/iai-web@0.0.0 build /home/runner/workspace/artifacts/iai-web
+> vite build --config vite.config.ts
+
+vite v7.3.2 building client environment for production...
+transforming...
+✓ 81 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/public/index.html                   1.32 kB │ gzip:  0.59 kB
+dist/public/assets/index-BuAxbS2Y.css   86.52 kB │ gzip: 14.49 kB
+dist/public/assets/index-BYKIaY1U.js   231.13 kB │ gzip: 71.83 kB
+✓ built in 2.03s

@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "httpStatus": 401,
+  "errorType": "AuthenticationError",
+  "synthetic": true
+}

@@ -1,0 +1,1 @@
+{"synthetic":true,"executed":12,"matching":11,"responseCount":1,"estimatedUSD":0.036434999999999995}

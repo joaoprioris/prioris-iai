@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from "react";
 import { getToken, AuthUser } from "../hooks/useAuth";
 import SurveyCard from "../components/SurveyCard";
+import HistorySettings from '../components/HistorySettings';
 import IaiIcon from "../components/IaiIcon";
 
 interface Message {
@@ -32,6 +33,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const [error, setError] = useState("");
   const [surveyQuestion, setSurveyQuestion] = useState<SurveyQuestion | null>(null);
   const [surveyDismissed, setSurveyDismissed] = useState(false);
+  const pendingRequestRef = useRef<{id:string;sessionId:string;content:string}|null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -62,6 +64,8 @@ export default function Chat({ user, onLogout }: ChatProps) {
   };
 
   const handleNewSession = async () => {
+    pendingRequestRef.current = null;
+    setSessionId(null);
     setMessages([]);
     setExchangeCount(0);
     setSessionClosed(false);
@@ -79,6 +83,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
     const token = getToken();
     if (!token) return;
 
+    const previousRequest = pendingRequestRef.current;
+    const requestId = previousRequest?.sessionId === sessionId && previousRequest.content === text ? previousRequest.id : crypto.randomUUID();
+    pendingRequestRef.current = {id:requestId,sessionId,content:text};
     setInput("");
     setSending(true);
     setError("");
@@ -97,13 +104,15 @@ export default function Chat({ user, onLogout }: ChatProps) {
       const res = await fetch("/api/session/message", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ sessionId, content: text }),
+        body: JSON.stringify({ sessionId, content: text, requestId }),
       });
 
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
         setError(data.error ?? "Erro ao enviar mensagem.");
-        setMessages((prev) => prev.slice(0, -1));
+        if (data.code === "REQUEST_ALREADY_COMPLETED" || data.code === "SESSION_CLOSED") setSessionClosed(true);
+        setMessages((prev) => prev.slice(0, -2));
+        setInput(text);
         setSending(false);
         return;
       }
@@ -111,6 +120,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let completed = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -147,6 +157,8 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 return updated;
               });
             } else if (event.type === "done") {
+              completed = true;
+              pendingRequestRef.current = null;
               setExchangeCount(event.exchangeCount);
               setSessionClosed(event.status === "closed");
               setMessages((prev) => {
@@ -160,16 +172,19 @@ export default function Chat({ user, onLogout }: ChatProps) {
               if (event.surveyQuestion) setSurveyQuestion(event.surveyQuestion);
             } else if (event.type === "error") {
               setError(event.error ?? "Erro no agente.");
-              setMessages((prev) => prev.slice(0, -1));
+              setMessages((prev) => prev.slice(0, -2));
+        setInput(text);
             }
           } catch {
             // ignore parse errors
           }
         }
       }
+      if (!completed) throw new Error("INCOMPLETE_STREAM");
     } catch {
-      setError("Erro de conexão.");
-      setMessages((prev) => prev.slice(0, -1));
+      setError("A resposta não chegou por completo. Tente enviar a mesma mensagem novamente.");
+      setMessages((prev) => prev.slice(0, -2));
+        setInput(text);
     }
 
     setSending(false);
@@ -265,6 +280,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
           sair
         </button>
       </header>
+      <HistorySettings busy={sending} onErased={() => { void handleNewSession(); }} />
 
       {/* ── Messages ────────────────────────────────────────────────────────── */}
       <div

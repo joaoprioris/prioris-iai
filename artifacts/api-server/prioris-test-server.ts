@@ -1,0 +1,10 @@
+import express from "express";
+import cookieParser from "cookie-parser";
+import path from "node:path";
+import authRouter from "./src/routes/auth";
+import {pool} from "@workspace/db";
+if(!process.env.DATABASE_URL?.includes(".prioris-auth-test"))throw new Error("ISOLATED_DATABASE_REQUIRED");
+const app=express();app.disable("x-powered-by");app.use(cookieParser());app.use(express.json({limit:"32kb"}));app.use((req,res,next)=>{req.log={info:()=>{},error:()=>console.log("FALHA_GENERICA_NO_TESTE")} as any;res.setHeader("Cache-Control","no-store");next()});
+let testMailRequests=0;app.use((req,res,next)=>{if(req.method==="POST"&&req.path==="/api/auth/request"){if(testMailRequests>=1){res.status(429).json({error:"O envio único deste teste já foi utilizado."});return}testMailRequests++}next()});app.use("/api",authRouter);app.use(express.static(path.resolve(".prioris-auth-test/ui")));app.get("/",(_req,res)=>res.sendFile(path.resolve(".prioris-auth-test/ui/index.html")));
+const server=app.listen(8082,"0.0.0.0",()=>console.log("TESTE_ISOLADO_PRONTO"));
+process.on("SIGTERM",()=>server.close(async()=>{await pool.end();process.exit(0)}));

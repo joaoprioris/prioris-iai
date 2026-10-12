@@ -1,0 +1,245 @@
+SOURCE lib/db/src/schema/users.ts
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+import { organizationsTable } from "./organizations";
+
+export const usersTable = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id").notNull().references(() => organizationsTable.id),
+  email: text("email").unique().notNull(),
+  role: text("role").default("leader"),
+  authToken: text("auth_token"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true });
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof usersTable.$inferSelect;
+
+
+SOURCE lib/db/src/schema/sessions.ts
+import { boolean, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+import { organizationsTable } from "./organizations";
+import { usersTable } from "./users";
+
+export const sessionsTable = pgTable("sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => usersTable.id),
+  organizationId: uuid("organization_id").notNull().references(() => organizationsTable.id),
+  agentType: text("agent_type").notNull(),
+  context: jsonb("context").default({}),
+  exchangeCount: integer("exchange_count").default(0),
+  status: text("status").default("active"),
+  incident: boolean("incident").default(false),
+  incidentReason: text("incident_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSessionSchema = createInsertSchema(sessionsTable).omit({ id: true, createdAt: true });
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type Session = typeof sessionsTable.$inferSelect;
+
+
+SOURCE artifacts/api-server/src/app.ts
+import cookieParser from "cookie-parser";
+import express, { type Express } from "express";
+import cors from "cors";
+import pinoHttp from "pino-http";
+import router from "./routes";
+import { logger } from "./lib/logger";
+
+const app: Express = express();
+
+app.use(
+  pinoHttp({
+    logger,
+    serializers: {
+      req(req) {
+        return {
+          id: req.id,
+          method: req.method,
+          url: req.url?.split("?")[0],
+        };
+      },
+      res(res) {
+        return {
+          statusCode: res.statusCode,
+        };
+      },
+    },
+  }),
+);
+app.use(cors());
+app.use(cookieParser());
+app.use(express.json({ limit: "32kb" }));
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/api", router);
+
+export default app;
+
+
+SOURCE artifacts/api-server/src/routes/index.ts
+import { Router, type IRouter } from "express";
+import healthRouter from "./health";
+import authRouter from "./auth";
+import sessionsRouter from "./sessions";
+import orchestratorRouter from "./orchestrator";
+import surveyRouter from "./survey";
+import adminRouter from "./admin";
+
+const router: IRouter = Router();
+
+router.use(healthRouter);
+router.use(authRouter);
+router.use(sessionsRouter);
+router.use(orchestratorRouter);
+router.use(surveyRouter);
+router.use(adminRouter);
+
+export default router;
+
+
+SOURCE artifacts/api-server/src/routes/sessions.ts
+import { Router, type IRouter } from "express";
+import { eq, and } from "drizzle-orm";
+import { db, sessionsTable } from "@workspace/db";
+import {
+  CreateSessionBody,
+  GetSessionParams,
+  GetSessionResponse,
+  ListSessionsResponse,
+} from "@workspace/api-zod";
+import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+
+const router: IRouter = Router();
+
+router.get("/sessions", requireAuth, async (req: AuthenticatedRequest, res): Promise<void> => {
+  const user = req.user!;
+
+  const rows = await db
+    .select()
+    .from(sessionsTable)
+    .where(
+      and(
+        eq(sessionsTable.userId, user.id),
+        eq(sessionsTable.organizationId, user.organizationId),
+      ),
+    )
+    .orderBy(sessionsTable.createdAt);
+
+  res.json(ListSessionsResponse.parse(rows));
+});
+
+router.post("/sessions", requireAuth, async (req: AuthenticatedRequest, res): Promise<void> => {
+  const user = req.user!;
+
+  const parsed = CreateSessionBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const [session] = await db
+    .insert(sessionsTable)
+    .values({
+      userId: user.id,
+      organizationId: user.organizationId,
+      agentType: parsed.data.agentType,
+      context: {},
+      exchangeCount: 0,
+      status: "active",
+    })
+    .returning();
+
+  req.log.info({ sessionId: session.id, agentType: session.agentType }, "Sessão criada");
+
+  res.status(201).json(GetSessionResponse.parse(session));
+});
+
+router.get("/sessions/:id", requireAuth, async (req: AuthenticatedRequest, res): Promise<void> => {
+  const user = req.user!;
+
+  const params = GetSessionParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [session] = await db
+    .select()
+    .from(sessionsTable)
+    .where(
+      and(
+        eq(sessionsTable.id, params.data.id),
+        eq(sessionsTable.userId, user.id),
+        eq(sessionsTable.organizationId, user.organizationId),
+      ),
+    );
+
+  if (!session) {
+    res.status(404).json({ error: "Sessão não encontrada." });
+    return;
+  }
+
+  res.json(GetSessionResponse.parse(session));
+});
+
+export default router;
+
+
+SOURCE prioris-isolated-build.cjs
+const fs=require("node:fs"),path=require("node:path"),esbuild=require("./artifacts/api-server/node_modules/esbuild");
+const ignore=fs.existsSync(".gitignore")?fs.readFileSync(".gitignore","utf8"):"";if(!ignore.includes(".prioris-auth-test/"))fs.appendFileSync(".gitignore",String.fromCharCode(10)+".prioris-auth-test/"+String.fromCharCode(10)+"artifacts/api-server/prioris-test-server.cjs"+String.fromCharCode(10));
+esbuild.buildSync({entryPoints:["artifacts/api-server/prioris-test-server.ts"],bundle:true,platform:"node",format:"cjs",packages:"external",alias:{"@workspace/db":path.resolve("lib/db/src/index.ts"),"@workspace/api-zod":path.resolve("lib/api-zod/src/index.ts")},outfile:"artifacts/api-server/prioris-test-server.cjs"});
+esbuild.buildSync({entryPoints:["artifacts/iai-web/src/prioris-auth-test-entry.tsx"],bundle:true,platform:"browser",format:"iife",jsx:"automatic",define:{"process.env.NODE_ENV":JSON.stringify("development")},alias:{"@":path.resolve("artifacts/iai-web/src")},loader:{".png":"dataurl",".jpg":"dataurl",".svg":"dataurl"},outfile:".prioris-auth-test/ui/app.js"});
+fs.writeFileSync(".prioris-auth-test/ui/index.html",'<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IAí - teste isolado</title><style>body{font:16px Arial;background:#101014;color:#eee;margin:24px}main{max-width:520px;margin:auto}aside{background:#453019;padding:16px;margin-bottom:20px}input,button{display:block;padding:12px;margin:12px 0;width:90%;font:inherit}button{background:#7d4bbb;color:white;border:0;border-radius:8px}svg{max-width:80px;max-height:80px}</style><div id="root"></div><script src="/app.js"></script></html>');console.log("INTERFACE_E_SERVIDOR_DE_TESTE_COMPILADOS");
+
+
+SOURCE prioris-pg-auth-test.cjs
+const fs=require("node:fs"),path=require("node:path"),cp=require("node:child_process"),esbuild=require("./artifacts/api-server/node_modules/esbuild");
+const root=path.resolve(".prioris-auth-test"),data=path.join(root,"pgdata"),socket=path.join(root,"socket");if(!fs.existsSync(path.join(data,"PG_VERSION")))throw Error("ISOLATED_DATABASE_NOT_PREPARED");
+const started=cp.spawnSync("pg_ctl",["-D",data,"status"],{stdio:"ignore"}).status!==0;if(started&&cp.spawnSync("pg_ctl",["-D",data,"-l",path.join(root,"postgres.log"),"-o","-h '' -k "+socket+" -p 55432","-w","start"],{stdio:"ignore"}).status!==0)throw Error("ISOLATED_DATABASE_START_FAILED");
+try{esbuild.buildSync({entryPoints:["artifacts/api-server/prioris-pg-auth.test.ts"],bundle:true,platform:"node",format:"cjs",packages:"external",alias:{"@workspace/db":path.resolve("lib/db/src/index.ts")},outfile:"artifacts/api-server/prioris-pg-auth.test.cjs"});const r=cp.spawnSync(process.execPath,["artifacts/api-server/prioris-pg-auth.test.cjs"],{stdio:"inherit",env:{...process.env,DATABASE_URL:fs.readFileSync(path.join(root,"database-url.txt"),"utf8"),NODE_PATH:["artifacts/api-server/node_modules","lib/db/node_modules"].map(p=>path.resolve(p)).join(":")}});process.exitCode=r.status??1}
+finally{if(started){const stopped=cp.spawnSync("pg_ctl",["-D",data,"-m","fast","-w","stop"],{stdio:"ignore"}).status===0;console.log("POSTGRES_TEMPORARIO_ENCERRADO",stopped);if(!stopped)process.exitCode=1}}
+
+
+SOURCE artifacts/api-server/package.json
+{
+  "name": "@workspace/api-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
+    "build": "node ./build.mjs",
+    "start": "node --enable-source-maps ./dist/index.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@workspace/api-zod": "workspace:*",
+    "@workspace/db": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2",
+    "drizzle-orm": "catalog:",
+    "express": "^5",
+    "nodemailer": "^10.1.0",
+    "pino": "^9",
+    "pino-http": "^10"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "catalog:",
+    "@types/nodemailer": "^8.0.2",
+    "esbuild": "^0.27.3",
+    "esbuild-plugin-pino": "^2.3.3",
+    "pino-pretty": "^13",
+    "thread-stream": "3.1.0"
+  }
+}
