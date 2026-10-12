@@ -1,14 +1,15 @@
 {
+  "version": "0.2.0",
   "synthetic": true,
   "persistence": "In-memory fixture; not PostgreSQL",
   "inputStatus": "Explicit two-message adaptations, original cases preserved",
-  "budgetCapUSD": 0.4,
-  "estimatedUSD": 0.11895499999999999,
+  "budgetCapUSD": 1,
+  "estimatedUSD": 0.30538200000000004,
   "usage": [
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 1880,
+        "input_tokens": 2004,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -19,28 +20,28 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.002895
+      "costUSD": 0.003019
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 614,
+        "input_tokens": 4283,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 230,
+        "output_tokens": 408,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.005292
+      "costUSD": 0.018969
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 2169,
+        "input_tokens": 2176,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -51,60 +52,44 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003194
+      "costUSD": 0.003201
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 884,
+        "input_tokens": 4543,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 201,
+        "output_tokens": 236,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.005667
+      "costUSD": 0.017169
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 1888,
+        "input_tokens": 2012,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 245,
+        "output_tokens": 265,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003113
-    },
-    {
-      "model": "sonnet",
-      "usage": {
-        "input_tokens": 639,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "cache_creation": {
-          "ephemeral_5m_input_tokens": 0,
-          "ephemeral_1h_input_tokens": 0
-        },
-        "output_tokens": 312,
-        "service_tier": "standard",
-        "inference_geo": "not_available"
-      },
-      "costUSD": 0.006597
+      "costUSD": 0.003337
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 2271,
+        "input_tokens": 2205,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -115,28 +100,28 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003296
+      "costUSD": 0.00323
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 986,
+        "input_tokens": 4488,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 371,
+        "output_tokens": 365,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.008523
+      "costUSD": 0.018939
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 1874,
+        "input_tokens": 1998,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -147,12 +132,28 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.002899
+      "costUSD": 0.003023
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 598,
+        "input_tokens": 4293,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 241,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.016494
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 4393,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -163,12 +164,12 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.004929
+      "costUSD": 0.016314
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 2146,
+        "input_tokens": 2094,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -179,28 +180,92 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003171
+      "costUSD": 0.003119
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 865,
+        "input_tokens": 4574,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 195,
+        "output_tokens": 244,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.00552
+      "costUSD": 0.017382
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 1879,
+        "input_tokens": 2003,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.003028
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 4297,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 236,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.016431
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 2137,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.003162
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 4504,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 247,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.017217
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 2011,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -211,28 +276,44 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.002869
+      "costUSD": 0.003001
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 618,
+        "input_tokens": 4317,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 132,
+        "output_tokens": 273,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003834
+      "costUSD": 0.017046
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 4417,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 238,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.016821
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 2072,
+        "input_tokens": 2104,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -243,60 +324,28 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003097
+      "costUSD": 0.003129
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 791,
+        "input_tokens": 4471,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 145,
+        "output_tokens": 244,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.004548
+      "costUSD": 0.017073
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 1887,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "cache_creation": {
-          "ephemeral_5m_input_tokens": 0,
-          "ephemeral_1h_input_tokens": 0
-        },
-        "output_tokens": 198,
-        "service_tier": "standard",
-        "inference_geo": "not_available"
-      },
-      "costUSD": 0.002877
-    },
-    {
-      "model": "sonnet",
-      "usage": {
-        "input_tokens": 628,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "cache_creation": {
-          "ephemeral_5m_input_tokens": 0,
-          "ephemeral_1h_input_tokens": 0
-        },
-        "output_tokens": 124,
-        "service_tier": "standard",
-        "inference_geo": "not_available"
-      },
-      "costUSD": 0.003744
-    },
-    {
-      "model": "haiku",
-      "usage": {
-        "input_tokens": 2068,
+        "input_tokens": 2007,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -307,28 +356,44 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003093
+      "costUSD": 0.003032
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 789,
+        "input_tokens": 4302,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 104,
+        "output_tokens": 266,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003927
+      "costUSD": 0.016896
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 4402,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 231,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.016671
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 1883,
+        "input_tokens": 2088,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -339,28 +404,44 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.002908
+      "costUSD": 0.003113
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 607,
+        "input_tokens": 4454,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 173,
+        "output_tokens": 241,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.004416
+      "costUSD": 0.016977
     },
     {
       "model": "haiku",
       "usage": {
-        "input_tokens": 2109,
+        "input_tokens": 2005,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 258,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.003295
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 2194,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
@@ -371,87 +452,23 @@
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.003134
+      "costUSD": 0.003219
     },
     {
       "model": "sonnet",
       "usage": {
-        "input_tokens": 825,
+        "input_tokens": 4675,
         "cache_creation_input_tokens": 0,
         "cache_read_input_tokens": 0,
         "cache_creation": {
           "ephemeral_5m_input_tokens": 0,
           "ephemeral_1h_input_tokens": 0
         },
-        "output_tokens": 221,
+        "output_tokens": 470,
         "service_tier": "standard",
         "inference_geo": "not_available"
       },
-      "costUSD": 0.00579
-    },
-    {
-      "model": "haiku",
-      "usage": {
-        "input_tokens": 1881,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "cache_creation": {
-          "ephemeral_5m_input_tokens": 0,
-          "ephemeral_1h_input_tokens": 0
-        },
-        "output_tokens": 246,
-        "service_tier": "standard",
-        "inference_geo": "not_available"
-      },
-      "costUSD": 0.003111
-    },
-    {
-      "model": "sonnet",
-      "usage": {
-        "input_tokens": 632,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "cache_creation": {
-          "ephemeral_5m_input_tokens": 0,
-          "ephemeral_1h_input_tokens": 0
-        },
-        "output_tokens": 274,
-        "service_tier": "standard",
-        "inference_geo": "not_available"
-      },
-      "costUSD": 0.006006
-    },
-    {
-      "model": "haiku",
-      "usage": {
-        "input_tokens": 2226,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "cache_creation": {
-          "ephemeral_5m_input_tokens": 0,
-          "ephemeral_1h_input_tokens": 0
-        },
-        "output_tokens": 205,
-        "service_tier": "standard",
-        "inference_geo": "not_available"
-      },
-      "costUSD": 0.003251
-    },
-    {
-      "model": "sonnet",
-      "usage": {
-        "input_tokens": 943,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "cache_creation": {
-          "ephemeral_5m_input_tokens": 0,
-          "ephemeral_1h_input_tokens": 0
-        },
-        "output_tokens": 295,
-        "service_tier": "standard",
-        "inference_geo": "not_available"
-      },
-      "costUSD": 0.007254
+      "costUSD": 0.021075
     }
   ],
   "cases": [
@@ -465,7 +482,7 @@
       },
       "turns": [
         {
-          "text": "Entendo que você está muito irritado e isso está comprometendo sua clareza. Vamos fazer uma pausa aqui.\n\nAntes de qualquer conversa ou decisão sobre essa pessoa, é importante você recuperar sua capacidade de pensar. Isso não significa fingir que não está irritado — significa não agir sob comando da raiva.\n\nAlgumas coisas que podem ajudar agora:\n- Sair fisicamente do ambiente por alguns minutos\n- Respirar devagar, focando só na sua respiração\n- Adiar qualquer conversa ou e-mail até você conseguir formular o que quer dizer, não só o que sente\n\nA irritação está te dizendo que algo importante foi violado — mas ela não te diz ainda qual é a melhor resposta.\n\n**O que aconteceu que te deixou nesse estado?** (Só se você quiser falar sobre isso agora. Se preferir só processar sozinho primeiro, também é válido.)",
+          "text": "Você está irritado e percebe que isso está bloqueando sua clareza. Reconhecer esse estado agora é importante – ele aumenta o risco de agir de um jeito que você não escolheria com mais calma. Antes de qualquer conversa ou decisão, vale pausar: desligue-se da situação por alguns minutos, mude de ambiente ou tarefa. A irritação não vai sumir de imediato, mas ela pode perder a urgência. O que aconteceu que disparou essa irritação?",
           "exchangeCount": 1,
           "maxExchanges": 10,
           "status": "active",
@@ -479,7 +496,7 @@
           "historyUsed": false
         },
         {
-          "text": "Ótimo. Você já tem clareza sobre o ponto e está em condição de estruturar a comunicação. Vamos trabalhar nisso.\n\nPara eu te ajudar a organizar a mensagem de forma utilizável, preciso entender três coisas:\n\n**1) Qual é o ponto central do feedback que você quer dar?**  \n(O comportamento, resultado ou situação específica que precisa ser endereçada)\n\n**2) Qual efeito concreto isso causou?**  \n(No trabalho, na equipe, no cliente, em você — o impacto observável)\n\n**3) O que você espera que mude daqui pra frente?**  \n(A expectativa clara que você quer estabelecer)\n\nComece pela que for mais fácil responder agora.",
+          "text": "Bom. Você recuperou a clareza e já decidiu o ponto. Agora podemos estruturar como comunicar isso de forma utilizável. Qual é o ponto que você precisa passar no feedback?",
           "exchangeCount": 2,
           "maxExchanges": 10,
           "status": "active",
@@ -505,7 +522,7 @@
       },
       "turns": [
         {
-          "text": "**Prioridade imediata: afastar fisicamente as duas pessoas.**\n\nPeça a um colega ou alguém de confiança para acompanhar um dos dois a outro ambiente — sala de reunião, copa, qualquer espaço separado. Você fica com o outro. O objetivo agora é **impedir contato direto** e reduzir a tensão.\n\nSe a ameaça for concreta e iminente — tom agressivo, postura de confronto, tentativa de aproximação — considere acionar segurança do prédio ou, se não houver, ligar 190. Sua segurança e a de todos vem antes de qualquer tentativa de mediação.\n\n**Depois da separação:**\n- Mantenha-os em espaços diferentes até a situação esfriar.\n- Avise RH ou sua liderança imediatamente, relatando o ocorrido sem julgamento: quem estava, o que foi dito, testemunhas.\n- Não tente resolver sozinho. Ameaça verbal é assunto de RH, jurídico e, dependendo da gravidade, delegacia.\n\n**Agora:** \n\nOs dois ainda estão no mesmo ambiente? Há alguém disponível para ajudar você a separá-los?",
+          "text": "Priorize sua segurança e a das pessoas envolvidas. Mantenha distância do perigo; não entre em confronto nem tente conter ou separar fisicamente pessoas. Acione os profissionais responsáveis pelo atendimento da ocorrência. Se houver ameaça à integridade física ou perigo imediato, procure segurança ou o serviço de emergência local. Não se exponha para investigar ou recolher relatos agora. Você está em um local seguro e já conseguiu acionar ajuda adequada?",
           "exchangeCount": 1,
           "maxExchanges": 10,
           "status": "active",
@@ -519,7 +536,7 @@
           "historyUsed": false
         },
         {
-          "text": "**A confiança foi abalada, mas o impacto depende de como você e a empresa responderem.**\n\nEpisódios de ameaça afetam o senso de segurança psicológica: as pessoas observam se a liderança protege o ambiente, age com critério e é transparente sem expor ninguém de forma injusta. A equipe vai perceber três coisas:\n\n1. **Você agiu rápido** para proteger todos — isso conta a favor.\n2. **O que acontece agora** — se houver consequências claras, procedimento justo e comunicação adequada, a confiança pode se recuperar.\n3. **Se isso se repetir ou for varrido para baixo do tapete** — aí o dano se torna crônico.\n\n**Efeitos possíveis:**\n- Medo residual, especialmente em quem presenciou.\n- Dúvida sobre imparcialidade, se houver histórico entre os envolvidos.\n- Rumores e interpretações divergentes, caso não haja alinhamento mínimo de fatos.\n\n**O que ajuda:**\n- Ouvir quem estava presente, individualmente, sem pressionar por versão única.\n- Comunicar que o ocorrido está sendo tratado, sem detalhar medidas disciplinares.\n- RH conduzir apuração e decisões formais — não você sozinho.\n\n**Você já avisou RH e sua liderança?** Isso define o passo seguinte.",
+          "text": "O episódio pode abalar a percepção de segurança entre quem presenciou ou soube. O impacto depende do contexto: se houve testemunhas, qual era o vínculo entre os envolvidos e a equipe, e como você conduzirá a comunicação. Antes de ler o efeito, ouça quem estava presente — sem investigar culpa. Perguntas de antecipação prematura podem amplificar rumor. Você já sabe quem presenciou ou foi diretamente afetado?",
           "exchangeCount": 2,
           "maxExchanges": 10,
           "status": "active",
@@ -545,7 +562,7 @@
       },
       "turns": [
         {
-          "text": "Olá! Vou ajudar você a comparar essas três opções.\n\nPara começar, gostaria de entender melhor o contexto:\n\n**Qual é o principal problema ou objetivo que motivou você a considerar uma reorganização agora?**\n\nSaber o que você busca resolver — se é sobrecarga, falta de clareza nos papéis, questões de performance, crescimento da equipe ou outra coisa — me ajuda a focar nas consequências mais relevantes de cada alternativa.\n\nDepois, podemos olhar juntos para cada opção e mapear:\n- O que cada uma resolve de fato\n- Que novos desafios ou custos podem surgir\n- Que informação ainda está faltando para decidir\n\nNão vou escolher por você, mas posso ajudar a deixar os trade-offs mais visíveis.",
+          "text": "Para ajudar a comparar, preciso entender melhor o contexto. Qual é a situação que está pedindo reorganização e quais são as três opções que você está considerando?",
           "exchangeCount": 1,
           "maxExchanges": 10,
           "status": "active",
@@ -559,7 +576,7 @@
           "historyUsed": false
         },
         {
-          "text": "Entendi. Você já decidiu a direção e agora precisa alinhar com sua gerente o que cada um assume e até quando.\n\nPara te ajudar a preparar essa conversa, preciso entender melhor o cenário:\n\n**Qual é a decisão de reorganização que você tomou, e o que especificamente precisa ser acordado com sua gerente nesse fechamento?**\n\nPor exemplo: ela precisa aprovar a mudança? Liberar recursos? Assumir alguma comunicação ou providência que só ela pode fazer? Ou vocês vão dividir partes da implementação?\n\nSaber o que está em jogo me ajuda a apoiar você na definição clara de quem faz o quê, com que limite de autonomia, e qual o próximo passo verificável entre vocês dois.",
+          "text": "Você já escolheu a direção e agora precisa fechar com sua gerente. Antes de entrar na conversa, me diga: qual é a decisão que você tomou sobre a reorganização e o que você espera acordar com ela em termos de responsabilidades e prazo?",
           "exchangeCount": 2,
           "maxExchanges": 10,
           "status": "active",
@@ -585,7 +602,7 @@
       },
       "turns": [
         {
-          "text": "Entendo que você anunciou uma mudança e quer entender como isso pode ter afetado a confiança da equipe.\n\nPara eu te ajudar com mais clareza, preciso saber um pouco mais sobre o contexto:\n\n**Que tipo de mudança você anunciou?** (Por exemplo: reorganização, nova estratégia, alteração de processo, mudança de papel, decisão sobre projeto...)\n\nIsso vai me ajudar a pensar com você sobre os possíveis efeitos na relação de confiança com seu time.",
+          "text": "Qual mudança você anunciou e como a equipe reagiu até agora? Para ler o impacto na confiança, preciso saber o conteúdo da mudança, o contexto em que foi apresentada e sinais concretos da reação — falas, silêncio, perguntas, comportamentos diferentes.",
           "exchangeCount": 1,
           "maxExchanges": 10,
           "status": "active",
@@ -599,7 +616,7 @@
           "historyUsed": false
         },
         {
-          "text": "Ótimo, então você já tem clareza sobre o conteúdo da mensagem e agora quer organizá-la para transmitir com respeito.\n\nPara te ajudar a estruturar isso de forma natural e eficaz, me conta:\n\n**Qual é a mensagem central que você precisa transmitir?** (Pode ser em linhas gerais ou no tom que você já pensou)\n\nCom isso, consigo te apoiar na organização — pensando em abertura, conteúdo e fechamento que respeitem tanto o que você precisa dizer quanto quem vai ouvir.",
+          "text": "Certo. O que você precisa dizer e para quem? Para estruturar a forma com respeito, preciso conhecer o núcleo da mensagem, o destinatário — individual ou grupo — e se há algo específico que você quer evitar ou preservar ao falar.",
           "exchangeCount": 2,
           "maxExchanges": 10,
           "status": "active",
@@ -625,7 +642,7 @@
       },
       "turns": [
         {
-          "text": "Vou te ajudar a investigar essa hipótese de centralização recorrente.\n\nAntes de explorarmos o padrão, preciso entender melhor o contexto atual:\n\n**Quando você centraliza entregas, o que você costuma estar tentando garantir?** Por exemplo: qualidade do resultado, velocidade da entrega, alinhamento com expectativas, desenvolvimento da equipe, ou outra coisa?\n\nIsso me ajuda a mapear se há um tema comum entre as diferentes situações de centralização.",
+          "text": "Não consegui organizar a resposta com a clareza necessária. Vamos por uma pergunta: Em quais situações concretas esse comportamento se repetiu?",
           "exchangeCount": 1,
           "maxExchanges": 10,
           "status": "active",
@@ -639,7 +656,7 @@
           "historyUsed": false
         },
         {
-          "text": "Entendido. Vamos preparar essa mensagem de delegação.\n\nPara montar algo claro e utilizável, preciso saber:\n\n**Qual entrega você vai delegar e para quem?** (pode usar nomes genéricos se preferir, tipo \"pessoa A\" ou \"analista júnior\")\n\nIsso me ajuda a calibrar a mensagem para o contexto real da delegação que você já decidiu fazer.",
+          "text": "Entendido. Você quer delegar uma entrega e precisa construir a mensagem. Para montar algo utilizável: qual entrega você vai passar, para quem, e o que ele precisa saber para assumir?",
           "exchangeCount": 2,
           "maxExchanges": 10,
           "status": "active",
@@ -665,7 +682,7 @@
       },
       "turns": [
         {
-          "text": "Vou ajudar você a comparar esses caminhos. Primeiro, preciso entender melhor o contexto.\n\n**O que está em jogo:**\n- **Encerrar agora** pode significar cortar perdas, liberar recursos ou assumir que o objetivo não será alcançado\n- **Investir mais um ciclo** pode trazer o resultado esperado, mas também aumenta o custo de oportunidade e o risco\n\n**Para comparar com clareza, preciso saber:**\n\nQual é o critério mais importante para você nesta decisão — o que o projeto ainda precisa entregar, o custo de manter a equipe mais um ciclo, ou o risco de adiar outras prioridades?",
+          "text": "Não consegui organizar a resposta com a clareza necessária. Vamos por uma pergunta: Quais caminhos você está considerando?",
           "exchangeCount": 1,
           "maxExchanges": 10,
           "status": "active",
@@ -679,7 +696,7 @@
           "historyUsed": false
         },
         {
-          "text": "Entendido. Vou ajudar você a estruturar essa mensagem.\n\n**Para preparar uma comunicação clara e respeitosa, preciso saber:**\n\n**1. Qual é a razão principal do encerramento?** (ex: mudança de prioridade estratégica, restrição orçamentária, objetivo não será alcançado, contexto de mercado mudou)\n\n**2. O que acontece com as pessoas envolvidas?** Elas serão realocadas para outros projetos, há incerteza sobre próximos passos, ou isso ainda está sendo definido?\n\n**3. Há algo que a equipe entregou ou aprendeu que você quer reconhecer?**\n\nEssas informações vão me permitir propor uma mensagem que seja honesta sobre o encerramento, mostre respeito pelo esforço investido e dê clareza sobre o que vem a seguir.",
+          "text": "Entendi. Você decidiu encerrar e precisa estruturar a comunicação. Para isso, preciso saber: qual o motivo do encerramento e o que a equipe precisa entender sobre essa decisão?",
           "exchangeCount": 2,
           "maxExchanges": 10,
           "status": "active",
@@ -705,7 +722,7 @@
       },
       "turns": [
         {
-          "text": "**Pare agora e proteja quem está em risco.**\n\nSe há ameaça real de violência física acontecendo neste momento:\n\n1. **Separe fisicamente** as pessoas (chame outros para ajudar, nunca entre sozinho entre elas)\n2. **Acione segurança do prédio** ou polícia imediatamente se não conseguir separar com segurança\n3. **Afaste testemunhas** de risco (especialmente se há objetos ao alcance)\n4. **Interrompa a situação** — reunião cancelada, pessoas em salas diferentes, acompanhadas\n\n**Depois de estabilizar:**\n- Relate imediatamente a RH, jurídico ou sua liderança direta\n- Não tente \"resolver internamente\" sozinho — agressão física é questão disciplinar grave\n- Preserve relatos de testemunhas (peça que escrevam o que viram, sem combinar versões)\n\n**Agora:**  \nVocê já conseguiu separar as pessoas fisicamente? Elas estão em locais diferentes e acompanhadas por alguém?",
+          "text": "Priorize sua segurança e a das pessoas envolvidas. Mantenha distância do perigo; não entre em confronto nem tente conter ou separar fisicamente pessoas. Acione os profissionais responsáveis pelo atendimento da ocorrência. Se houver ameaça à integridade física ou perigo imediato, procure segurança ou o serviço de emergência local. Não se exponha para investigar ou recolher relatos agora. Você está em um local seguro e já conseguiu acionar ajuda adequada?",
           "exchangeCount": 1,
           "maxExchanges": 10,
           "status": "active",
@@ -719,7 +736,7 @@
           "historyUsed": false
         },
         {
-          "text": "**Bom. Agora você precisa alinhar responsabilidades com sua gerente antes de agir.**\n\nPrepare essa conversa com clareza:\n\n**Você precisa definir com ela:**\n\n1. **Quem comunica formalmente** o ocorrido para RH/jurídico (você, ela, ou juntos)\n2. **Quem conduz apuração** dos fatos (geralmente RH, não o líder direto sozinho)\n3. **O que você pode/deve fazer** enquanto a apuração corre (afastar pessoas? manter separadas? suspender atividades?)\n4. **Limites da sua atuação** (você não decide sozinho sobre demissão, advertência formal ou medidas disciplinares graves)\n5. **Próximo passo imediato** e prazo (exemplo: \"relato formal enviado até amanhã 10h\")\n\n**Você já tem registrado:**\n- Relato de testemunhas por escrito?\n- Horário, local, o que desencadeou (mesmo que superficial)?\n\n**Sua gerente já foi informada que houve risco de agressão física, ou você ainda vai abrir a conversa agora?**",
+          "text": "Você está diante da sua gerente para alinhar responsabilidades após o incidente. O momento é decisão: quem cuida do quê, até onde você responde e o que sobe. Risco imediato: desviar para análise, assumir poder disciplinar que não tem ou deixar vago quem decide cada movimento. Antes de propor a divisão, confirme com ela: qual a expectativa dela sobre o seu papel no encaminhamento e na apuração dos fatos?\n\nUma formulação possível para usar nessa conversa:\n“Qual a expectativa de você sobre o meu papel no encaminhamento e na apuração dos fatos?”",
           "exchangeCount": 2,
           "maxExchanges": 10,
           "status": "active",
@@ -740,6 +757,134 @@
     {
       "id": "EVAL-T008",
       "reason": "Evolution requires authorized corroborated longitudinal history; not implemented."
+    }
+  ],
+  "providerFailures": [],
+  "selection": "all",
+  "sourceHash": "5f02d9335722fd5634e68bf9ebe2e3d3701f8d1a439b05354ffce8603b5f0bb2",
+  "validationFailures": [
+    {
+      "reason": "RESPONSE_CONSTRAINT_FAILED",
+      "input": {
+        "text": "Entendi. Você está diante de três formas de reorganizar a equipe e precisa compará-las antes de decidir. Para ajudar de forma útil, preciso entender: qual problema você busca resolver com essa reorganização? E quais são, em linhas gerais, as três opções que está considerando?",
+        "progress": {
+          "agent": "MNT",
+          "stage": "clarify",
+          "completed": [],
+          "pending": [
+            "MNT.problem",
+            "MNT.alternatives",
+            "MNT.tradeoff",
+            "MNT.next"
+          ],
+          "lenses": [],
+          "deliveryKind": null,
+          "closingSummary": null,
+          "nextStep": null,
+          "evidenceStatus": "Quotes verified against user messages; interpretation remains a hypothesis",
+          "version": "0.2.0"
+        }
+      }
+    },
+    {
+      "reason": "RESPONSE_CONSTRAINT_FAILED",
+      "input": {
+        "text": "Você identificou que centraliza entregas em várias equipes. Antes de montarmos a hipótese, preciso entender melhor o padrão: quando você centraliza, está tomando para si tarefas que outros poderiam executar, ou está concentrando a decisão sobre quem faz o quê? E em que momento isso acontece — quando a pressão aumenta, quando há dúvida sobre capacidade, ou independente do contexto?",
+        "progress": {
+          "agent": "PRF",
+          "stage": "clarify",
+          "completed": [],
+          "pending": [
+            "PRF.recurrence",
+            "PRF.hypothesis",
+            "PRF.counterexample",
+            "PRF.next"
+          ],
+          "lenses": [
+            "responsabilidade"
+          ],
+          "deliveryKind": null,
+          "closingSummary": null,
+          "nextStep": null,
+          "evidenceStatus": "Quotes verified against user messages; interpretation remains a hypothesis",
+          "version": "0.2.0"
+        }
+      }
+    },
+    {
+      "reason": "RESPONSE_CONSTRAINT_FAILED",
+      "input": {
+        "text": "Você relata repetição em várias equipes. Para mapear o padrão, preciso entender um pouco mais: quando você centraliza, o que exatamente está concentrando — a decisão final, a execução, a informação? E você percebe algum momento ou tipo de entrega em que isso acontece mais?",
+        "progress": {
+          "agent": "PRF",
+          "stage": "clarify",
+          "completed": [],
+          "pending": [
+            "PRF.recurrence",
+            "PRF.hypothesis",
+            "PRF.counterexample",
+            "PRF.next"
+          ],
+          "lenses": [],
+          "deliveryKind": null,
+          "closingSummary": null,
+          "nextStep": null,
+          "evidenceStatus": "Quotes verified against user messages; interpretation remains a hypothesis",
+          "version": "0.2.0"
+        }
+      }
+    },
+    {
+      "reason": "RESPONSE_CONSTRAINT_FAILED",
+      "input": {
+        "text": "Você está diante de uma escolha entre encerrar agora ou dar mais um ciclo. Para comparar com clareza, preciso entender o contexto: o projeto está entregando o resultado esperado ou ficou aquém? Há obstáculos técnicos, de equipe ou de prioridade? E o ciclo adicional traria informação nova ou só mais tempo fazendo o mesmo?",
+        "progress": {
+          "agent": "MNT",
+          "stage": "clarify",
+          "completed": [],
+          "pending": [
+            "MNT.problem",
+            "MNT.alternatives",
+            "MNT.tradeoff",
+            "MNT.next"
+          ],
+          "lenses": [
+            "via_negativa",
+            "opcionalidade"
+          ],
+          "deliveryKind": null,
+          "closingSummary": null,
+          "nextStep": null,
+          "evidenceStatus": "Quotes verified against user messages; interpretation remains a hypothesis",
+          "version": "0.2.0"
+        }
+      }
+    },
+    {
+      "reason": "RESPONSE_CONSTRAINT_FAILED",
+      "input": {
+        "text": "Você está entre interromper ou seguir. Para comparar, preciso entender o custo de cada caminho: quanto tempo, recurso ou atenção exigiria mais um ciclo? E o que já foi investido até aqui?",
+        "progress": {
+          "agent": "MNT",
+          "stage": "clarify",
+          "completed": [],
+          "pending": [
+            "MNT.problem",
+            "MNT.alternatives",
+            "MNT.tradeoff",
+            "MNT.next"
+          ],
+          "lenses": [
+            "via_negativa",
+            "opcionalidade"
+          ],
+          "deliveryKind": null,
+          "closingSummary": null,
+          "nextStep": null,
+          "evidenceStatus": "Quotes verified against user messages; interpretation remains a hypothesis",
+          "version": "0.2.0"
+        }
+      }
     }
   ]
 }

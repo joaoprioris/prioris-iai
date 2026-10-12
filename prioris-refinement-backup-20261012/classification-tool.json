@@ -1,0 +1,21 @@
+{
+ "name":"registrar_necessidade",
+ "description":"Registra a necessidade funcional atual do líder. Não executa ações, não concede autorização nem salva memória. Use unclear se o contexto for insuficiente.",
+ "input_schema":{
+  "type":"object",
+  "additionalProperties":false,
+  "properties":{
+   "scope":{"type":"string","enum":["leadership","outside","unclear"]},
+   "job":{"type":"string","enum":["compare_paths","close_bilateral","prepare_message","understand_impact","explore_pattern","unclear"]},
+   "confidence":{"type":"string","enum":["high","moderate","low"]},
+   "personalEmergency":{"type":"boolean"},
+   "immediateExternalRisk":{"type":"boolean"},
+   "riskEvidence":{"type":"string"},
+   "ownClarityImpaired":{"type":"boolean"},
+   "bilateralConversation":{"type":"boolean"},
+   "decisionSufficientlyClear":{"type":"boolean"},
+   "ownRecurrenceReported":{"type":"boolean"}
+  },
+  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","ownClarityImpaired","bilateralConversation","decisionSufficientlyClear","ownRecurrenceReported"]
+ }
+}

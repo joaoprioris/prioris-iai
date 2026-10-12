@@ -1,0 +1,55 @@
+[32m✔ Risco imediato usa orientação controlada e não uma resposta potencialmente perigosa do modelo [90m(1.955584ms)[39m[39m
+[32m✔ Risco encerrado permite nova necessidade sem manter orientação de emergência [90m(0.60312ms)[39m[39m
+[32m✔ Resposta recusada por formato não é apresentada como indisponibilidade do provedor nem gravada [90m(0.888285ms)[39m[39m
+[32m✔ Contexto é preservado quando muda a necessidade funcional [90m(0.597413ms)[39m[39m
+[32m✔ Resposta com não não é automaticamente frustração/Contenção [90m(0.282383ms)[39m[39m
+[32m✔ Ambiguidade faz uma pergunta e dispensa geração de resposta especializada [90m(0.366149ms)[39m[39m
+[32m✔ Falha do serviço de IA não fabrica agente nem grava sucesso [90m(0.306863ms)[39m[39m
+[32m✔ Resposta de classificação inválida não vira Mentor [90m(2.157455ms)[39m[39m
+[32m✔ Mesmo requestId não duplica mensagem, contagem ou chamada de IA [90m(0.344941ms)[39m[39m
+[32m✔ Mesmo requestId com outro conteúdo é conflito [90m(0.452989ms)[39m[39m
+[32m✔ Requisição de outra pessoa ou empresa não acessa a sessão [90m(0.196479ms)[39m[39m
+[32m✔ Sem opção habilitada o histórico privado não é recuperado [90m(0.157402ms)[39m[39m
+[32m✔ Opção habilitada exige aviso reconhecido [90m(0.08443ms)[39m[39m
+[32m✔ Histórico privado habilitado é usado sem virar autorização do modelo [90m(0.773442ms)[39m[39m
+[32m✔ Desativar ou apagar durante a geração impede regravação [90m(0.290897ms)[39m[39m
+[32m✔ Fechamento com histórico desativado remove texto do contexto persistido [90m(0.150353ms)[39m[39m
+[32m✔ Fechamento com histórico habilitado preserva contexto privado [90m(0.117003ms)[39m[39m
+[32m✔ Mensagem acima do limite não chama modelo [90m(0.199199ms)[39m[39m
+[32m✔ Geração concorrente da mesma sessão é recusada e bloqueio é liberado [90m(7.858505ms)[39m[39m
+[32m✔ Contenção com confiança baixa exige esclarecimento [90m(2.169248ms)[39m[39m
+[32m✔ Contenção com confiança moderada não presume incapacidade [90m(0.136437ms)[39m[39m
+[32m✔ Comparar caminhos não ativa 1:1 pelo nome da reunião [90m(0.083735ms)[39m[39m
+[32m✔ Fechar compromisso bilateral seleciona 1:1 [90m(0.075795ms)[39m[39m
+[32m✔ Fechamento sem interlocutor precisa ser esclarecido [90m(0.094824ms)[39m[39m
+[32m✔ Mensagem com decisão definida seleciona Feedback [90m(0.11656ms)[39m[39m
+[32m✔ Mensagem com decisão indefinida não produz script prematuro [90m(0.100479ms)[39m[39m
+[32m✔ Desgaste de terceiro não implica Contenção do usuário [90m(0.156184ms)[39m[39m
+[32m✔ Capacidade própria comprometida precede função [90m(0.22016ms)[39m[39m
+[32m✔ Dano externo imediato precede Contenção [90m(0.261474ms)[39m[39m
+[32m✔ Prazo curto por si só não ativa Crises [90m(0.11442ms)[39m[39m
+[32m✔ Risco marcado sem contexto exige pergunta [90m(0.173774ms)[39m[39m
+[32m✔ Risco já encerrado não mantém Crises artificialmente [90m(0.164072ms)[39m[39m
+[32m✔ Emergência pessoal encaminha ao apoio humano, não crise organizacional [90m(0.2198ms)[39m[39m
+[32m✔ Pedido fora de escopo não força especialização [90m(0.179788ms)[39m[39m
+[32m✔ Confiança insuficiente exige exploração [90m(0.156917ms)[39m[39m
+[32m✔ Episódio isolado não comprova padrão [90m(0.117783ms)[39m[39m
+[32m✔ Recorrência relatada permite hipótese, sem autorizar escrita de memória [90m(0.112085ms)[39m[39m
+[32m✔ Texto do classificador não concede autorização de histórico [90m(0.687504ms)[39m[39m
+[32m✔ Histórico autorizado e corroborado influencia em segundo plano [90m(0.147433ms)[39m[39m
+[32m✔ Memória de outro cliente é excluída [90m(0.054128ms)[39m[39m
+[32m✔ Memória de outra pessoa é excluída [90m(0.04531ms)[39m[39m
+[32m✔ Memória sem autorização é excluída [90m(0.096403ms)[39m[39m
+[32m✔ Histórico incompatível com contexto não governa a conversa [90m(1.064196ms)[39m[39m
+[32m✔ Clareamento mantém contexto anterior sem simular transição concluída [90m(0.647089ms)[39m[39m
+[32m✔ Mesmo agente não produz troca artificial [90m(0.068363ms)[39m[39m
+[32m✔ Evolução não vira oitavo chat nem gera score organizacional [90m(0.051301ms)[39m[39m
+[32m✔ Entradas malformadas falham antes de rotear [90m(0.481594ms)[39m[39m
+[34mℹ tests 47[39m
+[34mℹ suites 0[39m
+[34mℹ pass 47[39m
+[34mℹ fail 0[39m
+[34mℹ cancelled 0[39m
+[34mℹ skipped 0[39m
+[34mℹ todo 0[39m
+[34mℹ duration_ms 190.107756[39m

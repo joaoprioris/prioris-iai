@@ -1,0 +1,25 @@
+PRIORIS / IAí — RESULTADO DOS TESTES
+
+12/10/2026 — somente desenvolvimento e dados fictícios
+
+Encaminhamento adversarial com IA real: 40 de 40.
+20 situações repetidas duas vezes.
+Última rodada completa: 6 de 7 conversas concluídas.
+Perfil para Feedback: passou após correção, em reteste específico.
+As rodadas com falhas foram preservadas.
+
+Lógica e controles: 47 testes passaram.
+Recuperação de respostas: 5 testes passaram, com respostas simuladas.
+Banco isolado e HTTP: 22 testes passaram, com IA simulada.
+
+Corrigido no desenvolvimento:
+- Crises: orientação controlada, sem intervenção física.
+- Excesso de perguntas: reescrita limitada e recuperação transparente.
+
+Ainda pendente:
+- Aprovação da qualidade das respostas.
+- Piloto da versão atual no navegador.
+- Evolução baseada no histórico ao longo do tempo.
+
+Nenhuma publicação. Banco de produção não alterado.
+Acertar a rota não comprova qualidade completa.

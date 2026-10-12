@@ -11,6 +11,7 @@
    "personalEmergency":{"type":"boolean"},
    "immediateExternalRisk":{"type":"boolean"},
    "riskEvidence":{"type":"string"},
+   "riskKind":{"type":"string","enum":["physical","organizational","unclear"]},
    "ownClarityImpaired":{"type":"boolean"},
    "bilateralConversation":{"type":"boolean"},
    "decisionSufficientlyClear":{"type":"boolean"},

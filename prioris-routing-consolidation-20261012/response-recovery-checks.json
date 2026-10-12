@@ -1,0 +1,10 @@
+{
+  "typecheck": {
+    "exitCode": 0,
+    "output": "\n> @workspace/api-server@0.0.0 typecheck /home/runner/workspace/artifacts/api-server\n> tsc -p tsconfig.json --noEmit\n\n"
+  },
+  "tests": {
+    "exitCode": 0,
+    "output": "✔ Resposta adequada não custa uma reescrita adicional (1.232866ms)\n✔ Várias perguntas geram somente uma reescrita com contexto preservado (0.803987ms)\n✔ Duas respostas inadequadas produzem recuperação transparente sem loop ou falsa análise (0.504999ms)\n✔ Falha real do provedor não vira pergunta simulando resposta bem-sucedida (0.516107ms)\n✔ Resposta truncada não é tratada como texto completo (0.318301ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 385.746496\n"
+  }
+}

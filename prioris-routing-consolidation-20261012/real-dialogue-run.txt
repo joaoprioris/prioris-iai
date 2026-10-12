@@ -1,0 +1,1 @@
+{"exchanges":9,"closed":true,"pass":true,"costUSD":0.272612}

@@ -12,6 +12,27 @@ function fixture(overrides={}) {
  const service=createConversationService({repository,classify:async payload=>{state.classifyCalls++;return overrides.classify?overrides.classify(payload,state):analysis},respond:async payload=>{state.responseCalls++;return overrides.respond?overrides.respond(payload,state):'Considere duas alternativas e seus efeitos.'},agentPrompts:Object.fromEntries(['MNT','CTN','PRF','IMP','FBK','OTO','CRS'].map(k=>[k,'Prompt consolidado '+k]))});
  return {state,service};
 }
+test('Risco imediato usa orientação controlada e não uma resposta potencialmente perigosa do modelo',async()=>{
+ const {service,state}=fixture({classify:async()=>({...analysis,immediateExternalRisk:true,riskEvidence:'Ameaça física atual relatada pelo usuário'}),respond:async()=> 'Separe fisicamente as pessoas.'});
+ const r=await service.turn(scope,input);assert.equal(r.route.agent,'CRS');assert.equal(state.responseCalls,0);assert.match(r.text,/não entre em confronto nem tente conter ou separar fisicamente/);assert.match(r.text,/profissionais/);assert.equal(r.status,'active');
+});
+test('Risco encerrado permite nova necessidade sem manter orientação de emergência',async()=>{
+ const {service,state}=fixture({classify:async p=>p.messages.length===1?{...analysis,immediateExternalRisk:true,riskEvidence:'Risco imediato fictício'}:{...analysis,job:'understand_impact',immediateExternalRisk:false}});
+ await service.turn(scope,input);const r=await service.turn(scope,{...input,requestId:'test-after-risk',content:'Risco resolvido. Quero entender o impacto.'});assert.equal(r.route.agent,'IMP');assert.equal(r.route.transition,true);assert.equal(state.responseCalls,1);
+});
+test('Resposta recusada por formato não é apresentada como indisponibilidade do provedor nem gravada',async()=>{
+ const {service,state}=fixture({respond:async()=>{throw new Error('RESPONSE_CONSTRAINT_FAILED')}});await assert.rejects(service.turn(scope,input),e=>e.code==='INVALID_MODEL_RESPONSE'&&e.status===502);assert.equal(state.commits.length,0);assert.equal(state.session.exchangeCount,0);
+});
+test('Troca de agente não reinicia limite; décima encerra com direcionamento e décima primeira é recusada',async()=>{
+ let control;const {service,state}=fixture({classify:async p=>p.messages.length<17?analysis:{...analysis,job:'prepare_message',decisionSufficientlyClear:true},respond:async p=>{control=p.turn;return p.turn.number===10?'As alternativas foram examinadas; faltam custos. Levante os custos antes de decidir. Podemos retomar o próximo passo em nova conversa.':'Ainda falta esclarecer um fato do caso.'}});
+ for(let n=1;n<=10;n++){const r=await service.turn(scope,{...input,requestId:'bounded-turn-'+n,content:'Fato de teste '+n});assert.equal(r.exchangeCount,n);assert.equal(r.status,n===10?'closed':'active');}
+ assert.equal(control.number,10);assert.equal(control.max,10);assert.equal(state.session.exchangeCount,10);assert.equal(state.session.context.agentType,'FBK');await assert.rejects(service.turn(scope,{...input,requestId:'bounded-turn-11',content:'Continue além do limite'}),e=>e.code==='SESSION_CLOSED');assert.equal(state.classifyCalls,10);
+});
+test('Última troca ambígua reconhece pendências e não deixa pergunta sem possibilidade de resposta',async()=>{
+ const {service,state}=fixture({classify:async()=>({...analysis,confidence:'low'})});state.session.exchangeCount=9;const r=await service.turn(scope,{...input,content:'Ainda não consigo explicar o problema da equipe.'});assert.equal(r.status,'closed');assert.match(r.text,/pendentes/);assert.equal(r.text.includes('?'),false);assert.equal(state.responseCalls,0);
+});
+test('Crise organizacional tem condução própria sem inventar culpa nem remover proteção física',async()=>{const {service,state}=fixture({classify:async()=>({...analysis,immediateExternalRisk:true,riskEvidence:'Exposição de dados em curso',riskKind:'organizational'})});const r=await service.turn(scope,input);assert.equal(r.route.agent,'CRS');assert.match(r.text,/risco organizacional/);assert.match(r.text,/não improvise culpados/);assert.match(r.text,/não intervenha fisicamente/);assert.equal(state.responseCalls,0)});
+test('Tipo de risco inventado pelo modelo é rejeitado',async()=>{const {service,state}=fixture({classify:async()=>({...analysis,riskKind:'global_personality'})});await assert.rejects(service.turn(scope,input),e=>e.code==='INVALID_MODEL_RESPONSE');assert.equal(state.commits.length,0)});
 test('Contexto é preservado quando muda a necessidade funcional',async()=>{
  const {state,service}=fixture({classify:async p=>p.messages.length>1?{...analysis,job:'prepare_message',decisionSufficientlyClear:true}:analysis});
  await service.turn(scope,input);const r=await service.turn(scope,{...input,requestId:'test-request-002',content:'Agora preciso organizar a mensagem.'});

@@ -1,0 +1,17 @@
+{
+ "name":"registrar_resposta",
+ "description":"Compor resposta contextual e registrar progressão interna. Nunca concede autorização, altera roteamento ou calcula score. A evidência usa somente falas do usuário, numeradas a partir de zero.",
+ "input_schema":{
+  "type":"object","additionalProperties":false,
+  "required":["text","stage","completed","pending","lenses","closingSummary","nextStep"],
+  "properties":{
+   "text":{"type":"string","minLength":1,"maxLength":30000},
+   "stage":{"type":"string","enum":["clarify","structure","explore","direct","close"]},
+   "completed":{"type":"array","maxItems":4,"items":{"type":"object","additionalProperties":false,"required":["criterion","evidence"],"properties":{"criterion":{"type":"string"},"evidence":{"type":"array","minItems":1,"maxItems":4,"items":{"type":"object","additionalProperties":false,"required":["message","quote"],"properties":{"message":{"type":"integer","minimum":0,"maximum":9},"quote":{"type":"string","minLength":5,"maxLength":240}}}}}}},
+   "pending":{"type":"array","maxItems":4,"items":{"type":"string"}},
+   "lenses":{"type":"array","maxItems":11,"items":{"type":"string"}},
+   "closingSummary":{"type":"string","maxLength":1200},
+   "nextStep":{"type":"string","maxLength":800}
+  }
+ }
+}

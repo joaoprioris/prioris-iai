@@ -1,0 +1,54 @@
+[32m✔ Risco imediato usa orientação controlada e não uma resposta potencialmente perigosa do modelo [90m(2.03431ms)[39m[39m
+[32m✔ Risco encerrado permite nova necessidade sem manter orientação de emergência [90m(0.94573ms)[39m[39m
+[32m✔ Contexto é preservado quando muda a necessidade funcional [90m(0.557495ms)[39m[39m
+[32m✔ Resposta com não não é automaticamente frustração/Contenção [90m(0.314351ms)[39m[39m
+[32m✔ Ambiguidade faz uma pergunta e dispensa geração de resposta especializada [90m(0.281385ms)[39m[39m
+[32m✔ Falha do serviço de IA não fabrica agente nem grava sucesso [90m(1.026247ms)[39m[39m
+[32m✔ Resposta de classificação inválida não vira Mentor [90m(0.343033ms)[39m[39m
+[32m✔ Mesmo requestId não duplica mensagem, contagem ou chamada de IA [90m(1.311176ms)[39m[39m
+[32m✔ Mesmo requestId com outro conteúdo é conflito [90m(1.242582ms)[39m[39m
+[32m✔ Requisição de outra pessoa ou empresa não acessa a sessão [90m(0.433076ms)[39m[39m
+[32m✔ Sem opção habilitada o histórico privado não é recuperado [90m(0.573089ms)[39m[39m
+[32m✔ Opção habilitada exige aviso reconhecido [90m(0.223859ms)[39m[39m
+[32m✔ Histórico privado habilitado é usado sem virar autorização do modelo [90m(1.007798ms)[39m[39m
+[32m✔ Desativar ou apagar durante a geração impede regravação [90m(0.200681ms)[39m[39m
+[32m✔ Fechamento com histórico desativado remove texto do contexto persistido [90m(0.327311ms)[39m[39m
+[32m✔ Fechamento com histórico habilitado preserva contexto privado [90m(0.231336ms)[39m[39m
+[32m✔ Mensagem acima do limite não chama modelo [90m(0.127931ms)[39m[39m
+[32m✔ Geração concorrente da mesma sessão é recusada e bloqueio é liberado [90m(10.9184ms)[39m[39m
+[32m✔ Contenção com confiança baixa exige esclarecimento [90m(2.06162ms)[39m[39m
+[32m✔ Contenção com confiança moderada não presume incapacidade [90m(0.132776ms)[39m[39m
+[32m✔ Comparar caminhos não ativa 1:1 pelo nome da reunião [90m(0.08707ms)[39m[39m
+[32m✔ Fechar compromisso bilateral seleciona 1:1 [90m(0.079318ms)[39m[39m
+[32m✔ Fechamento sem interlocutor precisa ser esclarecido [90m(0.09873ms)[39m[39m
+[32m✔ Mensagem com decisão definida seleciona Feedback [90m(0.073178ms)[39m[39m
+[32m✔ Mensagem com decisão indefinida não produz script prematuro [90m(0.195786ms)[39m[39m
+[32m✔ Desgaste de terceiro não implica Contenção do usuário [90m(0.091806ms)[39m[39m
+[32m✔ Capacidade própria comprometida precede função [90m(0.136725ms)[39m[39m
+[32m✔ Dano externo imediato precede Contenção [90m(0.147577ms)[39m[39m
+[32m✔ Prazo curto por si só não ativa Crises [90m(0.21817ms)[39m[39m
+[32m✔ Risco marcado sem contexto exige pergunta [90m(0.135744ms)[39m[39m
+[32m✔ Risco já encerrado não mantém Crises artificialmente [90m(0.100864ms)[39m[39m
+[32m✔ Emergência pessoal encaminha ao apoio humano, não crise organizacional [90m(0.081836ms)[39m[39m
+[32m✔ Pedido fora de escopo não força especialização [90m(0.199689ms)[39m[39m
+[32m✔ Confiança insuficiente exige exploração [90m(0.054078ms)[39m[39m
+[32m✔ Episódio isolado não comprova padrão [90m(0.169061ms)[39m[39m
+[32m✔ Recorrência relatada permite hipótese, sem autorizar escrita de memória [90m(0.09891ms)[39m[39m
+[32m✔ Texto do classificador não concede autorização de histórico [90m(0.637026ms)[39m[39m
+[32m✔ Histórico autorizado e corroborado influencia em segundo plano [90m(0.120741ms)[39m[39m
+[32m✔ Memória de outro cliente é excluída [90m(0.048075ms)[39m[39m
+[32m✔ Memória de outra pessoa é excluída [90m(0.042385ms)[39m[39m
+[32m✔ Memória sem autorização é excluída [90m(0.84716ms)[39m[39m
+[32m✔ Histórico incompatível com contexto não governa a conversa [90m(0.099337ms)[39m[39m
+[32m✔ Clareamento mantém contexto anterior sem simular transição concluída [90m(0.046397ms)[39m[39m
+[32m✔ Mesmo agente não produz troca artificial [90m(0.02819ms)[39m[39m
+[32m✔ Evolução não vira oitavo chat nem gera score organizacional [90m(0.030941ms)[39m[39m
+[32m✔ Entradas malformadas falham antes de rotear [90m(0.377071ms)[39m[39m
+[34mℹ tests 46[39m
+[34mℹ suites 0[39m
+[34mℹ pass 46[39m
+[34mℹ fail 0[39m
+[34mℹ cancelled 0[39m
+[34mℹ skipped 0[39m
+[34mℹ todo 0[39m
+[34mℹ duration_ms 86.441386[39m
