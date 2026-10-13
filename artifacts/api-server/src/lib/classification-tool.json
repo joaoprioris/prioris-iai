@@ -6,17 +6,19 @@
   "additionalProperties":false,
   "properties":{
    "scope":{"type":"string","enum":["leadership","outside","unclear"]},
-   "job":{"type":"string","enum":["compare_paths","close_bilateral","prepare_message","understand_impact","explore_pattern","unclear"]},
+   "job":{"type":"string","enum":["compare_paths","conduct_live","prepare_message","understand_impact","explore_pattern","unclear"]},
    "confidence":{"type":"string","enum":["high","moderate","low"]},
    "personalEmergency":{"type":"boolean"},
    "immediateExternalRisk":{"type":"boolean"},
    "riskEvidence":{"type":"string"},
    "riskKind":{"type":"string","enum":["physical","organizational","unclear"]},
    "ownClarityImpaired":{"type":"boolean"},
-   "bilateralConversation":{"type":"boolean"},
+   "conversationInProgress":{"type":"boolean","description":"Conversa relevante acontecendo agora, bilateral ou em grupo; nome de reunião e estado Durante não bastam."},
+   "situationState":{"type":["string","null"],"enum":["BEFORE","DURING","AFTER","PATTERN","EMPTY",null],"description":"Leitura interna: Antes, Durante, Depois, Padrão, Vazio; null se faltar base. Não determina agente."},
+   "stateEvidence":{"type":"string","description":"Trecho exato do relato do usuário que sustenta a leitura atual; vazio quando não houver base. Atualize com correções."},
    "decisionSufficientlyClear":{"type":"boolean"},
    "ownRecurrenceReported":{"type":"boolean"}
   },
-  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","ownClarityImpaired","bilateralConversation","decisionSufficientlyClear","ownRecurrenceReported"]
+  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","ownClarityImpaired","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence"]
  }
 }

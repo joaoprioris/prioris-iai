@@ -1,5 +1,5 @@
 'use strict';
-const { decideRoute, AGENTS } = require('./functional-policy.cjs');
+const { decideRoute, AGENTS, readSituation, ROUTING_VERSION } = require('./functional-policy.cjs');
 const {createHash}=require('node:crypto');
 const {turnDirective,closingFallback}=require('./conversation-guidance.cjs');
 const MAX_EXCHANGES = 10;
@@ -14,11 +14,12 @@ function requireScope(scope) {
 function readAnalysis(value) {
   const v = typeof value === 'string' ? JSON.parse(value.trim().replace(/^```(?:json)?\s*|\s*```$/g, '').trim()) : value;
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
-  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskKind', 'ownClarityImpaired', 'bilateralConversation', 'decisionSufficientlyClear', 'ownRecurrenceReported'];
+  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskKind', 'ownClarityImpaired', 'conversationInProgress', 'decisionSufficientlyClear', 'ownRecurrenceReported', 'situationState', 'stateEvidence'];
   const clean = {};
   for (const k of allowed) if (Object.hasOwn(v, k)) clean[k] = v[k];
   if(clean.riskKind!==undefined&&!['physical','organizational','unclear'].includes(clean.riskKind))throw new ConversationError('INVALID_MODEL_RESPONSE',502);
   decideRoute(clean); // Runtime validation. Never accept trusted/history fields from a model.
+  readSituation(clean);
   return clean;
 }
 function createConversationService({ repository, classify, respond, agentPrompts, clock = () => new Date() }) {
@@ -55,8 +56,10 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const trusted = { userId: scope.userId, organizationId: scope.organizationId, historyAuthorized: settings.enabled && settings.noticeVersion === NOTICE_VERSION, historyCorroborated: false, historyCompatibleWithCurrent: false };
       const previous = AGENTS.includes(ctx.agentType) ? ctx.agentType : null;
       const route = decideRoute(analysis, trusted, previous);
+      // Re-read on every turn; do not inherit a stale state after a correction.
+      const situationReading = readSituation(analysis, [...currentMessages, {role:'user',content:input.content.trim()}]);
       const count=session.exchangeCount+1;
-      const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null};
+      const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading};
       const allMessages=[...currentMessages,{role:'user',content:input.content.trim()}];
       let text;
       let progress=null;
@@ -80,7 +83,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const result = { text, exchangeCount: count, maxExchanges: MAX_EXCHANGES, status: closing ? 'closed' : 'active', lowConfidence: route.mode === 'clarify', route: { mode: route.mode, agent: route.agent, transition: route.transition, reason: route.reason }, historyUsed: history.length > 0 };
       const messages = [...currentMessages, { role: 'user', content: input.content.trim() }, { role: 'assistant', content: text }];
       const progressTrail=[...(Array.isArray(ctx.progressTrail)?ctx.progressTrail:[]),{turn:count,agent:route.agent,stage:progress?.stage??route.mode,completed:progress?.completed?.map(c=>c.criterion)??[],pending:progress?.pending??[]}].slice(-MAX_EXCHANGES);
-      const context = { messages: closing && !settings.enabled ? [] : messages, agentType: route.agent || previous,progress,progressTrail,routingVersion: '0.2.0', lastRequest: { id: input.requestId, content: input.content.trim(), result } };
+      const context = { messages: closing && !settings.enabled ? [] : messages, agentType: route.agent || previous,progress,progressTrail,situationReading,routingVersion: ROUTING_VERSION, lastRequest: { id: input.requestId, content: input.content.trim(), result } };
       // Disabling history still permits operational context while a conversation is active.
       // Once it closes, retain no conversation text or replay payload in that context.
       const persistedContext = closing && !settings.enabled ? { agentType:context.agentType, routingVersion:context.routingVersion } : context;

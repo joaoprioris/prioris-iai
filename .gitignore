@@ -50,3 +50,4 @@ Thumbs.db
 
 .prioris-auth-test/
 artifacts/api-server/prioris-test-server.cjs
+/generated-artifacts/

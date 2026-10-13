@@ -2,7 +2,19 @@
 // Reference policy. Inputs are semantic observations, not keyword matches.
 // trustedContext must come from authenticated server-side state, never user/LLM output.
 const AGENTS = Object.freeze(['MNT', 'CTN', 'PRF', 'IMP', 'FBK', 'OTO', 'CRS']);
-const JOBS = Object.freeze(['compare_paths', 'close_bilateral', 'prepare_message', 'understand_impact', 'explore_pattern', 'unclear']);
+const ROUTING_VERSION = '0.3.0';
+const JOBS = Object.freeze(['compare_paths', 'conduct_live', 'prepare_message', 'understand_impact', 'explore_pattern', 'unclear']);
+const SITUATION_STATES = Object.freeze(['BEFORE', 'DURING', 'AFTER', 'PATTERN', 'EMPTY']);
+// A state is an internal reading, never an agent or evidence of incapacity.
+function readSituation(analysis, messages = []) {
+  if (analysis.situationState != null && !SITUATION_STATES.includes(analysis.situationState)) throw new TypeError('Invalid situation state');
+  if (analysis.stateEvidence !== undefined && typeof analysis.stateEvidence !== 'string') throw new TypeError('Invalid state evidence');
+  const evidence = analysis.stateEvidence?.trim();
+  const grounded = evidence && messages.some(m => m.role === 'user' && typeof m.content === 'string' && m.content.includes(evidence));
+  return grounded && analysis.situationState != null
+    ? Object.freeze({ state: analysis.situationState, evidence })
+    : Object.freeze({ state: null, evidence: null });
+}
 function checkBoolean(object, key) {
   if (object[key] !== undefined && typeof object[key] !== 'boolean') throw new TypeError('Invalid boolean: ' + key);
   return object[key] === true;
@@ -17,7 +29,7 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   const personalEmergency = checkBoolean(analysis, 'personalEmergency');
   const externalRisk = checkBoolean(analysis, 'immediateExternalRisk');
   const ownImpairment = checkBoolean(analysis, 'ownClarityImpaired');
-  const bilateral = checkBoolean(analysis, 'bilateralConversation');
+  const live = checkBoolean(analysis, 'conversationInProgress');
   const decisionClear = checkBoolean(analysis, 'decisionSufficientlyClear');
   const recurrenceReported = checkBoolean(analysis, 'ownRecurrenceReported');
   const authorized = checkBoolean(trustedContext, 'historyAuthorized');
@@ -27,9 +39,9 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   const sameTenant = typeof trustedContext.organizationId === 'string' && trustedContext.organizationId.length > 0 && trustedContext.organizationId === trustedContext.memoryOrganizationId;
   const historyUsable = authorized && corroborated && compatible && sameOwner && sameTenant;
   const result = (mode, agent, reason, question = null) => Object.freeze({
-    version: '0.1.0', mode, agent, reason, question,
+    version: ROUTING_VERSION, mode, agent, reason, question,
     transition: mode === 'agent' && previousAgent !== null && previousAgent !== agent,
-    previousAgent, background: mode === 'agent' && historyUsable ? ['EVL'] : [],
+    previousAgent, background: [],
     memoryWriteAllowed: false, organizationalScoreAllowed: false,
   });
   if (personalEmergency) return result('human_support', null, 'personal_emergency', 'Há alguém de confiança ou um serviço de apoio humano que possa acompanhar você agora?');
@@ -45,11 +57,11 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
     return result('agent', 'CTN', 'own_capacity_impaired');
   }
   if (analysis.scope === 'unclear' || analysis.confidence !== 'high' || analysis.job === 'unclear') {
-    return result('clarify', null, 'functional_need_unclear', 'Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?');
+    return result('clarify', null, 'functional_need_unclear', 'Você precisa conduzir uma conversa em andamento, preparar uma fala, comparar caminhos ou compreender o impacto?');
   }
   if (analysis.job === 'compare_paths') return result('agent', 'MNT', 'compare_paths');
-  if (analysis.job === 'close_bilateral') {
-    return bilateral ? result('agent', 'OTO', 'bilateral_commitment') : result('clarify', null, 'bilateral_context_missing', 'Esse fechamento depende de uma conversa com outra pessoa ou de comparar opções antes?');
+  if (analysis.job === 'conduct_live') {
+    return live ? result('agent', 'OTO', 'live_conversation_guidance') : result('clarify', null, 'live_context_missing', 'A conversa está acontecendo agora ou você está preparando o que dizer para depois?');
   }
   if (analysis.job === 'prepare_message') {
     return decisionClear ? result('agent', 'FBK', 'message_preparation') : result('clarify', null, 'decision_target_missing', 'O que você quer comunicar já está definido ou ainda precisa decidir?');
@@ -60,4 +72,4 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   }
   throw new TypeError('Unreachable job');
 }
-module.exports = { AGENTS, JOBS, decideRoute };
+module.exports = { AGENTS, JOBS, decideRoute, readSituation, SITUATION_STATES, ROUTING_VERSION };

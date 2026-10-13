@@ -1,9 +1,11 @@
 'use strict';
+const {ROUTING_VERSION}=require('./functional-policy.cjs');
 const STAGES=['clarify','structure','explore','direct','close'];
 function turnDirective(turn={}){
  const n=turn.number??1,max=turn.max??10;
  if(!Number.isInteger(n)||!Number.isInteger(max)||max!==10||n<1||n>max)throw new Error('INVALID_TURN_CONTROL');
- const base=`CONTROLE DO SERVIDOR: troca ${n} de ${max}. A contagem não reinicia ao mudar de agente. Reuse os fatos já relatados, não repita perguntas respondidas e atualize a leitura quando o usuário corrigir informações. O estágio é situacional, não uma fase fixa por número. Não alegue conclusão só por ter atingido o limite.`;
+ const reading=turn.situationReading?.state??null;
+ const base=`CONTROLE DO SERVIDOR: troca ${n} de ${max}. A contagem não reinicia ao mudar de agente. Reuse os fatos já relatados, não repita perguntas respondidas e atualize a leitura quando o usuário corrigir informações. O estágio é situacional, não uma fase fixa por número. Não alegue conclusão só por ter atingido o limite. LEITURA INTERNA: ${reading??'sem base suficiente'}. Antes: preparação de situação futura; Durante: agir em situação em curso; Depois: processar fato ocorrido; Padrão: repetição percebida como foco; Vazio: incômodo sem problema nomeado. Essa leitura não determina agente; Vazio não presume incapacidade emocional. Não exponha esses rótulos nem transforme a condução em roteiro visível.`;
  if(n===max)return base+' ÚLTIMA TROCA: faça fechamento estruturado agora. Sintetize o caso com fatos fornecidos, organize a leitura, reconheça pendências e deixe um próximo passo proporcional. Não faça nova pergunta nem abra investigação. stage deve ser close. Se não houver informação suficiente, diga isso sem inventar conclusão. Termine com abertura para uma futura conversa, sem incentivar dependência.';
  if(n===max-1)return base+' PENÚLTIMA TROCA: priorize consolidação e direcionamento. Só faça uma pergunta se ela for indispensável para concluir na próxima troca. Não abra novos ramos. Prepare o fechamento.';
  return base+' Esclareça apenas o que falta para sua função. Não dê aula genérica nem apresente todas as lentes. Encerre antes do limite se houver clareza suficiente para o próximo passo.';
@@ -42,12 +44,12 @@ function validateProgress(value,profile,messages,turn={}){
  if(/(?:medo|desconfiança)[^.!?]*permanecem/i.test(text)&&!reported.includes('medo')&&!reported.includes('desconfiança'))throw new Error('UNSUPPORTED_FACT');
  if(profile.id==='FBK'){for(const target of ['planejamento','andamento'])if(new RegExp('(?:comprometeu|compromete|afetou|prejudicou)[^.!?]*'+target,'i').test(text)&&!reported.includes(target))throw new Error('UNSUPPORTED_FACT');if(/(?:atrasos seguidos|duas últimas entregas)/i.test(text)&&!/(?:seguidos|consecutiv|últimas)/i.test(reported))throw new Error('UNSUPPORTED_FACT');}
  if(/(?:fortalece|fortalecer)[^.!?]*quem sobrevive|retirar limites só fortalece|exclui quem não aguenta/i.test(text))throw new Error('UNSUPPORTED_FACT');
- return {text,progress:{agent:profile.id,stage:value.stage,completed,pending:[...value.pending],lenses:[...value.lenses],deliveryKind,closingSummary:terminal?value.closingSummary:null,nextStep:terminal?value.nextStep:null,evidenceStatus:'Quotes verified against user messages; interpretation remains a hypothesis',version:'0.2.0'}};
+ return {text,progress:{agent:profile.id,stage:value.stage,completed,pending:[...value.pending],lenses:[...value.lenses],deliveryKind,closingSummary:terminal?value.closingSummary:null,nextStep:terminal?value.nextStep:null,evidenceStatus:'Quotes verified against user messages; interpretation remains a hypothesis',version:ROUTING_VERSION}};
 }
 function closingFallback(agent,messages){
  const last=messages.filter(x=>x.role==='user').at(-1)?.content??'';
  const excerpt=last.replace(/\s+/g,' ').replace(/\?/g,'.').slice(0,180);
- const next={MNT:'retomar as alternativas e a informação que falta antes de escolher',CTN:'priorizar uma pausa segura e retomar a decisão quando houver clareza',PRF:'retomar exemplos concretos que sustentem ou contradigam a recorrência',IMP:'retomar a diferença entre o efeito observado e a interpretação',FBK:'retomar os fatos e a mensagem que precisa ser comunicada',OTO:'retomar o compromisso que precisa ficar definido',CRS:'priorizar segurança e apoio humano adequado'};
+ const next={MNT:'retomar as alternativas e a informação que falta antes de escolher',CTN:'priorizar uma pausa segura e retomar a decisão quando houver clareza',PRF:'retomar exemplos concretos que sustentem ou contradigam a recorrência',IMP:'retomar a diferença entre o efeito observado e a interpretação',FBK:'retomar os fatos e a mensagem que precisa ser comunicada',OTO:'retomar o momento da interação e o próximo movimento possível, se a conversa ainda estiver em andamento',CRS:'priorizar segurança e apoio humano adequado'};
  return `Não consegui consolidar uma conclusão segura nesta conversa. Seu ponto mais recente foi: “${excerpt}”. O próximo passo é ${next[agent]??'retomar o contexto específico e a ajuda de liderança necessária'}. As informações que faltam continuam pendentes; não vou preencher essas lacunas com suposições. Podemos retomar isso em uma nova conversa.`;
 }
 module.exports={turnDirective,validateProgress,closingFallback,STAGES};

@@ -1,0 +1,1 @@
+- [Aderência documental](documental-scope.md) — 1:1 é condução ao vivo; estados não escolhem agente; validação local não equivale a aprovação semântica.

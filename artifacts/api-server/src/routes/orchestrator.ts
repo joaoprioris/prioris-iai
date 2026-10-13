@@ -616,7 +616,8 @@ router.post("/session/message", requireAuth, async (req: AuthenticatedRequest, r
     ];
 
     if (isClosing) {
-      await generateAndSaveSed(sessionId, user.organizationId, newMessages, lowConfidence);
+      // SED remains pending: do not generate or persist structured methodology
+      // from the legacy path while the documented functional router is opt-in.
       await db
         .update(sessionsTable)
         .set({
