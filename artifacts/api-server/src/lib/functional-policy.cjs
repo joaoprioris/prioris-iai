@@ -2,7 +2,7 @@
 // Reference policy. Inputs are semantic observations, not keyword matches.
 // trustedContext must come from authenticated server-side state, never user/LLM output.
 const AGENTS = Object.freeze(['MNT', 'CTN', 'PRF', 'IMP', 'FBK', 'OTO', 'CRS']);
-const ROUTING_VERSION = '0.3.0';
+const ROUTING_VERSION = '0.3.1';
 const JOBS = Object.freeze(['compare_paths', 'conduct_live', 'prepare_message', 'understand_impact', 'explore_pattern', 'unclear']);
 const SITUATION_STATES = Object.freeze(['BEFORE', 'DURING', 'AFTER', 'PATTERN', 'EMPTY']);
 // A state is an internal reading, never an agent or evidence of incapacity.
@@ -19,6 +19,20 @@ function checkBoolean(object, key) {
   if (object[key] !== undefined && typeof object[key] !== 'boolean') throw new TypeError('Invalid boolean: ' + key);
   return object[key] === true;
 }
+function readRisk(analysis, messages = []) {
+  const bases=['concrete_immediate_threat_or_harm','uncertainty_only','insufficient'];
+  if(analysis.riskBasis!==undefined&&!bases.includes(analysis.riskBasis))throw new TypeError('Invalid risk basis');
+  if(analysis.riskEvidence!==undefined&&typeof analysis.riskEvidence!=='string')throw new TypeError('Invalid risk evidence');
+  if(analysis.riskKind!==undefined&&!['physical','organizational','unclear'].includes(analysis.riskKind))throw new TypeError('Invalid risk kind');
+  const evidence=analysis.riskEvidence?.trim()??'';
+  const grounded=Boolean(evidence&&messages.some(m=>m.role==='user'&&typeof m.content==='string'&&m.content.includes(evidence)));
+  // "verified" means qualifier + quoted source, not proof of semantic accuracy
+  // or independent verification that harm exists.
+  return Object.freeze({
+    verified:analysis.immediateExternalRisk===true&&analysis.riskBasis==='concrete_immediate_threat_or_harm'&&grounded,
+    kind:analysis.riskKind??'unclear',basis:analysis.riskBasis??'insufficient',evidence:grounded?evidence:null,
+  });
+}
 function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   if (!analysis || typeof analysis !== 'object' || Array.isArray(analysis)) throw new TypeError('Invalid analysis');
   if (!trustedContext || typeof trustedContext !== 'object' || Array.isArray(trustedContext)) throw new TypeError('Invalid trusted context');
@@ -28,6 +42,7 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   if (previousAgent !== null && !AGENTS.includes(previousAgent)) throw new TypeError('Invalid previous agent');
   const personalEmergency = checkBoolean(analysis, 'personalEmergency');
   const externalRisk = checkBoolean(analysis, 'immediateExternalRisk');
+  const riskReading = readRisk(analysis, trustedContext.reportedMessages ?? []);
   const ownImpairment = checkBoolean(analysis, 'ownClarityImpaired');
   const live = checkBoolean(analysis, 'conversationInProgress');
   const decisionClear = checkBoolean(analysis, 'decisionSufficientlyClear');
@@ -46,10 +61,7 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   });
   if (personalEmergency) return result('human_support', null, 'personal_emergency', 'Há alguém de confiança ou um serviço de apoio humano que possa acompanhar você agora?');
   if (analysis.scope === 'outside') return result('outside_scope', null, 'outside_scope');
-  if (externalRisk) {
-    if (typeof analysis.riskEvidence !== 'string' || !analysis.riskEvidence.trim()) {
-      return result('clarify', null, 'risk_requires_context', 'O que está acontecendo agora e pode piorar se nada for feito?');
-    }
+  if (externalRisk && riskReading.verified) {
     return result('agent', 'CRS', 'immediate_external_risk');
   }
   if (ownImpairment) {
@@ -72,4 +84,4 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   }
   throw new TypeError('Unreachable job');
 }
-module.exports = { AGENTS, JOBS, decideRoute, readSituation, SITUATION_STATES, ROUTING_VERSION };
+module.exports = { AGENTS, JOBS, decideRoute, readSituation, readRisk, SITUATION_STATES, ROUTING_VERSION };

@@ -5,7 +5,9 @@ import { randomBytes, createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { createPilotBudget } from '../lib/pilot-budget.cjs';
-import { createPilotStore, IDENTITY } from '../lib/pilot-store.cjs';
+import { createPilotStore } from '../lib/pilot-store.cjs';
+import {prepareSecondRound,SECOND_IDENTITY} from '../lib/pilot-rounds.cjs';
+import {ROUTING_VERSION} from '../lib/functional-policy.cjs';
 import { createFunctionalRouter, createModelProviders } from './functional-orchestrator';
 import type { AuthenticatedRequest } from '../middlewares/auth';
 
@@ -26,13 +28,19 @@ export function createPilotRouter(options:{oidcClient?:typeof oidc;stateFile?:st
  // Stable across restarts: neither budget nor the single conversation resets.
  const file=options.stateFile??resolve(process.cwd(),process.cwd().endsWith('api-server')?'../../generated-artifacts/pilot-0.3.0-round/state.json':'generated-artifacts/pilot-0.3.0-round/state.json');
  let state:any;
- try{state=JSON.parse(readFileSync(file,'utf8'));if(state.version!=='0.3.0'||state.provider!==provider)throw Error('PILOT_STATE_MISMATCH');}
- catch(err:any){if(err.code!=='ENOENT')return blockedRouter(router);state={version:'0.3.0',provider,createdAt:Date.now(),expiresAt:Date.now()+2*60*60*1000,budget:{},requests:{}};}
+ try{state=JSON.parse(readFileSync(file,'utf8'));if(state.provider!==provider)throw Error('PILOT_STATE_MISMATCH');state=prepareSecondRound(state);}
+ catch(err:any){
+  // Only injected test fixtures may initialize a new empty ledger. Losing the
+  // real pilot file must never silently reset the accumulated expenditure.
+  if(err.code!=='ENOENT'||!options.stateFile)return blockedRouter(router);
+  state={version:ROUTING_VERSION,round:2,provider,createdAt:Date.now(),expiresAt:Date.now()+2*60*60*1000,budget:{currentRound:2},requests:{},audit:[],archivedRounds:[]};
+ }
  const save=()=>{mkdirSync(dirname(file),{recursive:true,mode:0o700});const temp=file+'.tmp';writeFileSync(temp,JSON.stringify(state),{mode:0o600});renameSync(temp,file);};
  save();
  const budget=createPilotBudget(state.budget,save);
- const store=createPilotStore(state,save);
- const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId};
+ const identity=SECOND_IDENTITY;
+ const store=createPilotStore(state,save,identity);
+ const scope={userId:identity.id,organizationId:identity.organizationId};
  const pending=new Map<string,{verifier:string;nonce:string;state:string;expires:number}>();
  const auth=options.oidcClient??oidc;
  let ownerSession:{digest:string;expires:number}|null=null;
@@ -44,11 +52,11 @@ export function createPilotRouter(options:{oidcClient?:typeof oidc;stateFile?:st
  const sameOrigin:RequestHandler=(req,res,next)=>{if(req.get('origin')!==origin){res.status(403).json({error:'Origem não autorizada para o piloto.'});return;}next();};
  const authorize:RequestHandler=(req,res,next)=>{
   if(!authenticated(req)){res.status(401).json({error:'Entre com a conta Replit do proprietário para acessar o piloto.'});return;}
-  (req as AuthenticatedRequest).user=IDENTITY;next();
+  (req as AuthenticatedRequest).user=identity;next();
  };
  const availability=()=>!active()?'Esta rodada expirou. Chamadas reais bloqueadas.':!authConfigured?'Identidade do proprietário não disponível. Chamadas reais bloqueadas.':!configured?'Provedor existente não configurado. Chamadas reais bloqueadas.':budget.snapshot().blocked?(budget.snapshot().reason??'Medição de consumo indisponível. Chamadas bloqueadas.'):null;
  router.use((_req,res,next)=>{res.setHeader('Cache-Control','no-store');next();});
- router.get('/status',(req,res)=>res.json({version:'0.3.0',authenticated:authenticated(req),available:availability()===null,error:availability(),provider,models:['claude-haiku-4-5','claude-sonnet-4-5'],budget:budget.snapshot(),identity:authenticated(req)?IDENTITY:undefined,historyEnabled:false,singleConversation:true}));
+ router.get('/status',(req,res)=>res.json({version:ROUTING_VERSION,round:2,authenticated:authenticated(req),available:availability()===null,error:availability(),provider,models:['claude-haiku-4-5','claude-sonnet-4-5'],budget:budget.snapshot(),identity:authenticated(req)?identity:undefined,historyEnabled:false,singleConversation:true}));
  router.post('/login',sameOrigin,async(req,res)=>{
   if(!active()||!authConfigured){res.status(503).send('O piloto está bloqueado: identidade do proprietário ou prazo indisponível.');return;}
   if(authenticated(req)){res.redirect('/pilot-0.3.0');return;}
@@ -104,6 +112,6 @@ export function createPilotRouter(options:{oidcClient?:typeof oidc;stateFile?:st
  return router;
 }
 function blockedRouter(router:ReturnType<typeof Router>){
- router.use((_req,res)=>res.status(503).json({error:'Estado isolado do piloto indisponível. Chamadas reais bloqueadas.',available:false,authenticated:false,version:'0.3.0'}));return router;
+ router.use((_req,res)=>res.status(503).json({error:'Estado isolado do piloto indisponível. Chamadas reais bloqueadas.',available:false,authenticated:false,version:ROUTING_VERSION}));return router;
 }
 export default createPilotRouter();

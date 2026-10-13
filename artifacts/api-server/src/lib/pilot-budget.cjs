@@ -18,7 +18,7 @@ function createPilotBudget(state,save=()=>{}) {
   // request caching. Output uses the exact SDK max_tokens (600 / 2200).
   const reserved=inputBound*price.input*2+payload.max_tokens*price.output;
   if(state.charged+reserved>state.cap){state.blocked=true;state.blockReason='Reserva conservadora insuficiente dentro do teto de US$1.';save();throw Error('PILOT_BUDGET_LIMIT');}
-  const entry={model:payload.model,inputBound,maxOutput:payload.max_tokens,reservedMicroUSD:reserved,status:'reserved'};
+  const entry={model:payload.model,round:state.currentRound??1,inputBound,maxOutput:payload.max_tokens,reservedMicroUSD:reserved,status:'reserved'};
   state.charged+=reserved;state.calls.push(entry);save();
   let response;
   try{response=await send(payload);}catch(err){entry.status='uncertain-held';save();throw err;}

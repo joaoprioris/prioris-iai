@@ -1,4 +1,5 @@
 export const ROUTING_VERSION: string;
+export function readRisk(analysis:any,messages?:any[]):{verified:boolean;kind:string;basis:string;evidence:string|null};
 export const AGENTS: readonly string[];
 export const JOBS: readonly string[];
 export const SITUATION_STATES: readonly string[];

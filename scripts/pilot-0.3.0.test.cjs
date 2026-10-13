@@ -100,7 +100,7 @@ test('Acesso real da rota: origem/owner/estado inválidos negados; proprietário
   assert.match(accepted.headers.get('set-cookie'),/HttpOnly/);assert.match(accepted.headers.get('set-cookie'),/Secure/);
   assert.equal((await request('/status',{headers:{cookie:'__Secure-iai-pilot-owner=forged'}}).then(r=>r.json())).authenticated,false);
   const status=await request('/status',{headers:{cookie:ownerCookie}}).then(r=>r.json());
-  assert.equal(status.authenticated,true);assert.equal(status.identity.id,IDENTITY.id);assert.equal(aiCalls,0);
+  assert.equal(status.authenticated,true);assert.equal(status.identity.id,'00000000-0000-4000-8000-000000000303');assert.equal(aiCalls,0);
   const headers={Origin:origin,cookie:ownerCookie,'Content-Type':'application/json'};
   const s1=await request('/sessions',{method:'POST',headers}).then(r=>r.json());
   const s2=await request('/sessions',{method:'POST',headers}).then(r=>r.json());assert.equal(s1.id,s2.id);

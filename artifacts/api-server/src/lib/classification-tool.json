@@ -10,7 +10,8 @@
    "confidence":{"type":"string","enum":["high","moderate","low"]},
    "personalEmergency":{"type":"boolean"},
    "immediateExternalRisk":{"type":"boolean"},
-   "riskEvidence":{"type":"string"},
+   "riskEvidence":{"type":"string","description":"Citação EXATA de fala do usuário sustentando ameaça ou dano concreto e imediato; não usar fala do assistente. Vazio sem base. Reavalie correções atuais."},
+   "riskBasis":{"type":"string","enum":["concrete_immediate_threat_or_harm","uncertainty_only","insufficient"],"description":"Qualifica a base relatada, não a pessoa: ameaça/dano concreto e imediato, apenas incerteza, ou base insuficiente. Divergência de informação não comprova dano por si só."},
    "riskKind":{"type":"string","enum":["physical","organizational","unclear"]},
    "ownClarityImpaired":{"type":"boolean"},
    "conversationInProgress":{"type":"boolean","description":"Conversa relevante acontecendo agora, bilateral ou em grupo; nome de reunião e estado Durante não bastam."},
@@ -19,6 +20,6 @@
    "decisionSufficientlyClear":{"type":"boolean"},
    "ownRecurrenceReported":{"type":"boolean"}
   },
-  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","ownClarityImpaired","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence"]
+  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","riskBasis","riskEvidence","riskKind","ownClarityImpaired","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence"]
  }
 }
