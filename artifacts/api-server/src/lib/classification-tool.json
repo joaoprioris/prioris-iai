@@ -10,16 +10,19 @@
    "confidence":{"type":"string","enum":["high","moderate","low"]},
    "personalEmergency":{"type":"boolean"},
    "immediateExternalRisk":{"type":"boolean"},
-   "riskEvidence":{"type":"string","description":"Citação EXATA de fala do usuário sustentando ameaça ou dano concreto e imediato; não usar fala do assistente. Vazio sem base. Reavalie correções atuais."},
+   "riskEvidence":{"type":"string","description":"Citação EXATA da fala ATUAL do usuário sustentando ameaça ou dano concreto e imediato ainda presente; não reciclar divergência antiga ou fala do assistente. Vazio sem base atual. Reavalie correções."},
+   "riskImpactEvidence":{"type":"string","description":"Citação EXATA da fala ATUAL que relata a ameaça/dano concreto, não apenas o cenário ou divergência. Pode coincidir com riskEvidence quando o próprio trecho contém a ameaça. Vazio quando há só hipótese, prazo divergente ou urgência."},
    "riskBasis":{"type":"string","enum":["concrete_immediate_threat_or_harm","uncertainty_only","insufficient"],"description":"Qualifica a base relatada, não a pessoa: ameaça/dano concreto e imediato, apenas incerteza, ou base insuficiente. Divergência de informação não comprova dano por si só."},
    "riskKind":{"type":"string","enum":["physical","organizational","unclear"]},
    "ownClarityImpaired":{"type":"boolean"},
+   "ownClarityEvidence":{"type":"string","description":"Citação EXATA da fala atual sobre a própria reação emocional ou sobrecarga impedindo julgamento. Não saber viabilidade nem ter urgência é insuficiente; vazio sem base."},
+   "ownClarityBasis":{"type":"string","enum":["reaction_or_overload_impeding_judgment","uncertainty_only","insufficient"]},
    "conversationInProgress":{"type":"boolean","description":"Conversa relevante acontecendo agora, bilateral ou em grupo; nome de reunião e estado Durante não bastam."},
    "situationState":{"type":["string","null"],"enum":["BEFORE","DURING","AFTER","PATTERN","EMPTY",null],"description":"Leitura interna: Antes, Durante, Depois, Padrão, Vazio; null se faltar base. Não determina agente."},
    "stateEvidence":{"type":"string","description":"Trecho exato do relato do usuário que sustenta a leitura atual; vazio quando não houver base. Atualize com correções."},
    "decisionSufficientlyClear":{"type":"boolean"},
    "ownRecurrenceReported":{"type":"boolean"}
   },
-  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","riskBasis","riskEvidence","riskKind","ownClarityImpaired","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence"]
+  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","riskBasis","riskEvidence","riskImpactEvidence","riskKind","ownClarityImpaired","ownClarityEvidence","ownClarityBasis","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence"]
  }
 }

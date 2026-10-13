@@ -12,7 +12,19 @@ function createPilotStore(state,save=()=>{},identity=IDENTITY) {
   getCompletedRequest:async(s,id,requestId)=>owned(s)&&state.session?.id===id?state.requests[requestId]:null,
   recordObservation:async(s,entry)=>{
    if(!owned(s)||state.session?.id!==entry.sessionId)throw Error('PILOT_SCOPE_DENIED');
-   state.audit??=[];state.audit.push({...structuredClone(entry),outcome:'classified'});save();
+   state.audit??=[];state.audit.push({...structuredClone(entry),classificationCallIndex:state.budget?.calls?.length?state.budget.calls.length-1:null,outcome:'classified'});save();
+  },
+  recordGeneration:async(s,entry)=>{
+   if(!owned(s)||state.session?.id!==entry.sessionId)throw Error('PILOT_SCOPE_DENIED');
+   const audit=state.audit?.findLast(e=>e.requestId===entry.requestId);
+   if(!audit)throw Error('PILOT_OBSERVATION_MISSING');
+   audit.generation=structuredClone(entry.response);save();
+  },
+  recordGenerationObservation:async(s,entry)=>{
+   if(!owned(s))throw Error('PILOT_SCOPE_DENIED');
+   const audit=state.audit?.findLast(e=>e.turn===entry.turn&&e.sessionId===state.session?.id);
+   if(!audit)throw Error('PILOT_OBSERVATION_MISSING');
+   audit.generationAttempts??=[];audit.generationAttempts.push({...structuredClone(entry),budgetCallIndex:state.budget?.calls?.length?state.budget.calls.length-1:null});save();
   },
   commitTurn:async(s,t)=>{
    if(!owned(s)||state.session?.id!==t.sessionId||t.expectedCount!==state.session.exchangeCount||t.settingsRevision!=='pilot-history-off'||t.privateRecord)return false;

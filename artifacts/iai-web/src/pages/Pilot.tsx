@@ -17,10 +17,10 @@ export default function Pilot(){
  }
  return <main style={{height:'100dvh',display:'flex',flexDirection:'column',background:'#0D0D0D',color:'#F2F2F2',fontFamily:'inherit'}}>
   <section aria-label="Identificação do piloto" style={{padding:'12px 20px',borderBottom:'1px solid #B8953F',flexShrink:0,fontSize:13}}>
-   <strong style={{color:'#B8953F'}}>IAí by PRIORIS — piloto fictício {status?.version??'0.3.1'} · rodada {status?.round??2}</strong>
+   <strong style={{color:'#B8953F'}}>IAí by PRIORIS — piloto fictício {status?.version??'0.3.2'} · rodada {status?.round??3}</strong>
    <div>Uma conversa limpa nesta rodada · até dez trocas · histórico pessoal desligado · sem camada organizacional</div>
    <div>IA real: {status?.provider==='anthropic'?'Anthropic direto':'Anthropic via Replit'} · Haiku 4.5 / Sonnet 4.5 · somente ao enviar sua fala</div>
-   <div>Teto acumulado das duas rodadas: US$1 · contabilizado: US${(status?.budget?.estimatedUSD??0).toFixed(4)} · chamadas acumuladas: {status?.budget?.calls??0}. Não é saldo nem fatura exata.</div>
+   <div>Teto acumulado de todas as rodadas: US$1 · contabilizado: US${(status?.budget?.estimatedUSD??0).toFixed(6)} · chamadas acumuladas: {status?.budget?.calls??0}. Não é saldo nem fatura exata.</div>
    {(error||status?.error||status?.budget?.reason)&&<p role="alert" style={{color:'#FFC38A'}}>{error||status?.error||status?.budget?.reason}</p>}
   </section>
   {status?.authenticated&&status.identity?

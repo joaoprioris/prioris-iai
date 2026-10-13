@@ -1,5 +1,6 @@
 'use strict';
 const {ROUTING_VERSION}=require('./functional-policy.cjs');
+const {validateGrounding,rejectDuplicateDelivery}=require('./response-grounding.cjs');
 const STAGES=['clarify','structure','explore','direct','close'];
 function turnDirective(turn={}){
  const n=turn.number??1,max=turn.max??10;
@@ -25,7 +26,8 @@ function validateProgress(value,profile,messages,turn={}){
  if(new Set(value.lenses).size!==value.lenses.length||value.lenses.some(x=>!allowed.has(x)))throw new Error('INVALID_PROGRESSION');
  const terminal=turn.number===10||value.stage==='close';
  if(value.stage!=='close'&&/com isso, você já tem mais clareza|iaí, posso te apoiar no próximo passo/i.test(value.text))throw new Error('INVALID_CLOSURE');
- if(value.stage==='close'&&(turn.number??1)<10&&!done.has(profile.id+'.next'))throw new Error('INVALID_CLOSURE');
+ // Early closure requires a supported next movement, not a completed target
+ // commitment or collection of every criterion. Gaps may remain pending.
  if(terminal&&value.stage!=='close')throw new Error('INVALID_CLOSURE');
  if(terminal&&(typeof value.closingSummary!=='string'||value.closingSummary.trim().length<15||value.closingSummary.length>1200||typeof value.nextStep!=='string'||value.nextStep.trim().length<10||value.nextStep.length>800))throw new Error('INVALID_CLOSURE');
  if(terminal&&(value.closingSummary.includes('?')||value.nextStep.includes('?')))throw new Error('INVALID_CLOSURE');
@@ -38,13 +40,17 @@ function validateProgress(value,profile,messages,turn={}){
   if(kind===null||!d||d.kind!==kind||typeof d.text!=='string'||!d.text.trim()||d.text.length>1200||d.text.includes('[ENCERRAR]'))throw new Error('INVALID_PROGRESSION');
   deliveryKind=d.kind;delivery='\n\nUma formulação possível para usar nessa conversa:\n“'+d.text.trim()+'”';
  }
+ const visibleParts=terminal?[value.closingSummary.trim(),value.nextStep.trim()]:[value.text.trim()];
+ const deliveryText=deliveryKind?value.delivery.text.trim():null;
+ rejectDuplicateDelivery(visibleParts,deliveryText);
+ const operationalClaims=validateGrounding(value,messages,[...visibleParts,...(deliveryText?[deliveryText]:[])]);
  const text=terminal?value.closingSummary.trim()+'\n\n'+value.nextStep.trim()+delivery+'\n\nPodemos retomar o próximo passo em uma nova conversa.':value.text.trim().replace(/\s*\[ENCERRAR\]\s*$/,'')+delivery;
  const reported=users.map(u=>u.content).join(' ').toLowerCase();
  if(/(?:expõe|produziu|gerou|houve|revela)\s+(?:uma\s+)?ruptura[^.!?]*segurança psicológica/i.test(text)&&!reported.includes('ruptura'))throw new Error('UNSUPPORTED_FACT');
  if(/(?:medo|desconfiança)[^.!?]*permanecem/i.test(text)&&!reported.includes('medo')&&!reported.includes('desconfiança'))throw new Error('UNSUPPORTED_FACT');
  if(profile.id==='FBK'){for(const target of ['planejamento','andamento'])if(new RegExp('(?:comprometeu|compromete|afetou|prejudicou)[^.!?]*'+target,'i').test(text)&&!reported.includes(target))throw new Error('UNSUPPORTED_FACT');if(/(?:atrasos seguidos|duas últimas entregas)/i.test(text)&&!/(?:seguidos|consecutiv|últimas)/i.test(reported))throw new Error('UNSUPPORTED_FACT');}
  if(/(?:fortalece|fortalecer)[^.!?]*quem sobrevive|retirar limites só fortalece|exclui quem não aguenta/i.test(text))throw new Error('UNSUPPORTED_FACT');
- return {text,progress:{agent:profile.id,stage:value.stage,completed,pending:[...value.pending],lenses:[...value.lenses],deliveryKind,closingSummary:terminal?value.closingSummary:null,nextStep:terminal?value.nextStep:null,evidenceStatus:'Quotes verified against user messages; interpretation remains a hypothesis',version:ROUTING_VERSION}};
+ return {text,progress:{agent:profile.id,stage:value.stage,completed,pending:[...value.pending],lenses:[...value.lenses],deliveryKind,delivery:deliveryKind?structuredClone(value.delivery):null,operationalClaims,closingSummary:terminal?value.closingSummary:null,nextStep:terminal?value.nextStep:null,evidenceStatus:'Quotes verified against displayed conversation; interpretation remains a hypothesis',version:ROUTING_VERSION}};
 }
 function closingFallback(agent,messages){
  const last=messages.filter(x=>x.role==='user').at(-1)?.content??'';

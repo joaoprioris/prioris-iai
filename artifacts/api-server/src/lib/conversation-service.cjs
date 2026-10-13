@@ -14,7 +14,7 @@ function requireScope(scope) {
 function readAnalysis(value) {
   const v = typeof value === 'string' ? JSON.parse(value.trim().replace(/^```(?:json)?\s*|\s*```$/g, '').trim()) : value;
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
-  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskKind', 'riskBasis', 'ownClarityImpaired', 'conversationInProgress', 'decisionSufficientlyClear', 'ownRecurrenceReported', 'situationState', 'stateEvidence'];
+  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskImpactEvidence', 'riskKind', 'riskBasis', 'ownClarityImpaired', 'ownClarityEvidence', 'ownClarityBasis', 'conversationInProgress', 'decisionSufficientlyClear', 'ownRecurrenceReported', 'situationState', 'stateEvidence'];
   const clean = {};
   for (const k of allowed) if (Object.hasOwn(v, k)) clean[k] = v[k];
   if(clean.riskKind!==undefined&&!['physical','organizational','unclear'].includes(clean.riskKind))throw new ConversationError('INVALID_MODEL_RESPONSE',502);
@@ -62,7 +62,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const count=session.exchangeCount+1;
       const riskReading=readRisk(analysis,allMessages);
       const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading,riskReading};
-      if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,analysis,riskReading,situationReading,route});
+      if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,analysis,riskReading,situationReading,route,messages:allMessages});
       let text;
       let progress=null;
       if (route.mode === 'clarify') text = count===MAX_EXCHANGES?closingFallback(null,allMessages):route.question;
@@ -74,8 +74,8 @@ function createConversationService({ repository, classify, respond, agentPrompts
       else {
         if (typeof agentPrompts[route.agent] !== 'string') throw new ConversationError('AGENT_CONFIGURATION_MISSING', 503);
         const proportionate=riskReading.kind==='physical'&&riskReading.verified?'':'\nNão há base verificada para ameaça física nesta leitura. Não acrescente instruções de afastamento físico, segurança ou emergência física sem relato pertinente. Atualize a ajuda com a correção atual do líder; risco organizacional não é automaticamente emergência física. Preserve a função documentada do agente selecionado. Incerteza não autoriza inventar data, execução, culpa, política ou obrigação.';
-        try { const response=await respond({ agent: route.agent, system:agentPrompts[route.agent]+'\n'+turnDirective(turnControl)+proportionate,messages:allMessages,history,turn:turnControl });if(typeof response==='string')text=response;else {text=response.text;progress=response.progress??null;} }
-        catch (err) { const invalid=['RESPONSE_CONSTRAINT_FAILED','INCOMPLETE_RESPONSE','INVALID_PROGRESSION','INVALID_PROGRESS_EVIDENCE','INVALID_CLOSURE'].includes(err?.message);throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE', invalid?502:503); }
+        try { const response=await respond({ agent: route.agent, system:agentPrompts[route.agent]+'\n'+turnDirective(turnControl)+proportionate,messages:allMessages,history,turn:turnControl });if(repository.recordGeneration)await repository.recordGeneration(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,response});if(typeof response==='string')text=response;else {text=response.text;progress=response.progress??null;} }
+        catch (err) { const invalid=['RESPONSE_CONSTRAINT_FAILED','INCOMPLETE_RESPONSE','INVALID_PROGRESSION','INVALID_PROGRESS_EVIDENCE','INVALID_CLOSURE','UNSUPPORTED_FACT','DUPLICATE_DELIVERY'].includes(err?.message);throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE', invalid?502:503); }
       }
       if (typeof text !== 'string' || !text.trim() || text.length > 30000) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
       const earlyClose = progress?progress.stage==='close':text.trimEnd().endsWith(CLOSE_SIGNAL);

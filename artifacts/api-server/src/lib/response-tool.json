@@ -3,7 +3,7 @@
  "description":"Compor resposta contextual e registrar progressão interna. Nunca concede autorização, altera roteamento ou calcula score. A evidência usa somente falas do usuário, numeradas a partir de zero.",
  "input_schema":{
   "type":"object","additionalProperties":false,
-  "required":["text","stage","completed","pending","lenses","closingSummary","nextStep"],
+  "required":["text","stage","completed","pending","lenses","closingSummary","nextStep","operationalClaims"],
   "properties":{
    "text":{"type":"string","minLength":1,"maxLength":1200},
    "stage":{"type":"string","enum":["clarify","structure","explore","direct","close"]},
@@ -12,6 +12,7 @@
    "lenses":{"type":"array","maxItems":11,"items":{"type":"string"}},
    "closingSummary":{"type":"string","maxLength":1200},
    "nextStep":{"type":"string","maxLength":800},
+   "operationalClaims":{"type":"array","maxItems":12,"description":"Proveniência de compromisso de tempo, viabilidade de opções, execução aceita pelo líder ou conteúdo anterior EXIBIDO. Vazio quando não há tais alegações. Não cite campos internos como histórico.","items":{"type":"object","additionalProperties":false,"required":["kind","text","role","message","quote"],"properties":{"kind":{"type":"string","enum":["time_commitment","viability","execution","prior_assistant_content"]},"text":{"type":"string","minLength":1,"maxLength":800},"role":{"type":"string","enum":["user","assistant"]},"message":{"type":"integer","minimum":0,"maximum":9},"quote":{"type":"string","minLength":1,"maxLength":1200}}}},
    "delivery":{"anyOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["kind","text"],"properties":{"kind":{"type":"string","enum":["message","micro_move"]},"text":{"type":"string","minLength":1,"maxLength":1200}}}]}
   }
  }
