@@ -3,6 +3,7 @@ import { useAuth } from "./hooks/useAuth";
 import Login from "./pages/Login";
 import Chat from "./pages/Chat";
 import IaiIcon from "./components/IaiIcon";
+import Pilot from './pages/Pilot';
 
 const queryClient = new QueryClient();
 
@@ -59,7 +60,7 @@ function AppInner() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppInner />
+      {import.meta.env.DEV && window.location.pathname.replace(/\/$/,'').endsWith('/pilot-0.3.0') ? <Pilot /> : <AppInner />}
     </QueryClientProvider>
   );
 }

@@ -18,6 +18,7 @@
     "drizzle-orm": "catalog:",
     "express": "^5",
     "nodemailer": "^10.1.0",
+    "openid-client": "^6.8.8",
     "pino": "^9",
     "pino-http": "^10"
   },

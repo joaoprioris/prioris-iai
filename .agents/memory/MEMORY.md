@@ -1,1 +1,2 @@
 - [Aderência documental](documental-scope.md) — 1:1 é condução ao vivo; estados não escolhem agente; validação local não equivale a aprovação semântica.
+- [Orçamento de pilotos](pilot-spend.md) — reserva cobre pedido completo e saídas máximas de cada tentativa; uso incerto não deve liberar verba.

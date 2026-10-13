@@ -65,6 +65,8 @@ export default defineConfig({
     allowedHosts: true,
     fs: {
       strict: true,
+      // Keep the isolated pilot ledger/context outside Vite's file-serving API.
+      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/generated-artifacts/pilot-0.3.0-round/**"],
     },
   },
   preview: {

@@ -1,0 +1,16 @@
+---
+name: Orçamento de pilotos
+description: Limite estimado conservador e uso incerto de chamadas de IA em pilotos.
+---
+
+Reservas devem cobrir a entrada completa e a saída máxima configurada de cada
+classificação, geração e recuperação. Não tratar teto estimado como garantia de
+faturamento nem como saldo disponível.
+
+**Why:** o proprietário identificou que reservar 1600 tokens para uma geração
+que permitia 2200, além de recuperação, não cobria o custo possível. Em falhas
+sem usage verificável, liberar a reserva pode autorizar gasto já consumido.
+
+**How to apply:** manter consumo incerto reservado e bloquear quando não houver
+base segura; confirmar preços vigentes e preservar o ledger entre reinícios,
+sem declarar que testes determinísticos verificaram faturamento ou semântica.

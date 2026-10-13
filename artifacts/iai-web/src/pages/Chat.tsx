@@ -19,11 +19,15 @@ interface SurveyQuestion {
 interface ChatProps {
   user: AuthUser;
   onLogout: () => void;
+  pilot?: boolean;
+  onPilotTurn?: () => void;
+  pilotBlocked?: boolean;
 }
 
 const MAX_EXCHANGES = 10;
 
-export default function Chat({ user, onLogout }: ChatProps) {
+export default function Chat({ user, onLogout, pilot = false, onPilotTurn, pilotBlocked = false }: ChatProps) {
+  const apiBase = pilot ? "/api/pilot-0.3.0" : "/api";
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -46,10 +50,10 @@ export default function Chat({ user, onLogout }: ChatProps) {
   }, []);
 
   const createSession = async () => {
-    const token = getToken();
+    const token = pilot ? "cookie" : getToken();
     if (!token) return;
     try {
-      const res = await fetch("/api/sessions", {
+      const res = await fetch(`${apiBase}/sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ agentType: "MNT" }),
@@ -58,6 +62,10 @@ export default function Chat({ user, onLogout }: ChatProps) {
       const session = await res.json();
       setSessionId(session.id);
       setExchangeCount(session.exchangeCount ?? 0);
+      if (pilot) {
+        setMessages(Array.isArray(session.messages) ? session.messages : []);
+        setSessionClosed(session.status === "closed");
+      }
     } catch {
       setError("Erro de conexão ao iniciar sessão.");
     }
@@ -78,9 +86,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const sendMessage = async (e?: FormEvent) => {
     e?.preventDefault();
     const text = input.trim();
-    if (!text || !sessionId || sending || sessionClosed) return;
+    if (!text || !sessionId || sending || sessionClosed || pilotBlocked) return;
 
-    const token = getToken();
+    const token = pilot ? "cookie" : getToken();
     if (!token) return;
 
     const previousRequest = pendingRequestRef.current;
@@ -101,7 +109,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
     ]);
 
     try {
-      const res = await fetch("/api/session/message", {
+      const res = await fetch(`${apiBase}/session/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ sessionId, content: text, requestId }),
@@ -114,6 +122,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
         setMessages((prev) => prev.slice(0, -2));
         setInput(text);
         setSending(false);
+        onPilotTurn?.();
         return;
       }
 
@@ -188,6 +197,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
     }
 
     setSending(false);
+    onPilotTurn?.();
     textareaRef.current?.focus();
   };
 
@@ -212,7 +222,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
         position: "relative",
         display: "flex",
         flexDirection: "column",
-        height: "100dvh",
+        height: pilot ? "100%" : "100dvh",
         maxWidth: "420px",
         margin: "0 auto",
         background: "#0D0D0D",
@@ -280,7 +290,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
           sair
         </button>
       </header>
-      <HistorySettings busy={sending} onErased={() => { void handleNewSession(); }} />
+      {!pilot && <HistorySettings busy={sending} onErased={() => { void handleNewSession(); }} />}
 
       {/* ── Messages ────────────────────────────────────────────────────────── */}
       <div
@@ -400,7 +410,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
           )}
 
           {/* Nova Conversa — shown when session is closed */}
-          {sessionClosed && (
+          {sessionClosed && !pilot && (
             <button
               onClick={handleNewSession}
               style={{
@@ -459,14 +469,14 @@ export default function Chat({ user, onLogout }: ChatProps) {
               }}
               onKeyDown={handleKeyDown}
               placeholder="Escreva sua mensagem..."
-              disabled={sending || !sessionId}
+              disabled={sending || !sessionId || pilotBlocked}
               rows={1}
               className="chat-textarea flex-1"
               style={{ opacity: sending || !sessionId ? 0.4 : 1 }}
             />
             <button
               onClick={() => sendMessage()}
-              disabled={!input.trim() || sending || !sessionId}
+              disabled={!input.trim() || sending || !sessionId || pilotBlocked}
               style={{
                 flexShrink: 0,
                 width: "36px",

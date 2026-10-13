@@ -6,10 +6,12 @@ import functionalOrchestratorRouter from './functional-orchestrator';
 import orchestratorRouter from "./orchestrator";
 import surveyRouter from "./survey";
 import adminRouter from "./admin";
+import pilotRouter from './pilot';
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use('/pilot-0.3.0',pilotRouter);
 router.use(authRouter);
 router.use(sessionsRouter);
 router.use(functionalOrchestratorRouter);
