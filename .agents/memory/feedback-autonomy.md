@@ -1,0 +1,23 @@
+---
+name: Autoria e julgamento no Feedback
+description: Orientação autoritativa do proprietário sobre desenvolvimento do líder, exemplos e avaliação.
+---
+
+“é provocar o líder, trazer clareza pra ele e perguntar como ele pretende dar o feedback”
+“senao o lider nao se desenvolve e fica viciado... nao eh a intenção”
+
+No Feedback, reconhecer momento/tensão, ampliar leitura pertinente e explorar
+como o líder pretende abordar a conversa e que mudança quer construir. Trabalhar
+sua elaboração e lacunas reais, confrontando suposições com respeito sem assumir
+autoria/decisão. Não transformar isso em roteiro ou sequência obrigatória nem
+ficar vazio/só devolver perguntas. Frases/exemplos são permissão contingente para
+apoiar elaboração existente, como opção, não solução proativa padrão.
+
+**Why:** orientação explícita do proprietário ao assistir o piloto: fala pronta
+como objetivo não desenvolve julgamento e pode produzir dependência.
+
+**How to apply:** priorizar autoria sobre interpretações anteriores da permissão
+para exemplos. Preservar funções, transições, camadas invisíveis e proteção física.
+Não moralizar receio, garantir proteção da relação ou atribuir impacto não relatado.
+Não declarar testes anteriores aprovados pelo critério de autonomia; a avaliação
+anterior centrada em conseguir fala pronta requer reavaliação separada.

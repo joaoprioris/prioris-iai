@@ -1,6 +1,8 @@
 'use strict';
 const {ROUTING_VERSION}=require('./functional-policy.cjs');
-const {validateGrounding,rejectDuplicateDelivery}=require('./response-grounding.cjs');
+const {validateGrounding}=require('./response-grounding.cjs');
+const {resolveUserEvidence,deduplicateDelivery}=require('./evidence-source.cjs');
+const {validateFeedbackAuthorship}=require('./feedback-autonomy.cjs');
 const STAGES=['clarify','structure','explore','direct','close'];
 function turnDirective(turn={}){
  const n=turn.number??1,max=turn.max??10;
@@ -15,9 +17,10 @@ function validateProgress(value,profile,messages,turn={}){
  if(!value||typeof value!=='object'||Array.isArray(value)||typeof value.text!=='string'||!value.text.trim()||value.text.length>1200)throw new Error('INVALID_PROGRESSION');
  if(!STAGES.includes(value.stage)||!Array.isArray(value.completed)||!Array.isArray(value.pending)||!Array.isArray(value.lenses))throw new Error('INVALID_PROGRESSION');
  const ids=new Set((profile.diagnostic_criteria??[]).map(x=>x.id));const users=messages.filter(x=>x.role==='user');
+ const referenceNormalizations=[];
  const completed=value.completed.map(x=>{
   if(!x||!ids.has(x.criterion)||!Array.isArray(x.evidence)||x.evidence.length<1||x.evidence.length>4)throw new Error('INVALID_PROGRESSION');
-  const evidence=x.evidence.map(e=>{if(!e||!Number.isInteger(e.message)||e.message<0||e.message>=users.length||typeof e.quote!=='string'||e.quote.trim().length<5||e.quote.length>240||!users[e.message].content.includes(e.quote))throw new Error('INVALID_PROGRESS_EVIDENCE');return {message:e.message,quote:e.quote}});
+  const evidence=x.evidence.map(e=>{const r=resolveUserEvidence(e,messages);if(r.normalization)referenceNormalizations.push({...r.normalization,criterion:x.criterion});return r.evidence;});
   return {criterion:x.criterion,evidence};
  });
  const done=new Set(completed.map(x=>x.criterion));
@@ -38,24 +41,34 @@ function validateProgress(value,profile,messages,turn={}){
  if(value.delivery!==undefined&&value.delivery!==null&&!emptyDelivery){
   const d=value.delivery;const kind=profile.id==='FBK'?'message':profile.id==='OTO'?'micro_move':null;
   if(kind===null||!d||d.kind!==kind||typeof d.text!=='string'||!d.text.trim()||d.text.length>1200||d.text.includes('[ENCERRAR]'))throw new Error('INVALID_PROGRESSION');
-  deliveryKind=d.kind;delivery='\n\nUma formulação possível para usar nessa conversa:\n“'+d.text.trim()+'”';
+  deliveryKind=d.kind;delivery='\n\n'+(profile.id==='FBK'?'Exemplo opcional para revisar sua abordagem:':'Uma formulação possível para usar nessa conversa:')+'\n“'+d.text.trim()+'”';
  }
- const visibleParts=terminal?[value.closingSummary.trim(),value.nextStep.trim()]:[value.text.trim()];
+ const rawParts=terminal?[value.closingSummary.trim(),value.nextStep.trim()]:[value.text.trim()];
  const deliveryText=deliveryKind?value.delivery.text.trim():null;
- rejectDuplicateDelivery(visibleParts,deliveryText);
+ const deduplicated=deduplicateDelivery(rawParts,deliveryText);
+ const visibleParts=deduplicated.parts;
+ let authorship=null;
+ if(profile.id==='FBK'){
+  const checked=validateFeedbackAuthorship(value,messages,[...visibleParts,...(deliveryText?[deliveryText]:[])]);
+  authorship=checked.authorship;referenceNormalizations.push(...checked.normalizations);
+  if(deliveryText&&!deduplicated.append&&!visibleParts.some(p=>/\b(?:opcional|opção|exemplo)\b/i.test(p)))throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ }
  const operationalClaims=validateGrounding(value,messages,[...visibleParts,...(deliveryText?[deliveryText]:[])]);
- const text=terminal?value.closingSummary.trim()+'\n\n'+value.nextStep.trim()+delivery+'\n\nPodemos retomar o próximo passo em uma nova conversa.':value.text.trim().replace(/\s*\[ENCERRAR\]\s*$/,'')+delivery;
+ const displayedDelivery=deduplicated.append?delivery:'';
+ const text=terminal?visibleParts.filter(Boolean).join('\n\n')+displayedDelivery+'\n\nPodemos retomar o próximo passo em uma nova conversa.':visibleParts.join('\n\n').replace(/\s*\[ENCERRAR\]\s*$/,'')+displayedDelivery;
  const reported=users.map(u=>u.content).join(' ').toLowerCase();
  if(/(?:expõe|produziu|gerou|houve|revela)\s+(?:uma\s+)?ruptura[^.!?]*segurança psicológica/i.test(text)&&!reported.includes('ruptura'))throw new Error('UNSUPPORTED_FACT');
  if(/(?:medo|desconfiança)[^.!?]*permanecem/i.test(text)&&!reported.includes('medo')&&!reported.includes('desconfiança'))throw new Error('UNSUPPORTED_FACT');
- if(profile.id==='FBK'){for(const target of ['planejamento','andamento'])if(new RegExp('(?:comprometeu|compromete|afetou|prejudicou)[^.!?]*'+target,'i').test(text)&&!reported.includes(target))throw new Error('UNSUPPORTED_FACT');if(/(?:atrasos seguidos|duas últimas entregas)/i.test(text)&&!/(?:seguidos|consecutiv|últimas)/i.test(reported))throw new Error('UNSUPPORTED_FACT');}
+ // Feedback impact claims are checked above against affirmative provenance,
+ // including delivery; merely mentioning an impact word is not confirmation.
+ if(profile.id==='FBK'&&/(?:atrasos seguidos|duas últimas entregas)/i.test(text)&&!/(?:seguidos|consecutiv|últimas)/i.test(reported))throw new Error('UNSUPPORTED_FACT');
  if(/(?:fortalece|fortalecer)[^.!?]*quem sobrevive|retirar limites só fortalece|exclui quem não aguenta/i.test(text))throw new Error('UNSUPPORTED_FACT');
- return {text,progress:{agent:profile.id,stage:value.stage,completed,pending:[...value.pending],lenses:[...value.lenses],deliveryKind,delivery:deliveryKind?structuredClone(value.delivery):null,operationalClaims,closingSummary:terminal?value.closingSummary:null,nextStep:terminal?value.nextStep:null,evidenceStatus:'Quotes verified against displayed conversation; interpretation remains a hypothesis',version:ROUTING_VERSION}};
+ return {text,progress:{agent:profile.id,stage:value.stage,completed,pending:[...value.pending],lenses:[...value.lenses],deliveryKind,delivery:deliveryKind?structuredClone(value.delivery):null,authorship,referenceNormalizations,displayNormalizations:deduplicated.normalizations,operationalClaims,closingSummary:terminal?value.closingSummary:null,nextStep:terminal?value.nextStep:null,evidenceStatus:'Source references verified; presentation-only repairs recorded; interpretation remains a hypothesis',version:ROUTING_VERSION}};
 }
 function closingFallback(agent,messages){
  const last=messages.filter(x=>x.role==='user').at(-1)?.content??'';
  const excerpt=last.replace(/\s+/g,' ').replace(/\?/g,'.').slice(0,180);
- const next={MNT:'retomar as alternativas e a informação que falta antes de escolher',CTN:'priorizar uma pausa segura e retomar a decisão quando houver clareza',PRF:'retomar exemplos concretos que sustentem ou contradigam a recorrência',IMP:'retomar a diferença entre o efeito observado e a interpretação',FBK:'retomar os fatos e a mensagem que precisa ser comunicada',OTO:'retomar o momento da interação e o próximo movimento possível, se a conversa ainda estiver em andamento',CRS:'priorizar segurança e apoio humano adequado'};
+ const next={MNT:'retomar as alternativas e a informação que falta antes de escolher',CTN:'priorizar uma pausa segura e retomar a decisão quando houver clareza',PRF:'retomar exemplos concretos que sustentem ou contradigam a recorrência',IMP:'retomar a diferença entre o efeito observado e a interpretação',FBK:'retomar os fatos e sua elaboração de como abordar a conversa e da mudança que quer construir',OTO:'retomar o momento da interação e o próximo movimento possível, se a conversa ainda estiver em andamento',CRS:'priorizar segurança e apoio humano adequado'};
  return `Não consegui consolidar uma conclusão segura nesta conversa. Seu ponto mais recente foi: “${excerpt}”. O próximo passo é ${next[agent]??'retomar o contexto específico e a ajuda de liderança necessária'}. As informações que faltam continuam pendentes; não vou preencher essas lacunas com suposições. Podemos retomar isso em uma nova conversa.`;
 }
 module.exports={turnDirective,validateProgress,closingFallback,STAGES};

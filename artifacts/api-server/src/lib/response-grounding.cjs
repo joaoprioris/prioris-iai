@@ -8,7 +8,7 @@ function validateGrounding(value,messages,visibleParts){
  if(!Array.isArray(claims)||claims.length>12)throw Error('UNSUPPORTED_FACT');
  const byRole={user:messages.filter(m=>m.role==='user'),assistant:messages.filter(m=>m.role==='assistant')};
  for(const claim of claims){
-  if(!claim||!['time_commitment','viability','execution','prior_assistant_content'].includes(claim.kind)||!['user','assistant'].includes(claim.role)||!Number.isInteger(claim.message)||typeof claim.quote!=='string'||!claim.quote.trim()||typeof claim.text!=='string'||!claim.text.trim())throw Error('UNSUPPORTED_FACT');
+  if(!claim||!['time_commitment','viability','impact','execution','prior_assistant_content'].includes(claim.kind)||!['user','assistant'].includes(claim.role)||!Number.isInteger(claim.message)||typeof claim.quote!=='string'||!claim.quote.trim()||typeof claim.text!=='string'||!claim.text.trim())throw Error('UNSUPPORTED_FACT');
   const source=byRole[claim.role][claim.message]?.content;
   if(typeof source!=='string'||!source.includes(claim.quote)||!visibleParts.some(p=>p.includes(claim.text)))throw Error('UNSUPPORTED_FACT');
   if(claim.kind==='prior_assistant_content'&&claim.role!=='assistant')throw Error('UNSUPPORTED_FACT');

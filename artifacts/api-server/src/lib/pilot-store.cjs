@@ -26,6 +26,19 @@ function createPilotStore(state,save=()=>{},identity=IDENTITY) {
    if(!audit)throw Error('PILOT_OBSERVATION_MISSING');
    audit.generationAttempts??=[];audit.generationAttempts.push({...structuredClone(entry),budgetCallIndex:state.budget?.calls?.length?state.budget.calls.length-1:null});save();
   },
+  recordValidation:async(s,entry)=>{
+   if(!owned(s))throw Error('PILOT_SCOPE_DENIED');
+   const audit=state.audit?.findLast(e=>e.turn===entry.turn&&e.sessionId===state.session?.id);
+   const attempt=audit?.generationAttempts?.findLast(e=>e.attempt===entry.attempt);
+   if(!attempt)throw Error('PILOT_OBSERVATION_MISSING');
+   attempt.validationEvents??=[];attempt.validationEvents.push(structuredClone(entry));save();
+  },
+  recordFailure:async(s,entry)=>{
+   if(!owned(s))throw Error('PILOT_SCOPE_DENIED');
+   const audit=state.audit?.findLast(e=>e.requestId===entry.requestId&&e.sessionId===entry.sessionId);
+   if(!audit||audit.outcome!=='classified')return;
+   audit.failure=structuredClone(entry);audit.outcome='failed';save();
+  },
   commitTurn:async(s,t)=>{
    if(!owned(s)||state.session?.id!==t.sessionId||t.expectedCount!==state.session.exchangeCount||t.settingsRevision!=='pilot-history-off'||t.privateRecord)return false;
    if(state.requests[t.requestId])return false;

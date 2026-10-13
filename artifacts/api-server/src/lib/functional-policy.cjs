@@ -2,7 +2,7 @@
 // Reference policy. Inputs are semantic observations, not keyword matches.
 // trustedContext must come from authenticated server-side state, never user/LLM output.
 const AGENTS = Object.freeze(['MNT', 'CTN', 'PRF', 'IMP', 'FBK', 'OTO', 'CRS']);
-const ROUTING_VERSION = '0.3.2';
+const ROUTING_VERSION = '0.3.3';
 const JOBS = Object.freeze(['compare_paths', 'conduct_live', 'prepare_message', 'understand_impact', 'explore_pattern', 'unclear']);
 const SITUATION_STATES = Object.freeze(['BEFORE', 'DURING', 'AFTER', 'PATTERN', 'EMPTY']);
 // A state is an internal reading, never an agent or evidence of incapacity.

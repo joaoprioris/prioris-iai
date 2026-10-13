@@ -49,8 +49,8 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const settings = Object.freeze({...fetchedSettings,enabled:fetchedSettings.enabled===true&&fetchedSettings.noticeVersion===NOTICE_VERSION});
       const history = settings.enabled && settings.noticeVersion === NOTICE_VERSION ? await repository.readPrivateHistory(scope, 4, input.sessionId) : [];
       const currentMessages = Array.isArray(ctx.messages) ? ctx.messages : [];
-      let analysis;
-      try { analysis = readAnalysis(await classify({ messages: [...currentMessages, { role: 'user', content: input.content.trim() }], history, previousAgent: ctx.agentType || null })); }
+      let analysis,classificationRaw;
+      try { classificationRaw=await classify({ messages: [...currentMessages, { role: 'user', content: input.content.trim() }], history, previousAgent: ctx.agentType || null });analysis = readAnalysis(classificationRaw); }
       catch (err) { throw new ConversationError(err.code === 'INVALID_MODEL_RESPONSE' || err instanceof TypeError || err instanceof SyntaxError ? 'INVALID_MODEL_RESPONSE' : 'MODEL_UNAVAILABLE', err.code === 'INVALID_MODEL_RESPONSE' || err instanceof TypeError || err instanceof SyntaxError ? 502 : 503); }
       // Stored history can give context, but is not automatically a verified pattern.
       const allMessages=[...currentMessages,{role:'user',content:input.content.trim()}];
@@ -62,7 +62,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const count=session.exchangeCount+1;
       const riskReading=readRisk(analysis,allMessages);
       const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading,riskReading};
-      if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,analysis,riskReading,situationReading,route,messages:allMessages});
+      if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,classificationRaw,analysis,riskReading,situationReading,route,messages:allMessages});
       let text;
       let progress=null;
       if (route.mode === 'clarify') text = count===MAX_EXCHANGES?closingFallback(null,allMessages):route.question;
@@ -75,7 +75,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
         if (typeof agentPrompts[route.agent] !== 'string') throw new ConversationError('AGENT_CONFIGURATION_MISSING', 503);
         const proportionate=riskReading.kind==='physical'&&riskReading.verified?'':'\nNão há base verificada para ameaça física nesta leitura. Não acrescente instruções de afastamento físico, segurança ou emergência física sem relato pertinente. Atualize a ajuda com a correção atual do líder; risco organizacional não é automaticamente emergência física. Preserve a função documentada do agente selecionado. Incerteza não autoriza inventar data, execução, culpa, política ou obrigação.';
         try { const response=await respond({ agent: route.agent, system:agentPrompts[route.agent]+'\n'+turnDirective(turnControl)+proportionate,messages:allMessages,history,turn:turnControl });if(repository.recordGeneration)await repository.recordGeneration(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,response});if(typeof response==='string')text=response;else {text=response.text;progress=response.progress??null;} }
-        catch (err) { const invalid=['RESPONSE_CONSTRAINT_FAILED','INCOMPLETE_RESPONSE','INVALID_PROGRESSION','INVALID_PROGRESS_EVIDENCE','INVALID_CLOSURE','UNSUPPORTED_FACT','DUPLICATE_DELIVERY'].includes(err?.message);throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE', invalid?502:503); }
+        catch (err) { const invalid=['RESPONSE_CONSTRAINT_FAILED','INCOMPLETE_RESPONSE','INVALID_PROGRESSION','INVALID_PROGRESS_EVIDENCE','INVALID_CLOSURE','UNSUPPORTED_FACT','DUPLICATE_DELIVERY','AUTONOMY_CONSTRAINT_FAILED'].includes(err?.message);throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE', invalid?502:503); }
       }
       if (typeof text !== 'string' || !text.trim() || text.length > 30000) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
       const earlyClose = progress?progress.stage==='close':text.trimEnd().endsWith(CLOSE_SIGNAL);
@@ -92,6 +92,9 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const committed = await repository.commitTurn(scope, { sessionId: input.sessionId, requestId:input.requestId, contentHash, expectedCount: session.exchangeCount, settingsRevision: settings.revision, context:persistedContext, agent: route.agent || previous || 'MNT', status: result.status, nextCount: count,result, privateRecord: settings.enabled ? { sessionId: input.sessionId, input: input.content.trim(), response: text, time: clock().toISOString() } : null });
       if (!committed) throw new ConversationError('CONVERSATION_CHANGED', 409);
       return result;
+    } catch(err) {
+      if(repository.recordFailure)await repository.recordFailure(scope,{sessionId:input.sessionId,requestId:input.requestId,code:err.code??'MODEL_UNAVAILABLE'});
+      throw err;
     } finally { busy.delete(key); }
   }
   return { turn };
