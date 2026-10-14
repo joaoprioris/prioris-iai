@@ -1,34 +1,191 @@
 {
- "name":"registrar_necessidade",
- "description":"Registra a necessidade funcional atual do líder. Não executa ações, não concede autorização nem salva memória. Use unclear se o contexto for insuficiente.",
- "input_schema":{
-  "type":"object",
-  "additionalProperties":false,
-  "properties":{
-   "scope":{"type":"string","enum":["leadership","outside","unclear"]},
-   "job":{"type":"string","enum":["compare_paths","conduct_live","prepare_message","understand_impact","explore_pattern","unclear"]},
-   "confidence":{"type":"string","enum":["high","moderate","low"]},
-   "personalEmergency":{"type":"boolean"},
-   "immediateExternalRisk":{"type":"boolean"},
-   "riskEvidence":{"type":"string","description":"Citação EXATA da fala ATUAL do usuário sustentando ameaça ou dano concreto e imediato ainda presente; não reciclar divergência antiga ou fala do assistente. Vazio sem base atual. Reavalie correções."},
-   "riskImpactEvidence":{"type":"string","description":"Citação EXATA da fala ATUAL que relata a ameaça/dano concreto, não apenas o cenário ou divergência. Pode coincidir com riskEvidence quando o próprio trecho contém a ameaça. Vazio quando há só hipótese, prazo divergente ou urgência."},
-   "riskBasis":{"type":"string","enum":["concrete_immediate_threat_or_harm","uncertainty_only","insufficient"],"description":"Qualifica a base relatada, não a pessoa: ameaça/dano concreto e imediato, apenas incerteza, ou base insuficiente. Divergência de informação não comprova dano por si só."},
-   "riskKind":{"type":"string","enum":["physical","organizational","unclear"]},
-   "ownClarityImpaired":{"type":"boolean"},
-   "ownClarityEvidence":{"type":"string","description":"Citação EXATA da fala atual sobre a própria reação emocional ou sobrecarga impedindo julgamento. Não saber viabilidade nem ter urgência é insuficiente; vazio sem base."},
-   "ownClarityBasis":{"type":"string","enum":["reaction_or_overload_impeding_judgment","uncertainty_only","insufficient"]},
-   "conversationInProgress":{"type":"boolean","description":"Conversa relevante acontecendo agora, bilateral ou em grupo; nome de reunião e estado Durante não bastam."},
-   "situationState":{"type":["string","null"],"enum":["BEFORE","DURING","AFTER","PATTERN","EMPTY",null],"description":"Leitura interna: Antes, Durante, Depois, Padrão, Vazio; null se faltar base. Não determina agente."},
-   "stateEvidence":{"type":"string","description":"Trecho exato do relato do usuário que sustenta a leitura atual; vazio quando não houver base. Atualize com correções."},
-   "stateReferences":{"type":"array","maxItems":4,"items":{"$ref":"#/$defs/userReference"},"description":"Fontes literais separadas, indexadas entre falas do usuário desde zero. Nunca colar ou adaptar trechos para stateEvidence. Se usar várias fontes, stateEvidence vazio; atualize com correções."},
-   "needEvidence":{"type":"array","maxItems":4,"items":{"$ref":"#/$defs/userReference"},"description":"Citações literais que sustentam a necessidade dominante, inclusive do histórico desta conversa. Correção/mudança usa fonte atual. Sem escolher por palavra-chave."},
-   "substantiveDecisionPending":{"type":"boolean","description":"Há decisão substantiva sobre o que fazer realmente em aberto? Não confundir com abordagem de comunicação ainda não elaborada, que integra Feedback."},
-   "decisionEvidence":{"type":"array","maxItems":4,"items":{"$ref":"#/$defs/userReference"},"description":"Fonte literal da decisão substantiva ainda em aberto; vazio sem base. Não promover dificuldade de como falar a decisão substantiva indefinida."},
-   "clarificationQuestion":{"type":"string","maxLength":280,"description":"Uma única questão focal sobre lacuna MATERIAL ainda não respondida; vazio sem lacuna. Não repetir menu de categorias nem perguntas já respondidas."},
-   "decisionSufficientlyClear":{"type":"boolean"},
-   "ownRecurrenceReported":{"type":"boolean"}
-  },
-  "$defs":{"userReference":{"type":"object","additionalProperties":false,"properties":{"message":{"type":"integer","minimum":0},"quote":{"type":"string","minLength":5,"maxLength":480}},"required":["message","quote"]}},
-  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","riskBasis","riskEvidence","riskImpactEvidence","riskKind","ownClarityImpaired","ownClarityEvidence","ownClarityBasis","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence","stateReferences","needEvidence","substantiveDecisionPending","decisionEvidence","clarificationQuestion"]
- }
+  "name": "registrar_necessidade",
+  "description": "Registra a necessidade funcional atual do líder. Não executa ações, não concede autorização nem salva memória. Use unclear se o contexto for insuficiente.",
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "scope": {
+        "type": "string",
+        "enum": [
+          "leadership",
+          "outside",
+          "unclear"
+        ]
+      },
+      "job": {
+        "type": "string",
+        "enum": [
+          "compare_paths",
+          "conduct_live",
+          "prepare_message",
+          "understand_impact",
+          "explore_pattern",
+          "unclear"
+        ]
+      },
+      "confidence": {
+        "type": "string",
+        "enum": [
+          "high",
+          "moderate",
+          "low"
+        ]
+      },
+      "personalEmergency": {
+        "type": "boolean"
+      },
+      "immediateExternalRisk": {
+        "type": "boolean"
+      },
+      "riskEvidence": {
+        "type": "string",
+        "description": "Citação EXATA da fala ATUAL do usuário sustentando ameaça ou dano concreto e imediato ainda presente; não reciclar divergência antiga ou fala do assistente. Vazio sem base atual. Reavalie correções."
+      },
+      "riskImpactEvidence": {
+        "type": "string",
+        "description": "Citação EXATA da fala ATUAL que relata a ameaça/dano concreto, não apenas o cenário ou divergência. Pode coincidir com riskEvidence quando o próprio trecho contém a ameaça. Vazio quando há só hipótese, prazo divergente ou urgência."
+      },
+      "riskBasis": {
+        "type": "string",
+        "enum": [
+          "concrete_immediate_threat_or_harm",
+          "uncertainty_only",
+          "insufficient"
+        ],
+        "description": "Qualifica a base relatada, não a pessoa: ameaça/dano concreto e imediato, apenas incerteza, ou base insuficiente. Divergência de informação não comprova dano por si só."
+      },
+      "riskKind": {
+        "type": "string",
+        "enum": [
+          "physical",
+          "organizational",
+          "unclear"
+        ]
+      },
+      "ownClarityImpaired": {
+        "type": "boolean"
+      },
+      "ownClarityEvidence": {
+        "type": "string",
+        "description": "Citação EXATA da fala atual sobre a própria reação emocional ou sobrecarga impedindo julgamento. Não saber viabilidade nem ter urgência é insuficiente; vazio sem base."
+      },
+      "ownClarityBasis": {
+        "type": "string",
+        "enum": [
+          "reaction_or_overload_impeding_judgment",
+          "uncertainty_only",
+          "insufficient"
+        ]
+      },
+      "conversationInProgress": {
+        "type": "boolean",
+        "description": "Conversa relevante acontecendo agora, bilateral ou em grupo; nome de reunião e estado Durante não bastam."
+      },
+      "situationState": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "BEFORE",
+          "DURING",
+          "AFTER",
+          "PATTERN",
+          "EMPTY",
+          null
+        ],
+        "description": "Leitura interna: Antes, Durante, Depois, Padrão, Vazio; null se faltar base. Não determina agente."
+      },
+      "stateEvidence": {
+        "type": "string",
+        "description": "Trecho exato do relato do usuário que sustenta a leitura atual; vazio quando não houver base. Atualize com correções."
+      },
+      "stateReferences": {
+        "type": "array",
+        "maxItems": 4,
+        "items": {
+          "$ref": "#/$defs/userReference"
+        },
+        "description": "Fontes literais separadas, indexadas entre falas do usuário desde zero. Nunca colar ou adaptar trechos para stateEvidence. Se usar várias fontes, stateEvidence vazio; atualize com correções."
+      },
+      "needEvidence": {
+        "type": "array",
+        "maxItems": 4,
+        "items": {
+          "$ref": "#/$defs/userReference"
+        },
+        "description": "Citações literais que sustentam a necessidade dominante, inclusive do histórico desta conversa. Correção/mudança usa fonte atual. Sem escolher por palavra-chave."
+      },
+      "substantiveDecisionPending": {
+        "type": "boolean",
+        "description": "Há decisão substantiva sobre o que fazer realmente em aberto? Não confundir com abordagem de comunicação ainda não elaborada, que integra Feedback."
+      },
+      "decisionEvidence": {
+        "type": "array",
+        "maxItems": 4,
+        "items": {
+          "$ref": "#/$defs/userReference"
+        },
+        "description": "Fonte literal da decisão substantiva ainda em aberto; vazio sem base. Não promover dificuldade de como falar a decisão substantiva indefinida."
+      },
+      "clarificationQuestion": {
+        "type": "string",
+        "maxLength": 280,
+        "description": "Uma única questão focal sobre lacuna MATERIAL ainda não respondida; vazio sem lacuna. Não repetir menu de categorias nem perguntas já respondidas."
+      },
+      "decisionSufficientlyClear": {
+        "type": "boolean"
+      },
+      "ownRecurrenceReported": {
+        "type": "boolean",
+        "description": "Verdadeiro somente quando o usuário declara repetição do próprio comportamento em ocasiões distintas. Um problema atual, preocupação, dúvida, frustração com a ferramenta ou verbo no contínuo não demonstram recorrência pessoal. Não use afirmações do assistente como evidência de recorrência."
+      }
+    },
+    "$defs": {
+      "userReference": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 480
+          }
+        },
+        "required": [
+          "message",
+          "quote"
+        ]
+      }
+    },
+    "required": [
+      "scope",
+      "job",
+      "confidence",
+      "personalEmergency",
+      "immediateExternalRisk",
+      "riskBasis",
+      "riskEvidence",
+      "riskImpactEvidence",
+      "riskKind",
+      "ownClarityImpaired",
+      "ownClarityEvidence",
+      "ownClarityBasis",
+      "conversationInProgress",
+      "decisionSufficientlyClear",
+      "ownRecurrenceReported",
+      "situationState",
+      "stateEvidence",
+      "stateReferences",
+      "needEvidence",
+      "substantiveDecisionPending",
+      "decisionEvidence",
+      "clarificationQuestion"
+    ]
+  }
 }

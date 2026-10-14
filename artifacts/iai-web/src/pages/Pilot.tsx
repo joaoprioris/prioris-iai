@@ -74,7 +74,7 @@ export default function Pilot() {
       >
         <strong style={{ color: "#B8953F" }}>
           IAí by PRIORIS — piloto fictício {status?.version ?? "0.3.4"} · rodada{" "}
-          {status?.round ?? 5}
+          {status?.round ?? '…'}
         </strong>
         <div>
           Uma conversa limpa nesta rodada · até dez trocas · histórico pessoal
@@ -87,12 +87,7 @@ export default function Pilot() {
             : "Anthropic via Replit"}{" "}
           · Haiku 4.5 / Sonnet 4.5 · somente ao enviar sua fala
         </div>
-        <div>
-          Teto acumulado de todas as rodadas: US${status?.budget?.capUSD ?? 2} ·
-          contabilizado: US${(status?.budget?.estimatedUSD ?? 0).toFixed(6)} ·
-          chamadas acumuladas: {status?.budget?.calls ?? 0}. Não é saldo nem
-          fatura exata.
-        </div>
+        {status?.budget ? <div>Teto acumulado de todas as rodadas: US{'$'}{status.budget.capUSD} · contabilizado: US{'$'}{status.budget.estimatedUSD.toFixed(6)} · chamadas acumuladas: {status.budget.calls}. Não é saldo nem fatura exata.</div> : <div>Conferindo a rodada e o orçamento acumulado…</div>}
         {(error || status?.error || status?.budget?.reason) && (
           <p role="alert" style={{ color: "#FFC38A" }}>
             {error || status?.error || status?.budget?.reason}
@@ -130,6 +125,21 @@ export default function Pilot() {
               }}
             >
               Entrar com Replit — abrir em nova aba
+            </button>
+          </form>
+<form method="POST" action={BASE + "/login"} target="_self">
+            <button
+              disabled={!status?.available}
+              style={{
+                padding: "12px 20px",
+                background: "#7B4FBF",
+                color: "white",
+                border: 0,
+                borderRadius: 8,
+                cursor: "pointer",
+              }}
+            >
+              Entrar com Replit — nesta aba
             </button>
           </form>
           <p style={{ fontSize: 13 }}>

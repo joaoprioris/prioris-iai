@@ -18,7 +18,8 @@
       "text": {
         "type": "string",
         "minLength": 1,
-        "maxLength": 1200
+        "maxLength": 1200,
+        "description": "Resposta curta ao líder, com observação útil ancorada no relato. Quando houver pergunta, faça UMA questão focal e use no máximo UM sinal de interrogação em todo este campo. Não faça outra pergunta antes ou depois dela, nem reúna subperguntas. No encerramento, nenhuma pergunta. Não declare certeza, bloqueio, prazo ou impacto que o relato não confirma."
       },
       "stage": {
         "type": "string",
