@@ -11,7 +11,8 @@ import { mkdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { createPilotBudget } from "../lib/pilot-budget.cjs";
 import { createPilotStore } from "../lib/pilot-store.cjs";
-import { prepareFifthRound, FIFTH_IDENTITY } from "../lib/pilot-rounds.cjs";
+import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
+import { pilotIdentity, advanceBlock, advancePilotRound } from "../lib/pilot-next-round.cjs";
 import { ROUTING_VERSION } from "../lib/functional-policy.cjs";
 import {
   createFunctionalRouter,
@@ -81,32 +82,19 @@ export function createPilotRouter(
     mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
     const temp = file + ".tmp";
     writeFileSync(temp, JSON.stringify(state), { mode: 0o600 });
-    renameSync(temp, file);
     const snapshotDirectory = dirname(file) + "/snapshots";
     mkdirSync(snapshotDirectory, { recursive: true, mode: 0o700 });
     const serialized = JSON.stringify(state);
     const snapshotFile = snapshotDirectory + "/" + hash(serialized) + ".json";
     try { writeFileSync(snapshotFile, serialized, { mode: 0o600, flag: "wx" }); } catch (snapshotError: any) { if (snapshotError.code !== "EEXIST") throw snapshotError; }
+    // Canonical commit is last: a failed archive write cannot advance the round.
+    renameSync(temp, file);
   };
   save();
   const budget = createPilotBudget(state.budget, save);
-  const identity =
-    state.round === 5
-      ? FIFTH_IDENTITY
-      : {
-          ...FIFTH_IDENTITY,
-          id:
-            "00000000-0000-4000-8000-" +
-            String(299 + 2 * state.round).padStart(12, "0"),
-          organizationId:
-            "00000000-0000-4000-8000-" +
-            String(300 + 2 * state.round).padStart(12, "0"),
-          organizationName:
-            "Empresa fictícia independente — rodada " + state.round,
-          email: "rodada" + state.round + "@example.invalid",
-        };
-  const store = createPilotStore(state, save, identity);
-  const scope = {
+  let identity = pilotIdentity(state.round);
+  let store = createPilotStore(state, save, identity);
+  let scope = {
     userId: identity.id,
     organizationId: identity.organizationId,
   };
@@ -118,6 +106,7 @@ export function createPilotRouter(
   let ownerSession: { digest: string; expires: number } | null = null;
   let config: oidc.Configuration | null = null;
   let sdk: Anthropic | null = null;
+  let inFlight = 0;
   const active = () => Date.now() < state.expiresAt;
   const cookieOptions = {
     httpOnly: true,
@@ -179,6 +168,11 @@ export function createPilotRouter(
       identity: authenticated(req) ? identity : undefined,
       historyEnabled: false,
       singleConversation: true,
+      nextConversation: authenticated(req) ? {
+        allowed: advanceBlock(state, inFlight) === null,
+        reason: advanceBlock(state, inFlight),
+        sessionId: state.session?.id ?? null,
+      } : undefined,
     }),
   );
   router.post("/login", sameOrigin, async (req, res) => {
@@ -286,6 +280,31 @@ export function createPilotRouter(
   router.post("/sessions", sameOrigin, authorize, (_req, res) =>
     res.json(store.open(scope)),
   );
+  router.post("/next-conversation", sameOrigin, authorize, (req, res) => {
+    const messages: Record<string, string> = {
+      ROUND_CHANGED: "A rodada mudou. Atualize a tela antes de continuar.",
+      PILOT_EXPIRED: "O período autorizado expirou. Nenhuma rodada foi aberta.",
+      TURN_IN_PROGRESS: "Aguarde o envio em andamento terminar.",
+      BUDGET_PENDING: "Há bloqueio ou contabilização pendente no orçamento.",
+      SESSION_NOT_CLOSED: "Encerre a conversa atual antes de abrir outra.",
+    };
+    try {
+      const result = advancePilotRound(state, {
+        expectedRound: req.body?.round, sessionId: req.body?.sessionId, inFlight,
+      }, save);
+      identity = pilotIdentity(state.round);
+      scope = { userId: identity.id, organizationId: identity.organizationId };
+      store = createPilotStore(state, save, identity);
+      functionalRouter = makeFunctionalRouter();
+      res.json(result);
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "STORAGE_UNAVAILABLE";
+      res.status(messages[code] ? 409 : 503).json({
+        code: messages[code] ? code : "STORAGE_UNAVAILABLE",
+        error: messages[code] ?? "Não foi possível arquivar a conversa. Nenhuma nova rodada foi confirmada.",
+      });
+    }
+  });
   // A lazy, budgeted SDK: startup, login and session creation do not call AI.
   const guardedClient = {
     messages: {
@@ -335,7 +354,7 @@ export function createPilotRouter(
         });
       return;
     }
-    if (!state.session || req.body.sessionId !== state.session.id) {
+    if (!state.session || req.body?.sessionId !== state.session.id) {
       res
         .status(403)
         .json({
@@ -343,17 +362,33 @@ export function createPilotRouter(
         });
       return;
     }
+    if (inFlight) {
+      res.status(409).json({ code: "TURN_IN_PROGRESS", error: "Já existe uma mensagem em processamento." });
+      return;
+    }
+    inFlight += 1;
+    // A disconnected browser must not unlock a still-running provider call.
+    let released = false;
+    const release = () => { if (!released) { released = true; inFlight -= 1; } };
+    res.once("finish", release);
+    const end = res.end.bind(res);
+    res.end = ((...args: any[]) => {
+      release();
+      return (end as any)(...args);
+    }) as typeof res.end;
     next();
   });
-  router.use(
-    createFunctionalRouter({
+  function makeFunctionalRouter() {
+    return createFunctionalRouter({
       repository: store.repository,
       authorize,
       origins: () => [origin],
       enabled: () => true,
       ...model,
-    }),
-  );
+    });
+  }
+  let functionalRouter = makeFunctionalRouter();
+  router.use((req, res, next) => functionalRouter(req, res, next));
   return router;
 }
 function blockedRouter(router: ReturnType<typeof Router>) {

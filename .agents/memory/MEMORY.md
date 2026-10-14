@@ -1,5 +1,5 @@
 - [Aderência documental](documental-scope.md) — 1:1 é condução ao vivo; estados não escolhem agente; validação local não equivale a aprovação semântica.
-- [Orçamento de pilotos](pilot-spend.md) — reserva cobre pedido completo e saídas máximas de cada tentativa; uso incerto não deve liberar verba.
+- [Orçamento de pilotos](pilot-spend.md) — reservas completas e uso incerto retido; nova conversa não renova orçamento nem janela de acesso.
 - [Risco e incerteza](risk-functional.md) — divergência não comprova emergência; Crises mantém função proporcional e correções do líder atualizam a leitura.
 - [Fidelidade dos pilotos](pilot-fidelity.md) — não presumir prazo/execução nem tratar campos internos como histórico exibido; evidência fictícia separada do histórico pessoal.
 - [Autoria no Feedback](feedback-autonomy.md) — orientação explícita: desenvolver julgamento, não entregar fala pronta por padrão; aprovação por “fala utilizável” exige reavaliação.

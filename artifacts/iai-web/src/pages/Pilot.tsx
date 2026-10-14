@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Chat from "./Chat";
 import type { AuthUser } from "../hooks/useAuth";
 const BASE = "/api/pilot-0.3.0";
@@ -10,6 +10,7 @@ type Status = {
   error?: string;
   identity?: AuthUser;
   provider?: string;
+  nextConversation?: { allowed: boolean; reason: string | null; sessionId: string | null };
   budget?: {
     capUSD: number;
     estimatedUSD: number;
@@ -22,6 +23,8 @@ type Status = {
 export default function Pilot() {
   const [status, setStatus] = useState<Status | null>(null);
   const [error, setError] = useState("");
+  const [advancing, setAdvancing] = useState(false);
+  const advanceLock = useRef(false);
   const refresh = useCallback(async () => {
     try {
       const r = await fetch(BASE + "/status", {
@@ -39,7 +42,29 @@ export default function Pilot() {
   }, []);
   useEffect(() => {
     void refresh();
+    const timer = window.setInterval(() => void refresh(), 5000);
+    return () => window.clearInterval(timer);
   }, [refresh]);
+  async function nextConversation() {
+    if (advanceLock.current || !status?.nextConversation?.allowed) return;
+    advanceLock.current = true;
+    setAdvancing(true);
+    try {
+      const r = await fetch(BASE + "/next-conversation", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ round: status.round, sessionId: status.nextConversation.sessionId }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.error ?? "Não foi possível abrir a próxima conversa.");
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível abrir a próxima conversa.");
+    } finally {
+      advanceLock.current = false;
+      setAdvancing(false);
+    }
+  }
   async function logout() {
     try {
       const r = await fetch(BASE + "/logout", {
@@ -93,10 +118,16 @@ export default function Pilot() {
             {error || status?.error || status?.budget?.reason}
           </p>
         )}
-      {status?.authenticated && status.round === 10 && <form method="POST" action={BASE + "/sessions"} target="_blank"><button type="submit">Conferir sessão do teste encerrado</button></form>}</section>
+        {status?.authenticated && <button
+          onClick={() => void nextConversation()}
+          disabled={advancing || !status.nextConversation?.allowed}
+          style={{ padding: "8px 12px", marginTop: 8 }}
+        >{advancing ? "Arquivando conversa…" : "Abrir próxima conversa limpa"}</button>}
+      </section>
       {status?.authenticated && status.identity ? (
         <div style={{ flex: 1, minHeight: 0 }}>
           <Chat
+            key={status.round}
             user={status.identity}
             onLogout={() => void logout()}
             pilot

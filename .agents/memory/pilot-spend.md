@@ -14,3 +14,12 @@ sem usage verificável, liberar a reserva pode autorizar gasto já consumido.
 **How to apply:** manter consumo incerto reservado e bloquear quando não houver
 base segura; confirmar preços vigentes e preservar o ledger entre reinícios,
 sem declarar que testes determinísticos verificaram faturamento ou semântica.
+
+Abrir outra conversa fictícia não constitui nova autorização de acesso nem
+novo orçamento: a campanha continua dentro da janela e do teto já autorizados.
+
+**Why:** o proprietário pediu continuidade dos testes sem reiniciar o app ou
+renovar o período de acesso, preservando integralmente custos e controles.
+
+**How to apply:** não reutilizar uma preparação de rodada que conceda outras
+duas horas por conveniência; renovação de acesso exige pedido separado.
