@@ -1,5 +1,6 @@
 'use strict';
 const { decideRoute, AGENTS, readSituation, readRisk, ROUTING_VERSION } = require('./functional-policy.cjs');
+const {readFunctionalNeed}=require('./functional-context.cjs');
 const {createHash}=require('node:crypto');
 const {turnDirective,closingFallback}=require('./conversation-guidance.cjs');
 const MAX_EXCHANGES = 10;
@@ -14,7 +15,7 @@ function requireScope(scope) {
 function readAnalysis(value) {
   const v = typeof value === 'string' ? JSON.parse(value.trim().replace(/^```(?:json)?\s*|\s*```$/g, '').trim()) : value;
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
-  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskImpactEvidence', 'riskKind', 'riskBasis', 'ownClarityImpaired', 'ownClarityEvidence', 'ownClarityBasis', 'conversationInProgress', 'decisionSufficientlyClear', 'ownRecurrenceReported', 'situationState', 'stateEvidence'];
+  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskImpactEvidence', 'riskKind', 'riskBasis', 'ownClarityImpaired', 'ownClarityEvidence', 'ownClarityBasis', 'conversationInProgress', 'decisionSufficientlyClear', 'ownRecurrenceReported', 'situationState', 'stateEvidence','stateReferences','needEvidence','substantiveDecisionPending','decisionEvidence','clarificationQuestion'];
   const clean = {};
   for (const k of allowed) if (Object.hasOwn(v, k)) clean[k] = v[k];
   if(clean.riskKind!==undefined&&!['physical','organizational','unclear'].includes(clean.riskKind))throw new ConversationError('INVALID_MODEL_RESPONSE',502);
@@ -50,11 +51,12 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const history = settings.enabled && settings.noticeVersion === NOTICE_VERSION ? await repository.readPrivateHistory(scope, 4, input.sessionId) : [];
       const currentMessages = Array.isArray(ctx.messages) ? ctx.messages : [];
       let analysis,classificationRaw;
-      try { classificationRaw=await classify({ messages: [...currentMessages, { role: 'user', content: input.content.trim() }], history, previousAgent: ctx.agentType || null });analysis = readAnalysis(classificationRaw); }
+      try { classificationRaw=await classify({ messages: [...currentMessages, { role: 'user', content: input.content.trim() }], history, previousAgent: ctx.agentType || null,functionalNeed:ctx.functionalNeed??null });analysis = readAnalysis(classificationRaw); }
       catch (err) { throw new ConversationError(err.code === 'INVALID_MODEL_RESPONSE' || err instanceof TypeError || err instanceof SyntaxError ? 'INVALID_MODEL_RESPONSE' : 'MODEL_UNAVAILABLE', err.code === 'INVALID_MODEL_RESPONSE' || err instanceof TypeError || err instanceof SyntaxError ? 502 : 503); }
       // Stored history can give context, but is not automatically a verified pattern.
       const allMessages=[...currentMessages,{role:'user',content:input.content.trim()}];
-      const trusted = { userId: scope.userId, organizationId: scope.organizationId, historyAuthorized: settings.enabled && settings.noticeVersion === NOTICE_VERSION, historyCorroborated: false, historyCompatibleWithCurrent: false,reportedMessages:allMessages };
+      const functionalNeed=readFunctionalNeed(analysis,allMessages,ctx.functionalNeed);
+      const trusted = { userId: scope.userId, organizationId: scope.organizationId, historyAuthorized: settings.enabled && settings.noticeVersion === NOTICE_VERSION, historyCorroborated: false, historyCompatibleWithCurrent: false,reportedMessages:allMessages,functionalNeed:ctx.functionalNeed };
       const previous = AGENTS.includes(ctx.agentType) ? ctx.agentType : null;
       const route = decideRoute(analysis, trusted, previous);
       // Re-read on every turn; do not inherit a stale state after a correction.
@@ -62,7 +64,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const count=session.exchangeCount+1;
       const riskReading=readRisk(analysis,allMessages);
       const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading,riskReading};
-      if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,classificationRaw,analysis,riskReading,situationReading,route,messages:allMessages});
+      if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,classificationRaw,analysis,functionalNeed,riskReading,situationReading,route,messages:allMessages});
       let text;
       let progress=null;
       if (route.mode === 'clarify') text = count===MAX_EXCHANGES?closingFallback(null,allMessages):route.question;
@@ -85,7 +87,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const result = { text, exchangeCount: count, maxExchanges: MAX_EXCHANGES, status: closing ? 'closed' : 'active', lowConfidence: route.mode === 'clarify', route: { mode: route.mode, agent: route.agent, transition: route.transition, reason: route.reason }, historyUsed: history.length > 0 };
       const messages = [...currentMessages, { role: 'user', content: input.content.trim() }, { role: 'assistant', content: text }];
       const progressTrail=[...(Array.isArray(ctx.progressTrail)?ctx.progressTrail:[]),{turn:count,agent:route.agent,stage:progress?.stage??route.mode,completed:progress?.completed?.map(c=>c.criterion)??[],pending:progress?.pending??[]}].slice(-MAX_EXCHANGES);
-      const context = { messages: closing && !settings.enabled ? [] : messages, agentType: route.agent || previous,progress,progressTrail,situationReading,routingVersion: ROUTING_VERSION, lastRequest: { id: input.requestId, content: input.content.trim(), result } };
+      const context = { messages: closing && !settings.enabled ? [] : messages, agentType: route.agent || previous,progress,progressTrail,situationReading,functionalNeed,routingVersion: ROUTING_VERSION, lastRequest: { id: input.requestId, content: input.content.trim(), result } };
       // Disabling history still permits operational context while a conversation is active.
       // Once it closes, retain no conversation text or replay payload in that context.
       const persistedContext = closing && !settings.enabled ? { agentType:context.agentType, routingVersion:context.routingVersion } : context;

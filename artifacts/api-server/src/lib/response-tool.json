@@ -1,20 +1,228 @@
 {
- "name":"registrar_resposta",
- "description":"Compor resposta contextual e registrar progressão interna. Nunca concede autorização, altera roteamento ou calcula score. A evidência usa somente falas do usuário, numeradas a partir de zero.",
- "input_schema":{
-  "type":"object","additionalProperties":false,
-  "required":["text","stage","completed","pending","lenses","closingSummary","nextStep","operationalClaims"],
-  "properties":{
-   "text":{"type":"string","minLength":1,"maxLength":1200},
-   "stage":{"type":"string","enum":["clarify","structure","explore","direct","close"]},
-   "completed":{"type":"array","maxItems":4,"items":{"type":"object","additionalProperties":false,"required":["criterion","evidence"],"properties":{"criterion":{"type":"string"},"evidence":{"type":"array","minItems":1,"maxItems":4,"items":{"type":"object","additionalProperties":false,"required":["message","quote"],"properties":{"message":{"type":"integer","minimum":0,"maximum":9},"quote":{"type":"string","minLength":5,"maxLength":240}}}}}}},
-   "pending":{"type":"array","maxItems":4,"items":{"type":"string"}},
-   "lenses":{"type":"array","maxItems":11,"items":{"type":"string"}},
-   "closingSummary":{"type":"string","maxLength":1200},
-   "nextStep":{"type":"string","maxLength":800},
-   "authorship":{"type":"object","additionalProperties":false,"required":["supportMode","approachEvidence","examplePurpose"],"properties":{"supportMode":{"type":"string","enum":["explore","review","optional_example"]},"approachEvidence":{"type":"array","maxItems":4,"items":{"type":"object","additionalProperties":false,"required":["message","quote"],"properties":{"message":{"type":"integer","minimum":0,"maximum":9,"description":"Índice exclusivo das falas do líder, não da conversa inteira."},"quote":{"type":"string","minLength":5,"maxLength":240}}}},"examplePurpose":{"type":"string","maxLength":300}}},
-   "operationalClaims":{"type":"array","maxItems":12,"description":"Proveniência de compromisso de tempo, viabilidade de opções, impacto afirmado pelo líder, execução aceita ou conteúdo anterior EXIBIDO. Vazio quando não há tais alegações. Uma negação ou hipótese não é confirmação de impacto. Não cite campos internos como histórico.","items":{"type":"object","additionalProperties":false,"required":["kind","text","role","message","quote"],"properties":{"kind":{"type":"string","enum":["time_commitment","viability","impact","execution","prior_assistant_content"]},"text":{"type":"string","minLength":1,"maxLength":800},"role":{"type":"string","enum":["user","assistant"]},"message":{"type":"integer","minimum":0,"maximum":9},"quote":{"type":"string","minLength":1,"maxLength":1200}}}},
-   "delivery":{"anyOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["kind","text"],"properties":{"kind":{"type":"string","enum":["message","micro_move"]},"text":{"type":"string","minLength":1,"maxLength":1200}}}]}
+  "name": "registrar_resposta",
+  "description": "Compor resposta contextual e registrar progressão interna. Nunca concede autorização, altera roteamento ou calcula score. A evidência usa somente falas do usuário, numeradas a partir de zero.",
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "text",
+      "stage",
+      "completed",
+      "pending",
+      "lenses",
+      "closingSummary",
+      "nextStep",
+      "operationalClaims"
+    ],
+    "properties": {
+      "text": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      },
+      "stage": {
+        "type": "string",
+        "enum": [
+          "clarify",
+          "structure",
+          "explore",
+          "direct",
+          "close"
+        ]
+      },
+      "completed": {
+        "type": "array",
+        "maxItems": 4,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "criterion",
+            "evidence"
+          ],
+          "properties": {
+            "criterion": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "message",
+                  "quote"
+                ],
+                "properties": {
+                  "message": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9
+                  },
+                  "quote": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 240
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "pending": {
+        "type": "array",
+        "maxItems": 4,
+        "items": {
+          "type": "string"
+        }
+      },
+      "lenses": {
+        "type": "array",
+        "maxItems": 11,
+        "items": {
+          "type": "string"
+        }
+      },
+      "closingSummary": {
+        "type": "string",
+        "maxLength": 1200
+      },
+      "nextStep": {
+        "type": "string",
+        "maxLength": 800
+      },
+      "authorship": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "supportMode",
+          "approachEvidence",
+          "examplePurpose"
+        ],
+        "properties": {
+          "supportMode": {
+            "type": "string",
+            "enum": [
+              "explore",
+              "review",
+              "optional_example"
+            ]
+          },
+          "approachEvidence": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "message",
+                "quote"
+              ],
+              "properties": {
+                "message": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9,
+                  "description": "Índice exclusivo das falas do líder, não da conversa inteira."
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 5,
+                  "maxLength": 240
+                }
+              }
+            }
+          },
+          "examplePurpose": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      },
+      "operationalClaims": {
+        "type": "array",
+        "maxItems": 12,
+        "description": "Liste somente alegações operacionais que esta resposta realmente expõe. Use [] se não afirmar compromisso de tempo, viabilidade, impacto, execução ou conteúdo anterior. Um prazo relatado pelo usuário para uma entrega não significa que ele assumiu o compromisso de cumpri-lo; não crie um item time_commitment apenas para repetir contexto ou data.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "text",
+            "role",
+            "message",
+            "quote"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "time_commitment",
+                "viability",
+                "impact",
+                "execution",
+                "prior_assistant_content"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "description": "Copie literalmente o trecho da sua resposta exibida que contém esta alegação. Não escreva título, resumo, etiqueta ou paráfrase do contexto. Este texto precisa aparecer na resposta."
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "user",
+                "assistant"
+              ]
+            },
+            "message": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9
+            },
+            "quote": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1200,
+              "description": "Citação literal de uma mensagem real do papel e índice informados que sustenta a alegação. Para time_commitment, precisa sustentar compromisso efetivamente assumido, não apenas um prazo mencionado."
+            }
+          }
+        }
+      },
+      "delivery": {
+        "anyOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "text"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "message",
+                  "micro_move"
+                ]
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200
+              }
+            }
+          }
+        ]
+      }
+    }
   }
- }
 }

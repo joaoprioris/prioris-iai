@@ -21,3 +21,15 @@ para exemplos. Preservar funções, transições, camadas invisíveis e proteç�
 Não moralizar receio, garantir proteção da relação ou atribuir impacto não relatado.
 Não declarar testes anteriores aprovados pelo critério de autonomia; a avaliação
 anterior centrada em conseguir fala pronta requer reavaliação separada.
+
+Distinguir decisão substantiva indefinida de abordagem de comunicação ainda não
+elaborada: esta é parte do trabalho Feedback. Confiança moderada sozinha não
+justifica repetir menu já respondido; esclarecer apenas lacuna material ainda
+não respondida, aproveitando a necessidade explicitada no histórico da conversa.
+
+**Why:** orientação explícita do proprietário após desistência por triagem
+repetida; a orientação de autoria não é “só fazer perguntas”.
+
+**How to apply:** não exigir que o líder saiba categorias internas nem elabore
+a abordagem sozinho antes de receber ajuda concreta para pensá-la. Preservar
+mudanças de necessidade e análise/proteção pertinentes, sem fixar Feedback pelo tema.

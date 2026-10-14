@@ -20,9 +20,15 @@
    "conversationInProgress":{"type":"boolean","description":"Conversa relevante acontecendo agora, bilateral ou em grupo; nome de reunião e estado Durante não bastam."},
    "situationState":{"type":["string","null"],"enum":["BEFORE","DURING","AFTER","PATTERN","EMPTY",null],"description":"Leitura interna: Antes, Durante, Depois, Padrão, Vazio; null se faltar base. Não determina agente."},
    "stateEvidence":{"type":"string","description":"Trecho exato do relato do usuário que sustenta a leitura atual; vazio quando não houver base. Atualize com correções."},
+   "stateReferences":{"type":"array","maxItems":4,"items":{"$ref":"#/$defs/userReference"},"description":"Fontes literais separadas, indexadas entre falas do usuário desde zero. Nunca colar ou adaptar trechos para stateEvidence. Se usar várias fontes, stateEvidence vazio; atualize com correções."},
+   "needEvidence":{"type":"array","maxItems":4,"items":{"$ref":"#/$defs/userReference"},"description":"Citações literais que sustentam a necessidade dominante, inclusive do histórico desta conversa. Correção/mudança usa fonte atual. Sem escolher por palavra-chave."},
+   "substantiveDecisionPending":{"type":"boolean","description":"Há decisão substantiva sobre o que fazer realmente em aberto? Não confundir com abordagem de comunicação ainda não elaborada, que integra Feedback."},
+   "decisionEvidence":{"type":"array","maxItems":4,"items":{"$ref":"#/$defs/userReference"},"description":"Fonte literal da decisão substantiva ainda em aberto; vazio sem base. Não promover dificuldade de como falar a decisão substantiva indefinida."},
+   "clarificationQuestion":{"type":"string","maxLength":280,"description":"Uma única questão focal sobre lacuna MATERIAL ainda não respondida; vazio sem lacuna. Não repetir menu de categorias nem perguntas já respondidas."},
    "decisionSufficientlyClear":{"type":"boolean"},
    "ownRecurrenceReported":{"type":"boolean"}
   },
-  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","riskBasis","riskEvidence","riskImpactEvidence","riskKind","ownClarityImpaired","ownClarityEvidence","ownClarityBasis","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence"]
+  "$defs":{"userReference":{"type":"object","additionalProperties":false,"properties":{"message":{"type":"integer","minimum":0},"quote":{"type":"string","minLength":5,"maxLength":480}},"required":["message","quote"]}},
+  "required":["scope","job","confidence","personalEmergency","immediateExternalRisk","riskBasis","riskEvidence","riskImpactEvidence","riskKind","ownClarityImpaired","ownClarityEvidence","ownClarityBasis","conversationInProgress","decisionSufficientlyClear","ownRecurrenceReported","situationState","stateEvidence","stateReferences","needEvidence","substantiveDecisionPending","decisionEvidence","clarificationQuestion"]
  }
 }

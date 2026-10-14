@@ -2,7 +2,8 @@
 // Reference policy. Inputs are semantic observations, not keyword matches.
 // trustedContext must come from authenticated server-side state, never user/LLM output.
 const AGENTS = Object.freeze(['MNT', 'CTN', 'PRF', 'IMP', 'FBK', 'OTO', 'CRS']);
-const ROUTING_VERSION = '0.3.3';
+const ROUTING_VERSION = '0.3.4';
+const {references,readFunctionalNeed,focalQuestion}=require('./functional-context.cjs');
 const JOBS = Object.freeze(['compare_paths', 'conduct_live', 'prepare_message', 'understand_impact', 'explore_pattern', 'unclear']);
 const SITUATION_STATES = Object.freeze(['BEFORE', 'DURING', 'AFTER', 'PATTERN', 'EMPTY']);
 // A state is an internal reading, never an agent or evidence of incapacity.
@@ -10,6 +11,13 @@ function readSituation(analysis, messages = []) {
   if (analysis.situationState != null && !SITUATION_STATES.includes(analysis.situationState)) throw new TypeError('Invalid situation state');
   if (analysis.stateEvidence !== undefined && typeof analysis.stateEvidence !== 'string') throw new TypeError('Invalid state evidence');
   const evidence = analysis.stateEvidence?.trim();
+  if(analysis.stateReferences!==undefined&&!Array.isArray(analysis.stateReferences))throw new TypeError('Invalid state references');
+  if(analysis.stateReferences?.length){
+    const refs=references(analysis.stateReferences,messages);
+    return refs.length===analysis.stateReferences.length&&analysis.situationState!=null
+      ?Object.freeze({state:analysis.situationState,evidence:refs[0].quote,references:refs})
+      :Object.freeze({state:null,evidence:null});
+  }
   const grounded = evidence && messages.some(m => m.role === 'user' && typeof m.content === 'string' && m.content.includes(evidence));
   return grounded && analysis.situationState != null
     ? Object.freeze({ state: analysis.situationState, evidence })
@@ -57,7 +65,13 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   const ownEvidence=analysis.ownClarityEvidence?.trim();
   const ownImpairment=impairmentFlag&&analysis.ownClarityBasis==='reaction_or_overload_impeding_judgment'&&Boolean(ownEvidence&&current?.content?.includes(ownEvidence));
   const live = checkBoolean(analysis, 'conversationInProgress');
-  const decisionClear = checkBoolean(analysis, 'decisionSufficientlyClear');
+  checkBoolean(analysis, 'decisionSufficientlyClear');
+  checkBoolean(analysis,'substantiveDecisionPending');
+  for(const key of ['needEvidence','decisionEvidence'])if(analysis[key]!==undefined&&!Array.isArray(analysis[key]))throw new TypeError('Invalid '+key);
+  if(analysis.clarificationQuestion!==undefined&&typeof analysis.clarificationQuestion!=='string')throw new TypeError('Invalid clarification question');
+  const messages=trustedContext.reportedMessages??[];
+  const need=readFunctionalNeed(analysis,messages,trustedContext.functionalNeed);
+  const question=(fallback)=>focalQuestion(need.clarificationQuestion,fallback,messages);
   const recurrenceReported = checkBoolean(analysis, 'ownRecurrenceReported');
   const authorized = checkBoolean(trustedContext, 'historyAuthorized');
   const corroborated = checkBoolean(trustedContext, 'historyCorroborated');
@@ -80,18 +94,20 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
     if(analysis.confidence!=='high')return result('clarify',null,'own_capacity_requires_context','Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?');
     return result('agent', 'CTN', 'own_capacity_impaired');
   }
-  if (analysis.scope === 'unclear' || analysis.confidence !== 'high' || analysis.job === 'unclear') {
-    return result('clarify', null, 'functional_need_unclear', 'Você precisa conduzir uma conversa em andamento, preparar uma fala, comparar caminhos ou compreender o impacto?');
+  if (analysis.scope === 'unclear' || need.confidence==='low' || (need.confidence==='moderate'&&!need.grounded) || need.job === 'unclear') {
+    return result('clarify', null, 'functional_need_unclear', question('Qual dúvida concreta desta situação ainda precisa ser trabalhada?'));
   }
-  if (analysis.job === 'compare_paths') return result('agent', 'MNT', 'compare_paths');
-  if (analysis.job === 'conduct_live') {
-    return live ? result('agent', 'OTO', 'live_conversation_guidance') : result('clarify', null, 'live_context_missing', 'A conversa está acontecendo agora ou você está preparando o que dizer para depois?');
+  if (need.job === 'compare_paths') return result('agent', 'MNT', 'compare_paths');
+  if (need.job === 'conduct_live') {
+    return live ? result('agent', 'OTO', 'live_conversation_guidance') : result('clarify', null, 'live_context_missing', question('A conversa está acontecendo agora ou você está preparando o que dizer para depois?'));
   }
-  if (analysis.job === 'prepare_message') {
-    return decisionClear ? result('agent', 'FBK', 'message_preparation') : result('clarify', null, 'decision_target_missing', 'O que você quer comunicar já está definido ou ainda precisa decidir?');
+  if (need.job === 'prepare_message') {
+    return need.substantiveDecisionPending
+      ?result('clarify',null,'substantive_decision_pending',question('Qual decisão sobre o que fazer ainda está em aberto?'))
+      :result('agent','FBK',need.inherited?'message_preparation_context_preserved':'message_preparation');
   }
-  if (analysis.job === 'understand_impact') return result('agent', 'IMP', 'human_impact');
-  if (analysis.job === 'explore_pattern') {
+  if (need.job === 'understand_impact') return result('agent', 'IMP', 'human_impact');
+  if (need.job === 'explore_pattern') {
     return recurrenceReported || historyUsable ? result('agent', 'PRF', historyUsable ? 'corroborated_history' : 'user_reported_hypothesis') : result('clarify', null, 'recurrence_not_established', 'Isso se repete em outros contextos ou você quer resolver este episódio?');
   }
   throw new TypeError('Unreachable job');

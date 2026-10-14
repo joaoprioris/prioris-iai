@@ -1,12 +1,21 @@
 'use strict';
 // Integer micro-USD. This is a conservative local estimate, not a billing API.
 const PRICES=Object.freeze({
- 'claude-haiku-4-5':{input:1,output:5,maxOutput:600},
+ 'claude-haiku-4-5':{input:1,output:5,maxOutput:1200},
  'claude-sonnet-4-5':{input:3,output:15,maxOutput:2200},
 });
 function createPilotBudget(state,save=()=>{}) {
- state.cap=1000000;state.charged??=0;state.calls??=[];state.blocked??=false;
- function snapshot(){return {capUSD:1,estimatedUSD:state.charged/1e6,remainingUSD:Math.max(0,1000000-state.charged)/1e6,calls:state.calls.length,blocked:state.blocked,reason:state.blockReason??null,estimated:true};}
+ state.cap=5000000;state.charged??=0;state.calls??=[];state.blocked??=false;
+ // Owner authorized continued low-cost product tests; preserve all charges.
+ if(state.blocked&&/^Reserva conservadora insuficiente/.test(state.blockReason??'')&&state.charged<state.cap){state.blocked=false;state.blockReason=null;save();}
+ function snapshot(){
+  const calls=state.calls.reduce((n,c)=>{
+   const count=c.kind==='recovered-ui-summary'?c.callCount:1;
+   if(!Number.isSafeInteger(count)||count<1)throw Error('PILOT_CALLCOUNT_UNVERIFIED');
+   return n+count;
+  },0);
+  return {capUSD:state.cap/1e6,estimatedUSD:state.charged/1e6,remainingUSD:Math.max(0,state.cap-state.charged)/1e6,calls,ledgerEntries:state.calls.length,recoveryHoldUSD:(state.recoveryHoldMicroUSD??0)/1e6,usageDetailIncomplete:state.usageDetailIncomplete===true,blocked:state.blocked,reason:state.blockReason??null,estimated:true};
+ }
  async function call(payload,send) {
   const price=PRICES[payload.model];
   if(state.blocked||!price||!Number.isInteger(payload.max_tokens)||payload.max_tokens<1||payload.max_tokens>price.maxOutput||payload.thinking||payload.cache_control||payload.stream)throw Error('PILOT_BUDGET_BLOCKED');
@@ -17,7 +26,7 @@ function createPilotBudget(state,save=()=>{}) {
   // Allow up to 2x input price (one-hour cache writes) even though we do not
   // request caching. Output uses the exact SDK max_tokens (600 / 2200).
   const reserved=inputBound*price.input*2+payload.max_tokens*price.output;
-  if(state.charged+reserved>state.cap){state.blocked=true;state.blockReason='Reserva conservadora insuficiente dentro do teto de US$1.';save();throw Error('PILOT_BUDGET_LIMIT');}
+  if(state.charged+reserved>state.cap){state.blocked=true;state.blockReason='Reserva conservadora insuficiente dentro do teto de US$'+(state.cap/1e6)+'.';save();throw Error('PILOT_BUDGET_LIMIT');}
   const entry={model:payload.model,round:state.currentRound??1,inputBound,maxOutput:payload.max_tokens,reservedMicroUSD:reserved,status:'reserved'};
   state.charged+=reserved;state.calls.push(entry);save();
   let response;
