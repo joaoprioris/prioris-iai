@@ -20,6 +20,8 @@ type Status = {
     calls: number;
     blocked: boolean;
     reason?: string;
+    uncertainReservedUSD?: number;
+    conservativeUncertaintyUSD?: number;
   };
 };
 export default function Pilot() {
@@ -140,6 +142,10 @@ export default function Pilot() {
           · Haiku 4.5 / Sonnet 4.5 · somente ao enviar sua fala
         </div>
         {status?.budget ? <div>Teto acumulado de todas as rodadas: US{'$'}{status.budget.capUSD} · contabilizado: US{'$'}{status.budget.estimatedUSD.toFixed(6)} · chamadas acumuladas: {status.budget.calls}. Não é saldo nem fatura exata.</div> : <div>Conferindo a rodada e o orçamento acumulado…</div>}
+        {!!status?.budget?.uncertainReservedUSD && <div>
+          Reserva integral por uso não confirmado: US${status.budget.uncertainReservedUSD.toFixed(6)}, já incluída no total deduzido.
+          {(status.budget.conservativeUncertaintyUSD ?? 0) > 0 && " Mantida como margem conservadora; não confirma tokens nem cobrança."}
+        </div>}
         {(error || status?.error || status?.budget?.reason) && (
           <p role="alert" style={{ color: "#FFC38A" }}>
             {error || status?.error || status?.budget?.reason}

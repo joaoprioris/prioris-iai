@@ -14,7 +14,9 @@ function createPilotBudget(state,save=()=>{}) {
    if(!Number.isSafeInteger(count)||count<1)throw Error('PILOT_CALLCOUNT_UNVERIFIED');
    return n+count;
   },0);
-  return {capUSD:state.cap/1e6,estimatedUSD:state.charged/1e6,remainingUSD:Math.max(0,state.cap-state.charged)/1e6,calls,ledgerEntries:state.calls.length,recoveryHoldUSD:(state.recoveryHoldMicroUSD??0)/1e6,usageDetailIncomplete:state.usageDetailIncomplete===true,blocked:state.blocked,reason:state.blockReason??null,estimated:true};
+  const uncertainReserved=state.calls.filter(c=>c.status==='uncertain-held').reduce((n,c)=>n+(c.reservedMicroUSD??0),0);
+  const conservativeUncertainty=(state.conservativeHolds??[]).reduce((n,h)=>n+h.heldMicroUSD,0);
+  return {capUSD:state.cap/1e6,estimatedUSD:state.charged/1e6,remainingUSD:Math.max(0,state.cap-state.charged)/1e6,calls,ledgerEntries:state.calls.length,recoveryHoldUSD:(state.recoveryHoldMicroUSD??0)/1e6,uncertainReservedUSD:uncertainReserved/1e6,conservativeUncertaintyUSD:conservativeUncertainty/1e6,usageDetailIncomplete:state.usageDetailIncomplete===true||uncertainReserved>0,blocked:state.blocked,reason:state.blockReason??null,estimated:true};
  }
  async function call(payload,send) {
   const price=PRICES[payload.model];

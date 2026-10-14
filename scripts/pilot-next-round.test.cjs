@@ -22,6 +22,68 @@ function fixture() {
       status: 'closed', exchangeCount: 6, context: { messages: [{ role: 'user', content: 'Fictício.' }] } } };
 }
 const request = { expectedRound: 17, sessionId: sid };
+function coveredFixture() {
+  const s = fixture();
+  s.budget.calls.push(
+    { round: 17, model: 'claude-haiku-4-5', status: 'accounted', estimatedMicroUSD: 1000 },
+    { round: 17, model: 'claude-sonnet-4-5', status: 'uncertain-held',
+      inputBound: 60046, maxOutput: 2200, reservedMicroUSD: 393276 });
+  s.budget.charged = 20000 + 1000 + 393276 + s.budget.recoveryHoldMicroUSD;
+  s.audit.push({ turn: 4, outcome: 'failed', failure: { code: 'MODEL_UNAVAILABLE' }, classificationCallIndex: 1 });
+  return s;
+}
+
+test('Incerteza coberta mantém reserva original e disponível idênticos, sem inventar uso; replay não duplica custo nem avanço', () => {
+  const s = coveredFixture(), before = structuredClone(s), budget = createPilotBudget(s.budget);
+  const available = budget.snapshot().remainingUSD;
+  assert.equal(advanceBlock(s, 1), 'TURN_IN_PROGRESS');
+  assert.equal(advanceBlock(s), null);
+  let writes = 0;
+  advancePilotRound(s, request, () => { writes++; });
+  assert.equal(budget.snapshot().remainingUSD, available);
+  assert.equal(budget.snapshot().conservativeUncertaintyUSD, .393276);
+  assert.equal(budget.snapshot().usageDetailIncomplete, true);
+  assert.deepEqual(s.budget.calls, before.budget.calls);
+  assert.equal(s.budget.calls[2].usage, undefined);
+  assert.equal(s.budget.calls[2].estimatedMicroUSD, undefined);
+  assert.equal(s.budget.conservativeHolds[0].usageConfirmed, false);
+  assert.equal(s.budget.charged, before.budget.charged);
+  assert.equal(s.budget.cap, before.budget.cap);
+  assert.deepEqual(s.archivedRounds.at(-1).original, { ...before, archivedRounds: [] });
+  assert.throws(() => advancePilotRound(s, request, () => { writes++; }), /ROUND_CHANGED/);
+  assert.equal(writes, 1); assert.equal(s.budget.conservativeHolds.length, 1);
+  assert.equal(budget.snapshot().remainingUSD, available);
+});
+
+test('Incerteza sem cobertura máxima, dedução integral, falha terminal ou com envio ativo permanece bloqueada', () => {
+  for (const change of [
+    s => { s.budget.calls[2].reservedMicroUSD--; },
+    s => { s.budget.calls[2].inputBound = 180001; },
+    s => { s.budget.calls[2].maxOutput = 2201; },
+    s => { s.budget.calls[2].model = 'unknown'; },
+    s => { delete s.budget.calls[2].inputBound; },
+    s => { s.budget.charged--; },
+    s => { s.audit = []; },
+    s => { s.audit.at(-1).outcome = 'classified'; },
+    s => { s.audit.at(-1).classificationCallIndex = 0; },
+    s => { s.budget.calls[2].status = 'reserved'; },
+    s => { s.budget.calls[2].status = 'unknown-usage-held'; },
+  ]) {
+    const s = coveredFixture(); change(s);
+    const before = structuredClone(s);
+    assert.equal(advanceBlock(s), 'BUDGET_PENDING');
+    assert.throws(() => advancePilotRound(s, request, () => assert.fail('Unexpected write')), /BUDGET_PENDING/);
+    assert.deepEqual(s, before);
+  }
+  const s = coveredFixture();
+  assert.throws(() => advancePilotRound(s, { ...request, inFlight: 1 }, () => assert.fail('Unexpected write')), /TURN_IN_PROGRESS/);
+});
+
+test('Incerteza coberta com persistência falha não acrescenta margem nem altera orçamento ou rodada', () => {
+  const s = coveredFixture(), before = structuredClone(s);
+  assert.throws(() => advancePilotRound(s, request, () => { throw Error('FICTIONAL_STORAGE_FAILURE'); }), /STORAGE_FAILURE/);
+  assert.deepEqual(s, before);
+});
 
 test('Avança uma vez, arquiva tudo, mantém janela, ledger e reservas conservadoras', () => {
   const s = fixture(), before = structuredClone(s), ledger = s.budget.calls;
@@ -129,7 +191,7 @@ test('Falha de persistência não encerra nem registra aprovação; avanço apó
   assert.equal(s.expiresAt, before.expiresAt);
 });
 
-test('HTTP isolado: proprietário/origem, replay e sessão nova sem reinício, sem chamada ao provedor', async () => {
+test('HTTP com incerteza coberta: proprietário/origem, replay e sessão nova sem reinício, sem chamada ao provedor', async () => {
   const Module = require('node:module');
   const requireApi = Module.createRequire(path.resolve('artifacts/api-server/package.json'));
   const { build } = requireApi('esbuild');
@@ -157,7 +219,7 @@ test('HTTP isolado: proprietário/origem, replay e sessão nova sem reinício, s
       return { claims: () => ({ sub: subject }) };
     } };
   const dir = mkdtempSync(path.join(tmpdir(), 'iai-isolated-next-'));
-  const file = path.join(dir, 'state.json'); writeFileSync(file, JSON.stringify(fixture()));
+  const file = path.join(dir, 'state.json'); writeFileSync(file, JSON.stringify(coveredFixture()));
   const express = requireApi('express'), app = express(); app.use(express.json());
   app.use(requireApi('cookie-parser')());
   let calls = 0;
@@ -200,7 +262,11 @@ test('HTTP isolado: proprietário/origem, replay e sessão nova sem reinício, s
     assert.equal(status.nextConversation.allowed, false);
     const after = JSON.parse(readFileSync(file, 'utf8'));
     assert.equal(after.expiresAt, before.expiresAt);
-    assert.deepEqual({ ...after.budget, currentRound: 17 }, before.budget);
+    const { conservativeHolds: afterHolds, ...afterBudget } = after.budget;
+    assert.deepEqual({ ...afterBudget, currentRound: 17 }, before.budget);
+    assert.equal(afterHolds.length, 1);
+    assert.equal(status.budget.conservativeUncertaintyUSD, .393276);
+    assert.equal(status.budget.remainingUSD, (before.budget.cap - before.budget.charged) / 1e6);
     assert.deepEqual(after.archivedRounds.at(-1).original.audit, before.audit);
     const session = await (await fetchLocal('/sessions', { method: 'POST', headers })).json();
     assert.equal(session.exchangeCount, 0); assert.deepEqual(session.messages, []);
@@ -224,7 +290,9 @@ test('HTTP isolado: proprietário/origem, replay e sessão nova sem reinício, s
     assert.equal(next.round, 19); assert.equal(next.authenticated, true); assert.equal(next.abandonment, undefined);
     const final = JSON.parse(readFileSync(file, 'utf8'));
     assert.equal(final.expiresAt, before.expiresAt);
-    assert.deepEqual({ ...final.budget, currentRound: 17 }, before.budget);
+    const { conservativeHolds: finalHolds, ...finalBudget } = final.budget;
+    assert.deepEqual({ ...finalBudget, currentRound: 17 }, before.budget);
+    assert.deepEqual(finalHolds, afterHolds);
     assert.equal(final.archivedRounds.at(-1).original.abandonment.approval, false);
     assert.equal(calls, 0);
   } finally {

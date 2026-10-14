@@ -23,3 +23,14 @@ renovar o período de acesso, preservando integralmente custos e controles.
 
 **How to apply:** não reutilizar uma preparação de rodada que conceda outras
 duas horas por conveniência; renovação de acesso exige pedido separado.
+
+Uso não confirmado após falha local não equivale a envio ainda em andamento.
+Pode haver continuidade sem liberar saldo apenas se houver término local
+comprovado e máximo confiável integralmente coberto pela reserva já deduzida.
+A reserva e a incerteza permanecem explícitas, sem inventar uso ou cobrança.
+
+**Why:** o proprietário autorizou essa recuperação conservadora para evitar
+bloquear testes por uma chamada terminada, sem reduzir margem nem aumentar teto.
+
+**How to apply:** verificar cobertura e dedução integral, preservar a reserva
+original e impedir continuidade quando houver envio ativo ou evidência insuficiente.
