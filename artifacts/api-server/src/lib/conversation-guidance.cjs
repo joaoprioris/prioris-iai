@@ -3,6 +3,7 @@ const { ROUTING_VERSION } = require('./functional-policy.cjs');
 const { validateGrounding } = require('./response-grounding.cjs');
 const { resolveUserEvidence, deduplicateDelivery } = require('./evidence-source.cjs');
 const { validateFeedbackAuthorship } = require('./feedback-autonomy.cjs');
+const { validateMethodologicalFidelity } = require('./methodological-fidelity.cjs');
 const STAGES = ['clarify', 'structure', 'explore', 'direct', 'close'];
 function turnDirective(turn = {}) {
   const n = turn.number ?? 1, max = turn.max ?? 10;
@@ -41,20 +42,21 @@ function validateProgress(value, profile, messages, turn = {}) {
   if (value.delivery !== undefined && value.delivery !== null && !emptyDelivery) {
     const d = value.delivery; const kind = profile.id === 'FBK' ? 'message' : profile.id === 'OTO' ? 'micro_move' : null;
     if (kind === null || !d || d.kind !== kind || typeof d.text !== 'string' || !d.text.trim() || d.text.length > 1200 || d.text.includes('[ENCERRAR]')) throw new Error('INVALID_PROGRESSION');
-    deliveryKind = d.kind; delivery = '\n\n' + (profile.id === 'FBK' ? 'Exemplo opcional para revisar sua abordagem:' : 'Uma formulação possível para usar nessa conversa:') + '\n“' + d.text.trim() + '”';
+    deliveryKind = d.kind; delivery = '\n\nExemplo opcional para revisar sua abordagem:\n“' + d.text.trim() + '”';
   }
   const rawParts = terminal ? [value.closingSummary.trim(), value.nextStep.trim()] : [value.text.trim()];
   const deliveryText = deliveryKind ? value.delivery.text.trim() : null;
   const deduplicated = deduplicateDelivery(rawParts, deliveryText);
   const visibleParts = deduplicated.parts;
   let authorship = null;
-  if (profile.id === 'FBK') {
+  if (['FBK','OTO'].includes(profile.id)) {
     const checked = validateFeedbackAuthorship(value, messages, [...visibleParts, ...(deliveryText ? [deliveryText] : [])]);
     authorship = checked.authorship; referenceNormalizations.push(...checked.normalizations);
     if (deliveryText && !deduplicated.append && !visibleParts.some(p => /\b(?:opcional|opção|exemplo)\b/i.test(p))) throw Error('AUTONOMY_CONSTRAINT_FAILED');
   }
   const operationalClaimNormalizations = [];
   const operationalClaims = validateGrounding(value, messages, [...visibleParts, ...(deliveryText ? [deliveryText] : [])], operationalClaimNormalizations);
+  const methodologyRevision=validateMethodologicalFidelity(value,messages,[...visibleParts,...(deliveryText?[deliveryText]:[])]);
   const displayedDelivery = deduplicated.append ? delivery : '';
   const text = terminal ? visibleParts.filter(Boolean).join('\n\n') + displayedDelivery + '\n\nPodemos retomar o próximo passo em uma nova conversa.' : visibleParts.join('\n\n').replace(/\s*\[ENCERRAR\]\s*$/, '') + displayedDelivery;
   const reported = users.map(u => u.content).join(' ').toLowerCase();
@@ -64,7 +66,7 @@ function validateProgress(value, profile, messages, turn = {}) {
   // including delivery; merely mentioning an impact word is not confirmation.
   if (profile.id === 'FBK' && /(?:atrasos seguidos|duas últimas entregas)/i.test(text) && !/(?:seguidos|consecutiv|últimas)/i.test(reported)) throw new Error('UNSUPPORTED_FACT');
   if (/(?:fortalece|fortalecer)[^.!?]*quem sobrevive|retirar limites só fortalece|exclui quem não aguenta/i.test(text)) throw new Error('UNSUPPORTED_FACT');
-  return { text, progress: { agent: profile.id, stage: value.stage, completed, pending: [...value.pending], lenses: [...value.lenses], deliveryKind, delivery: deliveryKind ? structuredClone(value.delivery) : null, authorship, referenceNormalizations, displayNormalizations: [...deduplicated.normalizations, ...operationalClaimNormalizations], operationalClaims, closingSummary: terminal ? value.closingSummary : null, nextStep: terminal ? value.nextStep : null, evidenceStatus: 'Source references verified; presentation-only repairs recorded; interpretation remains a hypothesis', version: ROUTING_VERSION } };
+  return { text, progress: { agent: profile.id, stage: value.stage, completed, pending: [...value.pending], lenses: [...value.lenses], deliveryKind, delivery: deliveryKind ? structuredClone(value.delivery) : null, authorship, referenceNormalizations, displayNormalizations: [...deduplicated.normalizations, ...operationalClaimNormalizations], operationalClaims, methodologyRevision, closingSummary: terminal ? value.closingSummary : null, nextStep: terminal ? value.nextStep : null, evidenceStatus: 'Source references verified; presentation-only repairs recorded; interpretation remains a hypothesis', version: ROUTING_VERSION } };
 }
 function closingFallback(agent, messages) {
   const last = messages.filter(x => x.role === 'user').at(-1)?.content ?? '';

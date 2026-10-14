@@ -4,6 +4,7 @@ import type { AuthUser } from "../hooks/useAuth";
 const BASE = "/api/pilot-0.3.0";
 type Status = {
   version: string;
+  methodologyRevision?: string;
   round?: number;
   authenticated: boolean;
   available: boolean;
@@ -130,6 +131,7 @@ export default function Pilot() {
         <strong style={{ color: "#B8953F" }}>
           IAí by PRIORIS — piloto fictício {status?.version ?? "0.3.4"} · rodada{" "}
           {status?.round ?? '…'}
+          {status?.methodologyRevision && ` · revisão ${status.methodologyRevision}`}
         </strong>
         <div>
           Uma conversa limpa nesta rodada · até dez trocas · histórico pessoal

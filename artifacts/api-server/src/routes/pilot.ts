@@ -15,6 +15,7 @@ import { createPilotDelivery } from "../lib/pilot-delivery.cjs";
 import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
 import { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation } from "../lib/pilot-next-round.cjs";
 import { ROUTING_VERSION } from "../lib/functional-policy.cjs";
+import { REVISION as METHODOLOGY_REVISION } from "../lib/methodological-fidelity.cjs";
 import {
   createFunctionalRouter,
   createModelProviders,
@@ -168,6 +169,7 @@ export function createPilotRouter(
   router.get("/status", (req, res) =>
     res.json({
       version: ROUTING_VERSION,
+      methodologyRevision: METHODOLOGY_REVISION,
       round: state.round, authenticated: authenticated(req),
       available: availability() === null,
       error: availability(),

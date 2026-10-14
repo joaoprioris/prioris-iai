@@ -43,6 +43,9 @@ function validateFeedbackAuthorship(value,messages,parts){
  const hasExample=Boolean(value.delivery?.text?.trim());
  if(a.supportMode==='review'&&!resolved.length)throw Error('AUTONOMY_CONSTRAINT_FAILED');
  if(hasExample&&(a.supportMode!=='optional_example'||!resolved.length||a.examplePurpose.trim().length<10))throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ // Exact provenance alone isn't proof of elaboration. Reject the narrow,
+ // evident misuse of a problem/intent-only quote as an approach to revise.
+ if(hasExample&&!resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote)))throw Error('AUTONOMY_CONSTRAINT_FAILED');
  if(!hasExample&&a.supportMode==='optional_example')throw Error('AUTONOMY_CONSTRAINT_FAILED');
  // Narrow output guards, not routing rules or semantic certification.
  for(const part of parts){

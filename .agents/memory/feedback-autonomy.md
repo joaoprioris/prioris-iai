@@ -33,3 +33,15 @@ repetida; a orientação de autoria não é “só fazer perguntas”.
 **How to apply:** não exigir que o líder saiba categorias internas nem elabore
 a abordagem sozinho antes de receber ajuda concreta para pensá-la. Preservar
 mudanças de necessidade e análise/proteção pertinentes, sem fixar Feedback pelo tema.
+
+No 1:1 ao vivo, inclusive quando o líder recebe feedback, microdirecionamento
+não obriga entregar uma fala pronta antes de conhecer sua abordagem. Intenção,
+hipótese, decisão e resultado têm estatutos distintos; só informação disponível
+antes da resposta pode sustentá-la.
+
+**Why:** o proprietário apontou fala pronta prematura, repetição de contexto
+e efeitos/capacidade presumidos nas rodadas fictícias e autorizou esta correção.
+
+**How to apply:** oferecer distinções concretas e provocar elaboração sem roteiro
+fixo; exemplo opcional revisa elaboração existente. Preservar hipótese identificada,
+efeito efetivamente relatado e proteção pertinente diante de perigo físico.
