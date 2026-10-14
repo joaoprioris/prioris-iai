@@ -26,3 +26,12 @@ operacional, mas isso não deve apagar a evidência explicitamente autorizada do
 
 **How to apply:** manter evidência no escopo fictício isolado, preservar lacunas
 históricas como lacunas e não chamar modelos para reconstruir registros ausentes.
+
+Desistência explícita de um participante fictício é abandono, nunca aprovação.
+Encerrar administrativamente a conversa não significa aprovação do conteúdo.
+
+**Why:** o proprietário pediu preservar a decisão de abandonar o teste sem
+reenviar a despedida à IA nem interpretar o encerramento como sucesso.
+
+**How to apply:** distinguir abandono de fechamento gerado pelo produto nas
+avaliações; conservar falas, falhas e custos incertos, sem reconstrução.

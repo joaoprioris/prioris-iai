@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { mkdtempSync, writeFileSync, readFileSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const path = require('node:path');
-const { pilotIdentity, advancePilotRound, advanceBlock } = require('../artifacts/api-server/src/lib/pilot-next-round.cjs');
+const { pilotIdentity, advancePilotRound, advanceBlock, abandonPilotConversation, abandonBlock } = require('../artifacts/api-server/src/lib/pilot-next-round.cjs');
 const { createPilotStore } = require('../artifacts/api-server/src/lib/pilot-store.cjs');
 const { createPilotBudget } = require('../artifacts/api-server/src/lib/pilot-budget.cjs');
 const sid = '00000000-0000-4000-8000-000000000999';
@@ -77,6 +77,58 @@ test('Identidades e históricos isolados; primeira sessão nova começa em zero 
   assert.match(source, /MAX_EXCHANGES\s*=\s*10/);
 });
 
+test('Desistência mantém falas, falhas, custo incerto e janela; não aprova, não repete auditoria nem libera próxima rodada', () => {
+  const s = fixture(); s.session.status = 'active'; s.session.exchangeCount = 3;
+  s.audit.push({ outcome: 'failed', failure: { code: 'MODEL_UNAVAILABLE' } });
+  s.budget.calls.push({ round: 17, status: 'uncertain-held', reservedMicroUSD: 5000 });
+  const before = structuredClone(s), reason = 'Vou parar o teste fictício aqui.';
+  let writes = 0;
+  const decision = abandonPilotConversation(s, { ...request, reason }, () => { writes++; });
+  assert.equal(writes, 1); assert.equal(decision.approval, false); assert.equal(decision.kind, 'abandonment');
+  assert.equal(s.session.status, 'closed'); assert.equal(s.session.exchangeCount, 3);
+  assert.deepEqual(s.session.context, before.session.context);
+  assert.deepEqual(s.audit.slice(0, -1), before.audit);
+  assert.equal(s.audit.at(-1).outcome, 'abandoned'); assert.equal(s.audit.at(-1).approval, false);
+  assert.equal(s.audit.at(-1).reason, reason);
+  assert.equal(s.audit.at(-1).kind, 'owner_abandonment');
+  assert.deepEqual(s.requests, before.requests); assert.deepEqual(s.budget, before.budget);
+  assert.equal(s.expiresAt, before.expiresAt);
+  assert.equal(advanceBlock(s), 'BUDGET_PENDING');
+  assert.throws(() => advancePilotRound(s, request, () => assert.fail('Must not advance')), /BUDGET_PENDING/);
+  assert.deepEqual(abandonPilotConversation(s, { ...request, reason }, () => assert.fail('Must not repeat')), decision);
+});
+
+test('Desistência bloqueia envio, reserva em andamento, expiração, sessão/rodada incorreta e razão inválida', () => {
+  for (const [change, extra, code] of [
+    [() => {}, { inFlight: 1 }, 'TURN_IN_PROGRESS'],
+    [s => s.budget.calls.push({ status: 'reserved' }), {}, 'TURN_IN_PROGRESS'],
+    [s => { s.expiresAt = 1; }, {}, 'PILOT_EXPIRED'],
+    [() => {}, { expectedRound: 18 }, 'ROUND_CHANGED'],
+    [() => {}, { sessionId: 'other' }, 'ROUND_CHANGED'],
+    [() => {}, { reason: {} }, 'INVALID_REASON'],
+    [() => {}, { reason: 'x'.repeat(2001) }, 'INVALID_REASON'],
+    [s => { s.session.status = 'closed'; }, {}, 'SESSION_NOT_ACTIVE'],
+  ]) {
+    const s = fixture(); s.session.status = 'active'; change(s);
+    const before = structuredClone(s);
+    assert.throws(() => abandonPilotConversation(s, { ...request, ...extra }, () => assert.fail('Must not write')), new RegExp(code));
+    assert.deepEqual(s, before);
+  }
+});
+
+test('Falha de persistência não encerra nem registra aprovação; avanço após abandono sem pendências arquiva e limpa metadados', () => {
+  const s = fixture(); s.session.status = 'active'; const before = structuredClone(s);
+  assert.equal(abandonBlock(s), null);
+  assert.throws(() => abandonPilotConversation(s, request, () => { throw Error('FICTITIOUS_STORAGE_FAILURE'); }), /STORAGE_FAILURE/);
+  assert.deepEqual(s, before);
+  abandonPilotConversation(s, { ...request, reason: 'Fim fictício.' }, () => {});
+  advancePilotRound(s, request, () => {});
+  assert.equal(s.round, 18); assert.equal(s.abandonment, undefined); assert.equal(s.session, undefined);
+  assert.deepEqual(s.audit, []); assert.equal(s.archivedRounds.at(-1).endedBy, 'owner-abandonment');
+  assert.equal(s.archivedRounds.at(-1).original.abandonment.approval, false);
+  assert.equal(s.expiresAt, before.expiresAt);
+});
+
 test('HTTP isolado: proprietário/origem, replay e sessão nova sem reinício, sem chamada ao provedor', async () => {
   const Module = require('node:module');
   const requireApi = Module.createRequire(path.resolve('artifacts/api-server/package.json'));
@@ -122,6 +174,8 @@ test('HTTP isolado: proprietário/origem, replay e sessão nova sem reinício, s
   try {
     assert.equal((await fetchLocal('/next-conversation', { method: 'POST',
       headers: { Origin: origin, 'Content-Type': 'application/json' }, body })).status, 401);
+    assert.equal((await fetchLocal('/abandon-conversation', { method: 'POST',
+      headers: { Origin: origin, 'Content-Type': 'application/json' }, body })).status, 401);
     let flow = cookie(await fetchLocal('/login', { method: 'POST', headers: { Origin: origin } }));
     assert.equal((await fetchLocal('/callback?state=state-fixture&code=fixture', { headers: { cookie: flow } })).status, 403);
     subject = 'owner-fixture-only';
@@ -153,6 +207,25 @@ test('HTTP isolado: proprietário/origem, replay e sessão nova sem reinício, s
     assert.equal(session.userId, pilotIdentity(18).id);
     assert.equal((await fetchLocal('/next-conversation', { method: 'POST', headers,
       body: JSON.stringify({ round: 18, sessionId: session.id }) })).status, 409);
+    const abandonBody = JSON.stringify({ round: 18, sessionId: session.id, reason: 'Parada fictícia.' });
+    assert.equal((await fetchLocal('/abandon-conversation', { method: 'POST',
+      headers: { ...headers, Origin: 'https://wrong.example.invalid' }, body: abandonBody })).status, 403);
+    const abandonResponses = await Promise.all([1, 2].map(() => fetchLocal('/abandon-conversation',
+      { method: 'POST', headers, body: abandonBody })));
+    assert(abandonResponses.every(r => r.status === 200));
+    const abandoned = await (await fetchLocal('/status', { headers })).json();
+    assert.equal(abandoned.authenticated, true);
+    assert.equal(abandoned.abandonment.approval, false);
+    assert.equal(abandoned.nextConversation.allowed, true);
+    assert.equal(JSON.parse(readFileSync(file, 'utf8')).audit.filter(a => a.kind === 'owner_abandonment').length, 1);
+    assert.equal((await fetchLocal('/next-conversation', { method: 'POST', headers,
+      body: JSON.stringify({ round: 18, sessionId: session.id }) })).status, 200);
+    const next = await (await fetchLocal('/status', { headers })).json();
+    assert.equal(next.round, 19); assert.equal(next.authenticated, true); assert.equal(next.abandonment, undefined);
+    const final = JSON.parse(readFileSync(file, 'utf8'));
+    assert.equal(final.expiresAt, before.expiresAt);
+    assert.deepEqual({ ...final.budget, currentRound: 17 }, before.budget);
+    assert.equal(final.archivedRounds.at(-1).original.abandonment.approval, false);
     assert.equal(calls, 0);
   } finally {
     await new Promise(resolve => server.close(resolve));

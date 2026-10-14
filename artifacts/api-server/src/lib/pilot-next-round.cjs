@@ -20,6 +20,49 @@ function advanceBlock(state, inFlight = 0, now = Date.now()) {
   return null;
 }
 
+function abandonBlock(state, inFlight = 0, now = Date.now()) {
+  if (now >= state.expiresAt) return 'PILOT_EXPIRED';
+  if (inFlight || state.budget?.calls?.some(c => c.status === 'reserved'))
+    return 'TURN_IN_PROGRESS';
+  if (state.session?.status !== 'active') return 'SESSION_NOT_ACTIVE';
+  return null;
+}
+
+function abandonPilotConversation(state, { expectedRound, sessionId, reason = '', inFlight = 0, now = Date.now() }, save) {
+  if (!Number.isSafeInteger(expectedRound) || expectedRound !== state.round ||
+      typeof sessionId !== 'string' || sessionId !== state.session?.id)
+    throw Error('ROUND_CHANGED');
+  if (typeof reason !== 'string' || reason.length > 2000) throw Error('INVALID_REASON');
+  if (now >= state.expiresAt) throw Error('PILOT_EXPIRED');
+  if (inFlight || state.budget?.calls?.some(c => c.status === 'reserved'))
+    throw Error('TURN_IN_PROGRESS');
+  if (state.session.status === 'closed' && state.abandonment?.kind === 'abandonment')
+    return state.abandonment; // Same action never adds a second audit event.
+  const blocked = abandonBlock(state, inFlight, now);
+  if (blocked) throw Error(blocked);
+  const session = state.session, audit = state.audit, previous = state.abandonment;
+  const abandonment = {
+    kind: 'abandonment', approval: false, at: now, reason,
+    recordedBy: 'authenticated-owner',
+  };
+  state.session = { ...session, status: 'closed' };
+  state.abandonment = abandonment;
+  state.audit = [...audit, {
+    ...abandonment,
+    kind: 'owner_abandonment', outcome: 'abandoned', round: state.round,
+    sessionId,
+  }];
+  try { save(); }
+  catch (error) {
+    state.session = session;
+    state.audit = audit;
+    if (previous === undefined) delete state.abandonment;
+    else state.abandonment = previous;
+    throw error;
+  }
+  return abandonment;
+}
+
 // Synchronous persistence makes competing clicks see either the old closed
 // round or the new empty round, never a partially archived conversation.
 function advancePilotRound(state, { expectedRound, sessionId, inFlight = 0, now = Date.now() }, save) {
@@ -33,7 +76,8 @@ function advancePilotRound(state, { expectedRound, sessionId, inFlight = 0, now 
   const original = { ...state };
   const previousBudgetRound = state.budget.currentRound;
   state.archivedRounds = [...state.archivedRounds, {
-    round: state.round, version: state.version, endedBy: 'owner-next-conversation',
+    round: state.round, version: state.version,
+    endedBy: state.abandonment?.kind === 'abandonment' ? 'owner-abandonment' : 'owner-next-conversation',
     original: prior,
   }];
   state.round += 1;
@@ -42,6 +86,7 @@ function advancePilotRound(state, { expectedRound, sessionId, inFlight = 0, now 
   state.requests = {};
   state.audit = [];
   delete state.session;
+  delete state.abandonment;
   try { save(); }
   catch (error) {
     Object.assign(state, original);
@@ -51,4 +96,4 @@ function advancePilotRound(state, { expectedRound, sessionId, inFlight = 0, now 
   return { round: state.round, expiresAt: state.expiresAt };
 }
 
-module.exports = { pilotIdentity, advanceBlock, advancePilotRound };
+module.exports = { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation };

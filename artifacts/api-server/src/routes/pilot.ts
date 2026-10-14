@@ -12,7 +12,7 @@ import { resolve, dirname } from "node:path";
 import { createPilotBudget } from "../lib/pilot-budget.cjs";
 import { createPilotStore } from "../lib/pilot-store.cjs";
 import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
-import { pilotIdentity, advanceBlock, advancePilotRound } from "../lib/pilot-next-round.cjs";
+import { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation } from "../lib/pilot-next-round.cjs";
 import { ROUTING_VERSION } from "../lib/functional-policy.cjs";
 import {
   createFunctionalRouter,
@@ -173,6 +173,12 @@ export function createPilotRouter(
         reason: advanceBlock(state, inFlight),
         sessionId: state.session?.id ?? null,
       } : undefined,
+      abandonConversation: authenticated(req) ? {
+        allowed: abandonBlock(state, inFlight) === null,
+        reason: abandonBlock(state, inFlight),
+        sessionId: state.session?.id ?? null,
+      } : undefined,
+      abandonment: authenticated(req) ? state.abandonment : undefined,
     }),
   );
   router.post("/login", sameOrigin, async (req, res) => {
@@ -280,6 +286,28 @@ export function createPilotRouter(
   router.post("/sessions", sameOrigin, authorize, (_req, res) =>
     res.json(store.open(scope)),
   );
+  router.post("/abandon-conversation", sameOrigin, authorize, (req, res) => {
+    const messages: Record<string, string> = {
+      ROUND_CHANGED: "A rodada mudou. Atualize a tela antes de continuar.",
+      PILOT_EXPIRED: "O período autorizado expirou. Nada foi encerrado.",
+      TURN_IN_PROGRESS: "Aguarde o envio em andamento terminar antes de encerrar.",
+      SESSION_NOT_ACTIVE: "Esta conversa não está ativa.",
+      INVALID_REASON: "Use um motivo de até 2.000 caracteres.",
+    };
+    try {
+      const abandonment = abandonPilotConversation(state, {
+        expectedRound: req.body?.round, sessionId: req.body?.sessionId,
+        reason: req.body?.reason, inFlight,
+      }, save);
+      res.json({ round: state.round, abandonment });
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "STORAGE_UNAVAILABLE";
+      res.status(code === "INVALID_REASON" ? 400 : messages[code] ? 409 : 503).json({
+        code: messages[code] ? code : "STORAGE_UNAVAILABLE",
+        error: messages[code] ?? "Não foi possível registrar a desistência. Nenhum encerramento foi confirmado.",
+      });
+    }
+  });
   router.post("/next-conversation", sameOrigin, authorize, (req, res) => {
     const messages: Record<string, string> = {
       ROUND_CHANGED: "A rodada mudou. Atualize a tela antes de continuar.",
