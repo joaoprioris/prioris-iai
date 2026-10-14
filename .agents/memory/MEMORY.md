@@ -3,3 +3,4 @@
 - [Risco e incerteza](risk-functional.md) — divergência não comprova emergência; Crises mantém função proporcional e correções do líder atualizam a leitura.
 - [Fidelidade dos pilotos](pilot-fidelity.md) — não presumir execução; apenas conteúdo exibido é histórico; desistência não é aprovação; evidência fictícia isolada.
 - [Autoria no Feedback](feedback-autonomy.md) — orientação explícita: desenvolver julgamento, não entregar fala pronta por padrão; aprovação por “fala utilizável” exige reavaliação.
+- [Recuperação do piloto](pilot-reliability.md) — desconexão não encerra envio; reinício sem resultado confirmado conserva incerteza e não autoriza repetição automática.

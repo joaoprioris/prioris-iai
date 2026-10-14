@@ -38,6 +38,38 @@ export default function Chat({ user, onLogout, pilot = false, onPilotTurn, pilot
   const [surveyQuestion, setSurveyQuestion] = useState<SurveyQuestion | null>(null);
   const [surveyDismissed, setSurveyDismissed] = useState(false);
   const pendingRequestRef = useRef<{id:string;sessionId:string;content:string}|null>(null);
+  const sendLock = useRef(false);
+  const [deliveryNotice,setDeliveryNotice]=useState("");
+  const [deliveryCodes,setDeliveryCodes]=useState("");
+  const [receiptUnknown,setReceiptUnknown]=useState(false);
+  const recoverPilot = async () => {
+    try {
+      const res=await fetch(`${apiBase}/delivery`,{cache:"no-store"});
+      if(!res.ok){setDeliveryNotice("Não foi possível consultar o envio. Autentique novamente se necessário; nenhum reenvio automático.");return;}
+      const data=await res.json();
+      const entries=data.deliveries??[];
+      setMessages(data.messages??[]);
+      setExchangeCount(data.exchangeCount??0);
+      setSessionClosed(data.status==="closed");
+      setSending(entries.some((d:any)=>d.status==="processing"));
+      const saved=sessionStorage.getItem(`iai-pilot-outbox:${data.sessionId}`);
+      const outbox=saved?JSON.parse(saved):null;
+      const receipt=outbox&&entries.find((d:any)=>d.requestId===outbox.id);
+      if(outbox&&!receipt){
+        setReceiptUnknown(true);
+        setMessages(prev=>[...prev,{role:"user",content:outbox.content}]);
+        setDeliveryNotice("Este envio está preservado nesta aba, mas o servidor não confirmou o recebimento. Nenhuma chamada será repetida automaticamente.");
+      }else{
+        setReceiptUnknown(false);
+        if(receipt)sessionStorage.removeItem(`iai-pilot-outbox:${data.sessionId}`);
+        setDeliveryNotice(entries.at(-1)?.description??"");
+      }
+      setDeliveryCodes(entries.filter((d:any)=>d.code).map((d:any)=>d.code).join(" · "));
+    }catch{
+      setReceiptUnknown(true);
+      setDeliveryNotice("Sem confirmação do servidor. Seu envio permanece preservado; não há reenvio automático.");
+    }
+  };
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -48,6 +80,12 @@ export default function Chat({ user, onLogout, pilot = false, onPilotTurn, pilot
   useEffect(() => {
     createSession();
   }, []);
+  useEffect(()=>{
+    if(!pilot||!sessionId)return;
+    void recoverPilot();
+    const timer=window.setInterval(()=>void recoverPilot(),3000);
+    return ()=>window.clearInterval(timer);
+  },[pilot,sessionId]);
 
   const createSession = async () => {
     const token = pilot ? "cookie" : getToken();
@@ -86,7 +124,30 @@ export default function Chat({ user, onLogout, pilot = false, onPilotTurn, pilot
   const sendMessage = async (e?: FormEvent) => {
     e?.preventDefault();
     const text = input.trim();
-    if (!text || !sessionId || sending || sessionClosed || pilotBlocked) return;
+    if (!text || !sessionId || sending || sendLock.current || sessionClosed || pilotBlocked || (pilot&&receiptUnknown)) return;
+
+    if(pilot){
+      sendLock.current=true;
+      setReceiptUnknown(true);
+      const requestId=crypto.randomUUID();
+      try{
+        sessionStorage.setItem(`iai-pilot-outbox:${sessionId}`,JSON.stringify({id:requestId,sessionId,content:text}));
+        setSending(true);setInput("");setError("");
+        setMessages(prev=>[...prev,{role:"user",content:text}]);
+        setDeliveryNotice("Enviando; aguardando confirmação. Não reenvie.");
+        const res=await fetch(`${apiBase}/session/message`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sessionId,content:text,requestId})});
+        // Committed responses are recovered through GET, including after a lost
+        // stream. Reading never re-enters classification or generation.
+        await res.text();
+        await recoverPilot();
+      }catch{
+        setDeliveryNotice("A conexão terminou sem confirmação. Seu envio foi preservado; consulte o estado, sem reenvio automático.");
+        await recoverPilot();
+      }finally{
+        sendLock.current=false;onPilotTurn?.();
+      }
+      return;
+    }
 
     const token = pilot ? "cookie" : getToken();
     if (!token) return;
@@ -291,6 +352,11 @@ export default function Chat({ user, onLogout, pilot = false, onPilotTurn, pilot
         </button>
       </header>
       {!pilot && <HistorySettings busy={sending} onErased={() => { void handleNewSession(); }} />}
+      {pilot && <section role="status" style={{padding:"8px 20px",fontSize:13}}>
+        <div>{deliveryNotice}</div>
+        {deliveryCodes && <div>Códigos registrados: {deliveryCodes}</div>}
+        <button onClick={()=>void recoverPilot()}>Consultar envio / recuperar resposta — sem nova chamada</button>
+      </section>}
 
       {/* ── Messages ────────────────────────────────────────────────────────── */}
       <div
@@ -469,14 +535,14 @@ export default function Chat({ user, onLogout, pilot = false, onPilotTurn, pilot
               }}
               onKeyDown={handleKeyDown}
               placeholder="Escreva sua mensagem..."
-              disabled={sending || !sessionId || pilotBlocked}
+              disabled={sending || !sessionId || pilotBlocked || (pilot&&receiptUnknown)}
               rows={1}
               className="chat-textarea flex-1"
               style={{ opacity: sending || !sessionId ? 0.4 : 1 }}
             />
             <button
               onClick={() => sendMessage()}
-              disabled={!input.trim() || sending || !sessionId || pilotBlocked}
+              disabled={!input.trim() || sending || !sessionId || pilotBlocked || (pilot&&receiptUnknown)}
               style={{
                 flexShrink: 0,
                 width: "36px",

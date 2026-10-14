@@ -31,6 +31,7 @@ export default function Pilot() {
   const advanceLock = useRef(false);
   const [abandoning, setAbandoning] = useState(false);
   const [abandonReason, setAbandonReason] = useState("");
+  const [confirmAbandon, setConfirmAbandon] = useState(false);
   const abandonLock = useRef(false);
   const refresh = useCallback(async () => {
     try {
@@ -75,7 +76,6 @@ export default function Pilot() {
   }
   async function abandonConversation() {
     if (abandonLock.current || advanceLock.current || !status?.abandonConversation?.allowed) return;
-    if (!window.confirm("Encerrar esta conversa como abandono, não aprovação? Falas, auditoria e custos serão preservados.")) return;
     abandonLock.current = true;
     setAbandoning(true);
     try {
@@ -86,6 +86,7 @@ export default function Pilot() {
       });
       const data = await r.json();
       if (!r.ok) throw Error(data.error ?? "Não foi possível registrar a desistência.");
+      setConfirmAbandon(false);
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível registrar a desistência.");
@@ -134,6 +135,13 @@ export default function Pilot() {
           Uma conversa limpa nesta rodada · até dez trocas · histórico pessoal
           desligado · sem camada organizacional
         </div>
+        <details>
+          <summary>Confiabilidade do piloto · revisão operacional 1</summary>
+          <div>Envios registrados antes do processamento; consulta e recuperação não fazem novas chamadas.
+            Após reinício sem resultado confirmado, a incerteza e as reservas permanecem.
+            Códigos de validação, serviço e gravação são apresentados separadamente na conversa.
+            Verificação com serviço simulado; não comprova disponibilidade do fornecedor nem validade metodológica.</div>
+        </details>
         <div>
           IA real:{" "}
           {status?.provider === "anthropic"
@@ -163,10 +171,15 @@ export default function Pilot() {
               maxLength={2000} disabled={abandoning}
               style={{ display: "block", width: "100%", maxWidth: 600, padding: 6 }} />
           </label>
-          <button onClick={() => void abandonConversation()}
+          <button onClick={() => setConfirmAbandon(true)}
             disabled={abandoning || advancing || !status.abandonConversation?.allowed}
             style={{ padding: "8px 12px", marginTop: 8 }}
           >{abandoning ? "Registrando desistência…" : "Encerrar por desistência — não é aprovação"}</button>
+          {confirmAbandon && <div role="group" aria-label="Confirmar desistência">
+            <p>Encerrar como abandono, não aprovação? Falas, auditoria e custos serão preservados.</p>
+            <button onClick={() => void abandonConversation()} disabled={abandoning || advancing || !status.abandonConversation?.allowed}>Confirmar desistência</button>
+            <button onClick={() => setConfirmAbandon(false)} disabled={abandoning}>Continuar conversa</button>
+          </div>}
         </>}
         {status?.authenticated && status.abandonment && <p role="status">
           Conversa encerrada por desistência. Não representa aprovação.

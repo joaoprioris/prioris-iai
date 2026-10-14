@@ -45,9 +45,21 @@ function createPilotStore(state,save=()=>{},identity=IDENTITY) {
    state.requests[t.requestId]={contentHash:t.contentHash};
    const audit=state.audit?.findLast(e=>e.requestId===t.requestId);
    if(audit){audit.outcome='completed';audit.result=structuredClone(t.result);}
+   const delivery=state.delivery?.[t.requestId];
+   if(delivery){delivery.status='completed';delivery.result=structuredClone(t.result);delivery.endedAt=Date.now();}
    state.session={...state.session,context:t.context,status:t.status,agentType:t.agent,exchangeCount:t.nextCount};save();return true;
   },
  };
+ // Restore operational memory on failed writes; never roll back provider costs.
+ for(const key of ['recordObservation','recordGeneration','recordGenerationObservation','recordValidation','recordFailure','commitTurn']){
+  const operation=repository[key];
+  repository[key]=async(...args)=>{
+   const before={};
+   for(const field of ['session','requests','audit','delivery'])before[field]=structuredClone(state[field]);
+   try{return await operation(...args);}
+   catch(err){for(const field of Object.keys(before)){if(before[field]===undefined)delete state[field];else state[field]=before[field];}err.code='STORAGE_UNAVAILABLE';throw err;}
+  };
+ }
  function open(s){
   if(!owned(s))throw Error('PILOT_SCOPE_DENIED');
   if(!state.session){state.session={id:randomUUID(),userId:identity.id,organizationId:identity.organizationId,agentType:'MNT',status:'active',exchangeCount:0,context:{}};save();}

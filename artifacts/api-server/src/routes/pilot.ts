@@ -11,6 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { createPilotBudget } from "../lib/pilot-budget.cjs";
 import { createPilotStore } from "../lib/pilot-store.cjs";
+import { createPilotDelivery } from "../lib/pilot-delivery.cjs";
 import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
 import { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation } from "../lib/pilot-next-round.cjs";
 import { ROUTING_VERSION } from "../lib/functional-policy.cjs";
@@ -29,6 +30,7 @@ export function createPilotRouter(
     oidcClient?: typeof oidc;
     stateFile?: string;
     client?: Anthropic;
+    simulatedModel?: {classify:any;respond:any};
   } = {},
 ) {
   const router = Router();
@@ -78,7 +80,7 @@ export function createPilotRouter(
       archivedRounds: [],
     };
   }
-  const save = () => {
+  const save = () => { try {
     mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
     const temp = file + ".tmp";
     writeFileSync(temp, JSON.stringify(state), { mode: 0o600 });
@@ -89,9 +91,16 @@ export function createPilotRouter(
     try { writeFileSync(snapshotFile, serialized, { mode: 0o600, flag: "wx" }); } catch (snapshotError: any) { if (snapshotError.code !== "EEXIST") throw snapshotError; }
     // Canonical commit is last: a failed archive write cannot advance the round.
     renameSync(temp, file);
+  } catch (error) {
+    const failure = error instanceof Error ? error : new Error("STORAGE_UNAVAILABLE");
+    (failure as any).code = "STORAGE_UNAVAILABLE";
+    throw failure;
+  }
   };
   save();
   const budget = createPilotBudget(state.budget, save);
+  let delivery = createPilotDelivery(state, save);
+  delivery.recoverRestart();
   let identity = pilotIdentity(state.round);
   let store = createPilotStore(state, save, identity);
   let scope = {
@@ -283,9 +292,13 @@ export function createPilotRouter(
     res.clearCookie(COOKIE, cookieOptions);
     res.json({ ok: true });
   });
-  router.post("/sessions", sameOrigin, authorize, (_req, res) =>
-    res.json(store.open(scope)),
-  );
+  router.post("/sessions", sameOrigin, authorize, (_req, res) => {
+    try { res.json({...store.open(scope),...delivery.view()}); }
+    catch { res.status(503).json({code:"STORAGE_UNAVAILABLE",error:"Não foi possível recuperar a sessão com segurança."}); }
+  });
+  router.get("/delivery", authorize, (_req,res) => {
+    res.json({sessionId:state.session?.id,exchangeCount:state.session?.exchangeCount,status:state.session?.status,...delivery.view()});
+  });
   router.post("/abandon-conversation", sameOrigin, authorize, (req, res) => {
     const messages: Record<string, string> = {
       ROUND_CHANGED: "A rodada mudou. Atualize a tela antes de continuar.",
@@ -323,6 +336,7 @@ export function createPilotRouter(
       identity = pilotIdentity(state.round);
       scope = { userId: identity.id, organizationId: identity.organizationId };
       store = createPilotStore(state, save, identity);
+      delivery = createPilotDelivery(state, save);
       functionalRouter = makeFunctionalRouter();
       res.json(result);
     } catch (err) {
@@ -363,7 +377,7 @@ export function createPilotRouter(
       },
     },
   };
-  const model = createModelProviders({
+  const model = options.stateFile && options.simulatedModel ? options.simulatedModel : createModelProviders({
     client: guardedClient as unknown as Anthropic,
     onGenerationObservation: (entry) =>
       store.repository.recordGenerationObservation(scope, entry),
@@ -371,6 +385,13 @@ export function createPilotRouter(
       store.repository.recordValidation(scope, entry),
   });
   router.post("/session/message", sameOrigin, authorize, (req, res, next) => {
+    // A replay retrieves state and never enters the model path, even when the
+    // original call failed or the budget no longer allows another call.
+    if ((state.delivery?.[req.body?.requestId] || state.requests?.[req.body?.requestId] || state.audit?.some((a:any)=>a.requestId===req.body?.requestId)) && req.body?.sessionId === state.session?.id) {
+      try { delivery.begin(req.body,inFlight);res.json({recovered:true,...delivery.view()}); }
+      catch (err) {res.status(409).json({code:(err as Error).message,error:"Identificador já usado com outro conteúdo."});}
+      return;
+    }
     const unavailable = availability();
     if (unavailable || budget.snapshot().blocked) {
       res
@@ -394,13 +415,24 @@ export function createPilotRouter(
       res.status(409).json({ code: "TURN_IN_PROGRESS", error: "Já existe uma mensagem em processamento." });
       return;
     }
+    try { delivery.begin(req.body,inFlight); }
+    catch(err) {res.status((err as any).code==="STORAGE_UNAVAILABLE"?503:409).json({code:(err as any).code??(err as Error).message,error:"O envio não foi iniciado. Consulte o estado registrado."});return;}
     inFlight += 1;
     // A disconnected browser must not unlock a still-running provider call.
     let released = false;
     const release = () => { if (!released) { released = true; inFlight -= 1; } };
-    res.once("finish", release);
+    let failureCode = "STORAGE_UNAVAILABLE";
+    const json = res.json.bind(res);
+    res.json = ((body:any) => {
+      failureCode = body?.code ?? "STORAGE_UNAVAILABLE";
+      if(failureCode==="MODEL_UNAVAILABLE")body.error="A chamada terminou sem resposta disponível; a causa externa não foi comprovada. Uso incerto permanece reservado. Não reenvie automaticamente.";
+      if(failureCode==="INVALID_MODEL_RESPONSE")body.error="A resposta foi recusada pela validação, não por indisponibilidade do serviço. Seu envio foi preservado.";
+      return json(body);
+    }) as typeof res.json;
     const end = res.end.bind(res);
     res.end = ((...args: any[]) => {
+      try { delivery.finish(req.body.requestId,failureCode); }
+      catch { failureCode="STORAGE_UNAVAILABLE"; }
       release();
       return (end as any)(...args);
     }) as typeof res.end;

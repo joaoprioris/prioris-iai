@@ -57,6 +57,7 @@ function pilotIdentity(round) {
 }
 
 function advanceBlock(state, inFlight = 0, now = Date.now()) {
+  if(Object.values(state.delivery||{}).some(d=>d.status==='processing'))return 'TURN_IN_PROGRESS';
   if (now >= state.expiresAt) return 'PILOT_EXPIRED';
   if (inFlight) return 'TURN_IN_PROGRESS';
   if (state.budget?.blocked || !Array.isArray(state.budget?.calls) ||
@@ -137,6 +138,7 @@ function advancePilotRound(state, { expectedRound, sessionId, inFlight = 0, now 
   state.createdAt = now;
   state.budget.currentRound = state.round; // Keep the budget object/ledger alive.
   state.requests = {};
+  delete state.delivery;
   state.audit = [];
   delete state.session;
   delete state.abandonment;
