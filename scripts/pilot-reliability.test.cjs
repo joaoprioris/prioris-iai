@@ -107,9 +107,13 @@ test('HTTP simulado: desconexão não encerra execução; replay, concorrência,
   server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
   base=`http://127.0.0.1:${server.address().port}/api/pilot-0.3.0`;
   const cookie=r=>r.headers.getSetCookie().map(c=>c.split(';')[0]).filter(c=>!c.endsWith('=')).join('; ');
-  const flow=cookie(await fetch(base+'/login',{method:'POST',headers:{Origin:'https://pilot.example.invalid'},redirect:'manual'}));
-  const owner=cookie(await fetch(base+'/callback?state=fixture-state',{headers:{cookie:flow},redirect:'manual'}));
-  headers={cookie:owner,Origin:'https://pilot.example.invalid','Content-Type':'application/json'};
+  if(!headers){
+    const flow=cookie(await fetch(base+'/login',{method:'POST',headers:{Origin:'https://pilot.example.invalid'},redirect:'manual'}));
+    const owner=cookie(await fetch(base+'/callback?state=fixture-state',{headers:{cookie:flow},redirect:'manual'}));
+    headers={cookie:owner,Origin:'https://pilot.example.invalid','Content-Type':'application/json'};
+  }else{
+    assert.equal((await (await fetch(base+'/status',{headers})).json()).authenticated,true);
+  }
  }
  const post=(body)=>fetch(base+'/session/message',{method:'POST',headers,body:JSON.stringify(body)});
  const view=async()=> (await fetch(base+'/delivery',{headers})).json();

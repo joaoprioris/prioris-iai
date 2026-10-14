@@ -7,11 +7,12 @@ import {
 import * as oidc from "openid-client";
 import Anthropic from "@anthropic-ai/sdk";
 import { randomBytes, createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
+import { existsSync, mkdirSync, rmdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { createPilotBudget } from "../lib/pilot-budget.cjs";
 import { createPilotStore } from "../lib/pilot-store.cjs";
 import { createPilotDelivery } from "../lib/pilot-delivery.cjs";
+import { createPilotPersistence } from "../lib/pilot-persistence.cjs";
 import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
 import { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation } from "../lib/pilot-next-round.cjs";
 import { ROUTING_VERSION } from "../lib/functional-policy.cjs";
@@ -81,27 +82,14 @@ export function createPilotRouter(
       archivedRounds: [],
     };
   }
-  const save = () => { try {
-    mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
-    const temp = file + ".tmp";
-    writeFileSync(temp, JSON.stringify(state), { mode: 0o600 });
-    const snapshotDirectory = dirname(file) + "/snapshots";
-    mkdirSync(snapshotDirectory, { recursive: true, mode: 0o700 });
-    const serialized = JSON.stringify(state);
-    const snapshotFile = snapshotDirectory + "/" + hash(serialized) + ".json";
-    try { writeFileSync(snapshotFile, serialized, { mode: 0o600, flag: "wx" }); } catch (snapshotError: any) { if (snapshotError.code !== "EEXIST") throw snapshotError; }
-    // Canonical commit is last: a failed archive write cannot advance the round.
-    renameSync(temp, file);
-  } catch (error) {
-    const failure = error instanceof Error ? error : new Error("STORAGE_UNAVAILABLE");
-    (failure as any).code = "STORAGE_UNAVAILABLE";
-    throw failure;
-  }
-  };
-  save();
+  const persistence=createPilotPersistence(file,state);
+  const save=()=>persistence.save();
+  // Loading an existing state is read-only; it must never overwrite a newer
+  // state just because a second instance started.
+  if(options.stateFile){try{readFileSync(file);}catch{save();}}
   const budget = createPilotBudget(state.budget, save);
   let delivery = createPilotDelivery(state, save);
-  delivery.recoverRestart();
+  if(!persistence.requestActive())delivery.recoverRestart();
   let identity = pilotIdentity(state.round);
   let store = createPilotStore(state, save, identity);
   let scope = {
@@ -114,6 +102,17 @@ export function createPilotRouter(
   >();
   const auth = options.oidcClient ?? oidc;
   let ownerSession: { digest: string; expires: number } | null = null;
+  const authFile=file+'.owner-session.json';
+  const loadOwner=()=>{try{ownerSession=JSON.parse(readFileSync(authFile,'utf8'));}catch{ownerSession=null;}};
+  const saveOwner=()=>{
+    const lock=authFile+'.lock';mkdirSync(lock,{mode:0o700});
+    try{
+      let current:any=null;try{current=JSON.parse(readFileSync(authFile,'utf8'));}catch{}
+      if(ownerSession && current?.expires>Date.now() && current.digest!==ownerSession.digest)throw Error("OWNER_SESSION_ALREADY_ACTIVE");
+      const temp=authFile+'.'+process.pid+'.tmp';writeFileSync(temp,JSON.stringify(ownerSession),{mode:0o600});renameSync(temp,authFile);
+    }finally{rmdirSync(lock);}
+  };
+  loadOwner();
   let config: oidc.Configuration | null = null;
   let sdk: Anthropic | null = null;
   let inFlight = 0;
@@ -125,12 +124,15 @@ export function createPilotRouter(
     path: BASE,
     maxAge: 2 * 60 * 60 * 1000,
   };
-  const authenticated = (req: Request) =>
+  const authenticated = (req: Request) => {
+    loadOwner();
+    return (
     active() &&
     ownerSession !== null &&
     ownerSession.expires > Date.now() &&
     typeof req.cookies?.[COOKIE] === "string" &&
-    hash(req.cookies[COOKIE]) === ownerSession.digest;
+    hash(req.cookies[COOKIE]) === ownerSession.digest);
+  };
   const sameOrigin: RequestHandler = (req, res, next) => {
     if (req.get("origin") !== origin) {
       res.status(403).json({ error: "Origem não autorizada para o piloto." });
@@ -152,7 +154,9 @@ export function createPilotRouter(
     next();
   };
   const availability = () =>
-    !active()
+    state.realCallsSuspended || existsSync(file+".real-calls-suspended")
+      ? "Chamadas reais suspensas para reconciliação. Consultar e recuperar não chama IA."
+    : !active()
       ? "Esta rodada expirou. Chamadas reais bloqueadas."
       : !authConfigured
         ? "Identidade do proprietário não disponível. Chamadas reais bloqueadas."
@@ -164,14 +168,24 @@ export function createPilotRouter(
             : null;
   router.use((_req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
+    try{
+      if(!inFlight && persistence.refresh()){
+        identity=pilotIdentity(state.round);scope={userId:identity.id,organizationId:identity.organizationId};
+        store=createPilotStore(state,save,identity);delivery=createPilotDelivery(state,save);
+        functionalRouter=makeFunctionalRouter();
+      }
+    }catch{res.status(503).json({code:"STATE_CONFLICT",error:"Estado persistido indisponível ou divergente. Chamadas bloqueadas."});return;}
     next();
   });
   router.get("/status", (req, res) =>
     res.json({
       version: ROUTING_VERSION,
       methodologyRevision: METHODOLOGY_REVISION,
+      reliabilityRevision:"consistency-2",
+      realCallsSuspended:state.realCallsSuspended===true,
       round: state.round, authenticated: authenticated(req),
       available: availability() === null,
+      loginAvailable:active() && authConfigured,
       error: availability(),
       provider,
       models: ["claude-haiku-4-5", "claude-sonnet-4-5"],
@@ -180,13 +194,13 @@ export function createPilotRouter(
       historyEnabled: false,
       singleConversation: true,
       nextConversation: authenticated(req) ? {
-        allowed: advanceBlock(state, inFlight) === null,
-        reason: advanceBlock(state, inFlight),
+        allowed: advanceBlock(state, inFlight || Number(persistence.requestActive())) === null,
+        reason: advanceBlock(state, inFlight || Number(persistence.requestActive())),
         sessionId: state.session?.id ?? null,
       } : undefined,
       abandonConversation: authenticated(req) ? {
-        allowed: abandonBlock(state, inFlight) === null,
-        reason: abandonBlock(state, inFlight),
+        allowed: abandonBlock(state, inFlight || Number(persistence.requestActive())) === null,
+        reason: abandonBlock(state, inFlight || Number(persistence.requestActive())),
         sessionId: state.session?.id ?? null,
       } : undefined,
       abandonment: authenticated(req) ? state.abandonment : undefined,
@@ -279,6 +293,7 @@ export function createPilotRouter(
         digest: hash(sid),
         expires: Math.min(state.expiresAt, Date.now() + 2 * 60 * 60 * 1000),
       };
+      saveOwner();
       res.cookie(COOKIE, sid, cookieOptions);
       res.redirect("/pilot-0.3.0");
     } catch {
@@ -291,6 +306,7 @@ export function createPilotRouter(
   });
   router.post("/logout", sameOrigin, authorize, (_req, res) => {
     ownerSession = null;
+    saveOwner();
     res.clearCookie(COOKIE, cookieOptions);
     res.json({ ok: true });
   });
@@ -312,7 +328,7 @@ export function createPilotRouter(
     try {
       const abandonment = abandonPilotConversation(state, {
         expectedRound: req.body?.round, sessionId: req.body?.sessionId,
-        reason: req.body?.reason, inFlight,
+        reason: req.body?.reason, inFlight:inFlight || Number(persistence.requestActive()),
       }, save);
       res.json({ round: state.round, abandonment });
     } catch (err) {
@@ -333,7 +349,7 @@ export function createPilotRouter(
     };
     try {
       const result = advancePilotRound(state, {
-        expectedRound: req.body?.round, sessionId: req.body?.sessionId, inFlight,
+        expectedRound: req.body?.round, sessionId: req.body?.sessionId, inFlight:inFlight || Number(persistence.requestActive()),
       }, save);
       identity = pilotIdentity(state.round);
       scope = { userId: identity.id, organizationId: identity.organizationId };
@@ -417,12 +433,13 @@ export function createPilotRouter(
       res.status(409).json({ code: "TURN_IN_PROGRESS", error: "Já existe uma mensagem em processamento." });
       return;
     }
-    try { delivery.begin(req.body,inFlight); }
-    catch(err) {res.status((err as any).code==="STORAGE_UNAVAILABLE"?503:409).json({code:(err as any).code??(err as Error).message,error:"O envio não foi iniciado. Consulte o estado registrado."});return;}
+    let releaseRequest:(()=>void)|undefined;
+    try { releaseRequest=persistence.acquireRequest();delivery.begin(req.body,inFlight); }
+    catch(err) {releaseRequest?.();res.status((err as any).code==="STORAGE_UNAVAILABLE"?503:409).json({code:(err as any).code??(err as Error).message,error:"O envio não foi iniciado. Consulte o estado registrado."});return;}
     inFlight += 1;
     // A disconnected browser must not unlock a still-running provider call.
     let released = false;
-    const release = () => { if (!released) { released = true; inFlight -= 1; } };
+    const release = () => { if (!released) { released = true; inFlight -= 1;releaseRequest?.(); } };
     let failureCode = "STORAGE_UNAVAILABLE";
     const json = res.json.bind(res);
     res.json = ((body:any) => {

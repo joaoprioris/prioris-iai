@@ -7,6 +7,7 @@ type Status = {
   methodologyRevision?: string;
   round?: number;
   authenticated: boolean;
+  loginAvailable?: boolean;
   available: boolean;
   error?: string;
   identity?: AuthUser;
@@ -23,6 +24,8 @@ type Status = {
     reason?: string;
     uncertainReservedUSD?: number;
     conservativeUncertaintyUSD?: number;
+    observedMinimumUSD?: number;
+    additionalUncertainHoldUSD?: number;
   };
 };
 export default function Pilot() {
@@ -152,6 +155,10 @@ export default function Pilot() {
           · Haiku 4.5 / Sonnet 4.5 · somente ao enviar sua fala
         </div>
         {status?.budget ? <div>Teto acumulado de todas as rodadas: US{'$'}{status.budget.capUSD} · contabilizado: US{'$'}{status.budget.estimatedUSD.toFixed(6)} · chamadas acumuladas: {status.budget.calls}. Não é saldo nem fatura exata.</div> : <div>Conferindo a rodada e o orçamento acumulado…</div>}
+        {!!status?.budget?.additionalUncertainHoldUSD && <div>
+          Mínimo observado: US${status.budget.observedMinimumUSD?.toFixed(6)} · margem adicional por resultado desconhecido: US${status.budget.additionalUncertainHoldUSD.toFixed(6)}.
+          O total acima inclui a margem, não significa consumo confirmado. Novas chamadas reais suspensas.
+        </div>}
         {!!status?.budget?.uncertainReservedUSD && <div>
           Reserva integral por uso não confirmado: US${status.budget.uncertainReservedUSD.toFixed(6)}, já incluída no total deduzido.
           {(status.budget.conservativeUncertaintyUSD ?? 0) > 0 && " Mantida como margem conservadora; não confirma tokens nem cobrança."}
@@ -210,7 +217,7 @@ export default function Pilot() {
           </p>
           <form method="POST" action={BASE + "/login"} target="_blank">
             <button
-              disabled={!status?.available}
+              disabled={!(status?.loginAvailable??status?.available)}
               style={{
                 padding: "12px 20px",
                 background: "#7B4FBF",
@@ -225,7 +232,7 @@ export default function Pilot() {
           </form>
 <form method="POST" action={BASE + "/login"} target="_self">
             <button
-              disabled={!status?.available}
+              disabled={!(status?.loginAvailable??status?.available)}
               style={{
                 padding: "12px 20px",
                 background: "#7B4FBF",

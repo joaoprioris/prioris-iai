@@ -8,6 +8,7 @@ const descriptions={
  INVALID_MODEL_RESPONSE:'A resposta foi recusada pelos controles de interpretação/validação. Não é evidência de indisponibilidade do serviço.',
  STORAGE_UNAVAILABLE:'Não foi possível confirmar a gravação. Consulte o estado novamente; não reenvie automaticamente.',
  INTERRUPTED_UNCONFIRMED:'O servidor reiniciou antes de confirmar o resultado local. O resultado remoto é desconhecido e as reservas foram preservadas. Não há reenvio automático.',
+ RESULT_UNCONFIRMED:'Envio preservado a partir da observação externa. Resultado remoto e uso desconhecidos; chamadas suspensas e margem adicional mantida. Não repetir.',
 };
 function createPilotDelivery(state,save){
  let storageFailed=false;
@@ -32,13 +33,17 @@ function createPilotDelivery(state,save){
   const context=state.session?.context?.messages;
   const visible=messages.length?messages:Array.isArray(context)?structuredClone(context):[];
   for(const d of entries){
+   // External recovery explicitly supplies the same confirmed pair as its
+   // operational context. Display that pair once; don't collapse ordinary
+   // requests merely because their texts happen to match.
+   if(d.source==='external-observation'&&d.status==='completed'&&visible.some((m,i)=>m.role==='user'&&m.content===d.content&&visible[i+1]?.role==='assistant'&&visible[i+1]?.content===d.result?.text))continue;
    if(!seen.has(d.requestId)){
     visible.push({role:'user',content:d.content,requestId:d.requestId});
     if(d.status==='completed'&&d.result?.text)visible.push({role:'assistant',content:d.result.text});
    }
   }
   const historical=(state.audit||[]).filter(a=>a.outcome==='failed'&&!state.delivery?.[a.requestId]).map(a=>({requestId:a.requestId,status:'failed',code:a.failure?.code}));
-  return {messages:visible,storageFailed,deliveries:[...historical,...entries].map(d=>({...d,...(storageFailed&&d.status==='processing'?{status:'uncertain',code:'STORAGE_UNAVAILABLE'}:{}),description:descriptions[storageFailed&&d.status==='processing'?'STORAGE_UNAVAILABLE':d.code||d.status]??'Envio recusado. Consulte o código registrado; não houve reenvio automático.'}))};
+  return {messages:visible,storageFailed,deliveries:[...historical,...entries].map(d=>({...d,...(storageFailed&&d.status==='processing'?{status:'uncertain',code:'STORAGE_UNAVAILABLE'}:{}),description:d.source==='external-observation'&&d.status==='completed'?'Resposta recuperada da observação externa preservada; classificação, geração bruta e usage originais não foram recuperados.':descriptions[storageFailed&&d.status==='processing'?'STORAGE_UNAVAILABLE':d.code||d.status]??'Envio recusado. Consulte o código registrado; não houve reenvio automático.'}))};
  }
  function begin(input,inFlight){
   if(!state.session||input?.sessionId!==state.session.id)throw Error('SESSION_NOT_FOUND');

@@ -14,3 +14,16 @@ causa externa, e a interface incentivava repetição após apagar o envio.
 **How to apply:** preservar envio, resultado confirmado e incerteza separadamente;
 manter reservas e autorização original. Não atribuir ao fornecedor uma falha
 de validação ou gravação e não renovar acesso para completar uma verificação.
+
+Estados carregados em instâncias distintas não podem sobrescrever despesas,
+conversas ou auditorias sem verificar a versão persistida e exclusão compartilhada.
+Uma recuperação a partir de observação externa deve conservar essa origem,
+sem inventar metadados de provedor ou converter margem conservadora em consumo.
+
+**Why:** o proprietário observou retrocesso de 170 para 168 chamadas; reprodução
+com instâncias independentes comprovou que o escritor atrasado apagava o novo
+estado. O escritor do incidente histórico não foi identificado nos registros.
+
+**How to apply:** conservar versões conflitantes, suspender chamadas na divergência
+e reconciliar separadamente com pisos observados e incerteza explícita. Não
+confundir reprodução de um defeito com identificação completa da causa histórica.
