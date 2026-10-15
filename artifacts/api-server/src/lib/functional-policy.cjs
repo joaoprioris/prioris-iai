@@ -2,9 +2,9 @@
 // Reference policy. Inputs are semantic observations, not keyword matches.
 // trustedContext must come from authenticated server-side state, never user/LLM output.
 const AGENTS = Object.freeze(['MNT', 'CTN', 'PRF', 'IMP', 'FBK', 'OTO', 'CRS']);
-const ROUTING_VERSION = '0.3.4';
+const ROUTING_VERSION = '0.3.4-EX04-1';
 const {references,readFunctionalNeed,focalQuestion}=require('./functional-context.cjs');
-const JOBS = Object.freeze(['compare_paths', 'conduct_live', 'prepare_message', 'understand_impact', 'explore_pattern', 'unclear']);
+const JOBS = Object.freeze(['compare_paths', 'conduct_live', 'prepare_message', 'understand_impact', 'explore_pattern', 'analyze_crisis', 'unclear']);
 const SITUATION_STATES = Object.freeze(['BEFORE', 'DURING', 'AFTER', 'PATTERN', 'EMPTY']);
 // A state is an internal reading, never an agent or evidence of incapacity.
 function readSituation(analysis, messages = []) {
@@ -71,6 +71,11 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
   if(analysis.clarificationQuestion!==undefined&&typeof analysis.clarificationQuestion!=='string')throw new TypeError('Invalid clarification question');
   const messages=trustedContext.reportedMessages??[];
   const need=readFunctionalNeed(analysis,messages,trustedContext.functionalNeed);
+  if(analysis.crisisPhase!==undefined&&!['BEFORE','DURING','AFTER',null].includes(analysis.crisisPhase))throw new TypeError('Invalid crisis phase');
+  if(analysis.crisisEvidence!==undefined&&!Array.isArray(analysis.crisisEvidence))throw new TypeError('Invalid crisis evidence');
+  const crisisSources=references(analysis.crisisEvidence,messages);
+  const currentIndex=messages.filter(m=>m.role==='user').length-1;
+  const currentCrisis=crisisSources.length>0&&crisisSources.some(r=>r.message===currentIndex);
   const question=(fallback)=>focalQuestion(need.clarificationQuestion,fallback,messages);
   const recurrenceReported = checkBoolean(analysis, 'ownRecurrenceReported');
   const authorized = checkBoolean(trustedContext, 'historyAuthorized');
@@ -98,6 +103,9 @@ function decideRoute(analysis, trustedContext = {}, previousAgent = null) {
     return result('clarify', null, 'functional_need_unclear', question('Qual dúvida concreta desta situação ainda precisa ser trabalhada?'));
   }
   if (need.job === 'compare_paths') return result('agent', 'MNT', 'compare_paths');
+  if (need.job === 'analyze_crisis') return currentCrisis && analysis.crisisPhase
+    ? result('agent','CRS','contextualized_crisis_analysis')
+    : result('clarify',null,'crisis_context_missing',question('Quais riscos ou consequências desta situação ainda precisam ser organizados?'));
   if (need.job === 'conduct_live') {
     return live ? result('agent', 'OTO', 'live_conversation_guidance') : result('clarify', null, 'live_context_missing', question('A conversa está acontecendo agora ou você está preparando o que dizer para depois?'));
   }

@@ -8,7 +8,8 @@ import {
   NOTICE_VERSION,
 } from "../lib/conversation-service.cjs";
 import { createPostgresRepository } from "../lib/private-history-repository.cjs";
-import contract from "../lib/agent-contract.json";
+import baseContract from "../lib/agent-contract.json";
+import { resolveContract, classifierAuthority, retrieve, referenceMessage } from "../lib/ex04-reference.cjs";
 import classificationTool from "../lib/classification-tool.json";
 import responseTool from "../lib/response-tool.json";
 import {
@@ -19,6 +20,7 @@ import {
 import { ROUTING_VERSION } from "../lib/functional-policy.cjs";
 import { FEEDBACK_AUTONOMY_PROMPT } from "../lib/feedback-autonomy.cjs";
 import { FIDELITY_PROMPT } from "../lib/methodological-fidelity.cjs";
+const contract = resolveContract(baseContract) as typeof baseContract;
 
 const LEADER_AUTHORSHIP_PROMPT = `
 PRIORIDADE COMUM A TODAS AS FUNÇÕES: apoie o pensamento, a clareza e o julgamento do líder sem assumir sua autoria. Trabalhe a tensão concreta a partir dos fatos relatados e explicite a lacuna pertinente, sem moralizar receio ou afirmar que determinada abordagem preservará confiança/relação. Não conclua sobrecarga, erosão da confiança ou mudança de padrão somente por retrabalho, experiência ou receio. Ao comparar opções, examine critérios e trade-offs sem decidir automaticamente entre interromper agora e calar/esperar; não introduza rótulos como ataque nem prometa benefício para a confiança sem base relatada. Não repita como exemplo a formulação do líder quando isso não acrescentar revisão ou esclarecimento. Quando a necessidade for elaborar comunicação, explore COMO O LÍDER PRETENDE abordar antes de redigir por ele, mesmo que a função atual seja Impacto Humano. Sua intenção de resultado não é ainda uma abordagem elaborada. Não ofereça por padrão frases entre aspas, perguntas prontas ao interlocutor, discurso, fórmula ou passos imperativos. Um pedido de exemplo não elimina autoria: primeiro aproveite a formulação própria realmente relatada; só então um exemplo opcional pode apoiar a revisão, sem garanti-la. Ajuda concreta inclui distinguir fato de hipótese, examinar uma suposição ou uma escolha e formular UMA questão focal que avance a elaboração. Não se limite a devolver perguntas genéricas nem exponha esta mecânica. Mantenha a função atual, sem usar esta regra para fixar agente, exigir sequência rígida ou enfraquecer proteção pertinente a perigo físico. Em Feedback, enquanto não houver abordagem própria relatada, use supportMode explore, approachEvidence vazio e delivery null; não esconda a fala pronta em text, resumo ou próximo passo. Em reparo por AUTONOMY_CONSTRAINT_FAILED, abandone a fala pronta e trabalhe diretamente a elaboração com base nos fatos, em vez de repetir uma fórmula. A ausência de confirmação sobre responsável, disponibilidade ou progresso não comprova execução travada, atraso ou indisponibilidade. Diferencie lacuna observada de conclusão ainda não sustentada. Janelas ou intervalos coincidentes não significam datas idênticas. Não invente marcos intermediários ou datas-limite para validar, escalar ou declarar risco; use apenas marcos estabelecidos pelo líder ou sugestão explicitamente opcional compatível com o relato, sem transformá-la em fato. Ausência de informação sobre impedimento não demonstra viabilidade nem margem de prazo. Não ordene frentes de trabalho por conta própria com base apenas no calendário ou em reclamação, sem conhecer consequências e condições de execução: explicite a hipótese e a lacuna que mudaria a prioridade. Uma possibilidade de investigar não equivale a capacidade de resolver ou conter; não transforme a escolha em duas alternativas exclusivas sem base. Diante de risco imediato confirmado, preserve a orientação de contenção simples e segura, sem inventar essa viabilidade. Conserve referências relativas de tempo: em três dias não autoriza inventar dia da semana ou data. Só repita dia da semana informado pelo líder; uma data sugerida pelo próprio IAí não é fonte. Dois relatórios nas últimas semanas não significa os últimos dois relatórios: não acrescente sequência ou recência não relatadas. Em operationalClaims.text cite o trecho EXATO que realmente expõe na resposta; deixe [] quando não expõe alegação de compromisso, execução, viabilidade, impacto ou histórico. Não preencha esse campo com um resumo do contexto que não aparece na resposta. Uma abertura elaborada pelo líder não resolve automaticamente outra escolha ainda em aberto. Se ele ainda pergunta como dividir uma tarefa, examine um critério concreto da divisão e convide sua proposta, sem atribuir partes, donos ou datas por ele. Não encerre afirmando que uma solução não exibida foi trabalhada. Nesta resposta, use apenas o tipo de delivery autorizado pelo agente selecionado, independentemente do nome da situação relatada. Uma preferência concreta de abordagem, como reconhecer a divergência sem buscar culpado, já é elaboração própria para apoiar um pequeno exemplo opcional. Não exija uma fala completa antes de ajudar; aproveite essa preferência e a lacuna presente. Mostre o exemplo apenas em delivery, mantendo text para reflexão ou convite de revisão, sem imperativo de usar a frase. Esta prioridade limita as permissões de exemplos nas instruções anteriores.`;
@@ -95,6 +97,8 @@ export function createModelProviders(
         max_tokens: 1200,
         system:
           classificationPrompt +
+          "\n" + classifierAuthority() +
+          "\nEX04: analyze_crisis representa organizar riscos e consequências contextualizados antes/durante/depois, sem exigir dano atual. Registre crisisPhase e crisisEvidence literal atual. Isso não marca immediateExternalRisk: só dano em curso/ameaça concreta sustentam contenção imediata. Revise necessidade com a fala atual. Escolha momentReferences apenas entre IDs dos dados candidatos pertinentes; [] se nenhum servir. Nenhum candidato determina função. Não cite exemplos como evidência do líder." +
           riskQualification +
           currentBasis +
           contextQualification +
@@ -108,6 +112,7 @@ export function createModelProviders(
               conversation: messages,
               privateHistory: privateContext(history),
               previousAgent,
+              referenceCandidates: retrieve(messages),
             }),
           },
         ],
@@ -206,7 +211,10 @@ export function createModelProviders(
             JSON.stringify(profile.diagnostic_criteria),
           tools: [tool as Anthropic.Tool],
           tool_choice: { type: "tool", name: tool.name },
-          messages: [...memory, ...messages],
+          messages: [
+            ...(referenceMessage(turn.momentReferences) ? [referenceMessage(turn.momentReferences)!] : []),
+            ...memory, ...messages,
+          ],
         });
         options.onUsage?.("sonnet", reply.usage);
         if (reply.stop_reason === "max_tokens")

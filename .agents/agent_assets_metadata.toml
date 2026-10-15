@@ -42,3 +42,17 @@ mtime_ms = 1792100852835
 storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:4ba82eb6-87ce-4b44-8498-2461103c0175/661280e3-9b0d-4fa9-b88f-32ecac4b9466/ee58f4c6-56b2-4161-9ffa-d1b4012351c7"
 storage_version_token = "1792100861245657"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "FT1THnHzXx8p8as1WXlTy"
+uri = "file://generated-artifacts/ex04/IAI-EX04-1-patch-evidencias.zip"
+type = "unspecified"
+title = "IAí — EX04-1: patch e evidências"
+description = "Patch, catálogo de 17 fontes, avaliação separada, relatório, resultados locais e manifesto SHA256. Sem estado histórico, credenciais ou builds."
+logical_id = "2d7b5c95-c969-45d7-910f-14ed04cab64b"
+content_hash = "sha256:ca2f9710cdefedd56538670a8259ae9c49cf24022ec482ec1f46a1cfe284e6d3"
+size = 439650
+mtime_ms = 1792103482979
+storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:4ba82eb6-87ce-4b44-8498-2461103c0175/2d7b5c95-c969-45d7-910f-14ed04cab64b/ea5845c1-ab1c-462d-9906-0e1976a95f90"
+storage_version_token = "1792103508719608"
+content_type = "application/octet-stream"

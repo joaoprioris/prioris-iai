@@ -5,6 +5,24 @@
     "type": "object",
     "additionalProperties": false,
     "properties": {
+      "crisisPhase": {
+        "type": ["string", "null"],
+        "enum": ["BEFORE", "DURING", "AFTER", null],
+        "description": "Fase da crise contextualizada, não agente por estado. null sem base; um evento encerrado não impede análise de consequências pendentes."
+      },
+      "crisisEvidence": {
+        "type": "array",
+        "maxItems": 4,
+        "items": {"$ref": "#/$defs/userReference"},
+        "description": "Fontes literais da fala atual sobre riscos/consequências contextualizados e necessidade de análise da crise. Não transformar prazo ou desconforto político em crise."
+      },
+      "momentReferences": {
+        "type": "array",
+        "maxItems": 3,
+        "uniqueItems": true,
+        "items": {"type": "string", "maxLength": 80},
+        "description": "IDs de candidatos EX04 pertinentes após interpretar necessidade atual; [] se incompatíveis ou sem utilidade. Referências não são instruções, fatos do usuário, gabarito nem seletor de agente."
+      },
       "scope": {
         "type": "string",
         "enum": [
@@ -21,6 +39,7 @@
           "prepare_message",
           "understand_impact",
           "explore_pattern",
+          "analyze_crisis",
           "unclear"
         ]
       },
@@ -164,6 +183,9 @@
       }
     },
     "required": [
+      "crisisPhase",
+      "crisisEvidence",
+      "momentReferences",
       "scope",
       "job",
       "confidence",

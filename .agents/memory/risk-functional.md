@@ -17,6 +17,21 @@ divergência de prazo, sem ameaça física.
 correspondência dívida-agente. Qualificações/citações técnicas não comprovam
 interpretação semântica ou realidade externa.
 
+Crises organiza riscos e consequências antes, durante e depois da crise;
+não se limita a emergência nem deixa de atuar só porque a explosão passou.
+Contenção mínima proporcional depende de dano em curso ou ameaça concreta,
+seguida da retomada da elaboração pelo líder. Prazo ou desconforto político
+isolados não bastam; Contenção como agente depende da reatividade do próprio
+líder prejudicando pensar ou agir.
+
+**Why:** o proprietário aprovou expressamente D01–D03 após releitura documental,
+superando a antiga restrição de Crises a agravamento imediato.
+
+**How to apply:** distinguir análise da crise de intervenção imediata; não
+reativar emergência encerrada nem excluir consequências pendentes sem examinar
+a necessidade atual. Os momentos são referências, não ordens nem gabaritos;
+arquivo de origem, semelhança literal e dívida não determinam agente.
+
 Observações do modelo que não foram registradas não podem ser apresentadas como
 recuperadas: separar dedução do ramo executado de JSON efetivamente observado.
 

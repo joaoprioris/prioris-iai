@@ -1,6 +1,7 @@
 'use strict';
 const { decideRoute, AGENTS, readSituation, readRisk, ROUTING_VERSION } = require('./functional-policy.cjs');
 const {readFunctionalNeed}=require('./functional-context.cjs');
+const {selectReferences}=require('./ex04-reference.cjs');
 const {createHash}=require('node:crypto');
 const {turnDirective,closingFallback}=require('./conversation-guidance.cjs');
 const MAX_EXCHANGES = 10;
@@ -15,7 +16,7 @@ function requireScope(scope) {
 function readAnalysis(value) {
   const v = typeof value === 'string' ? JSON.parse(value.trim().replace(/^```(?:json)?\s*|\s*```$/g, '').trim()) : value;
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
-  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskImpactEvidence', 'riskKind', 'riskBasis', 'ownClarityImpaired', 'ownClarityEvidence', 'ownClarityBasis', 'conversationInProgress', 'decisionSufficientlyClear', 'ownRecurrenceReported', 'situationState', 'stateEvidence','stateReferences','needEvidence','substantiveDecisionPending','decisionEvidence','clarificationQuestion'];
+  const allowed = ['scope', 'job', 'confidence', 'personalEmergency', 'immediateExternalRisk', 'riskEvidence', 'riskImpactEvidence', 'riskKind', 'riskBasis', 'ownClarityImpaired', 'ownClarityEvidence', 'ownClarityBasis', 'conversationInProgress', 'decisionSufficientlyClear', 'ownRecurrenceReported', 'situationState', 'stateEvidence','stateReferences','needEvidence','substantiveDecisionPending','decisionEvidence','clarificationQuestion','crisisPhase','crisisEvidence','momentReferences'];
   const clean = {};
   for (const k of allowed) if (Object.hasOwn(v, k)) clean[k] = v[k];
   if(clean.riskKind!==undefined&&!['physical','organizational','unclear'].includes(clean.riskKind))throw new ConversationError('INVALID_MODEL_RESPONSE',502);
@@ -63,7 +64,8 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const situationReading = readSituation(analysis, [...currentMessages, {role:'user',content:input.content.trim()}]);
       const count=session.exchangeCount+1;
       const riskReading=readRisk(analysis,allMessages);
-      const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading,riskReading};
+      const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading,riskReading,
+        momentReferences:selectReferences(analysis.momentReferences,allMessages),crisisPhase:analysis.crisisPhase??null};
       if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,classificationRaw,analysis,functionalNeed,riskReading,situationReading,route,messages:allMessages});
       let text;
       let progress=null;
