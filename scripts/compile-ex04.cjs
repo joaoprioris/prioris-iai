@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const {extractBlock,canonicalRules}=require('../artifacts/api-server/src/lib/ex04-extraction.cjs');
 const input = path.resolve('generated-artifacts/ex04-input/FONTES_CANONICAS.json');
 const output = path.resolve('artifacts/api-server/src/lib/ex04-corpus.generated.json');
 const source = JSON.parse(fs.readFileSync(input, 'utf8'));
@@ -28,17 +29,29 @@ const sources = source.sources.map(s => {
     current.push(p);
   }
   flush();
-  return {...s, role:libraryIds.has(s.id)?'library':Number(s.id.slice(1))<=8?'definition':'principles', blocks};
+  const exampleStart=s.paragraphs.findIndex(p=>/^9\.\s/u.test(p.text.trim()));
+  const referenceBlocks=libraryIds.has(s.id)?blocks.map(b=>({...b,kind:'library_reference'})):
+    Number(s.id.slice(1))<=7&&exampleStart>=0
+      ?[{id:`${s.id}:example:${s.paragraphs[exampleStart].ref}-${s.paragraphs.at(-1).ref}`,
+        kind:'definition_example',paragraphs:s.paragraphs.slice(exampleStart)}]:[];
+  return {...s, role:libraryIds.has(s.id)?'library':Number(s.id.slice(1))<=8?'definition':'principles', blocks,
+    referenceBlocks:referenceBlocks.map(b=>({...b,extraction:extractBlock(b.paragraphs)}))};
 });
-const corpus = {revision:'EX04-1', inputSha256:sha(fs.readFileSync(input)),
+const canonical=sources.find(s=>s.id==='S16');
+for(const rule of canonicalRules)for(const ref of rule.refs)
+  if(!canonical.paragraphs.some(p=>p.ref===ref&&p.text.trim()))throw Error('EX04_CANONICAL_REFERENCE_MISSING');
+const corpus = {revision:'EX04-2', inputSha256:sha(fs.readFileSync(input)),
   authority:source.authority, approvedDecisions:source.approved_decisions, sources};
 fs.writeFileSync(output,JSON.stringify(corpus,null,2)+'\n');
 const counts = sources.map(s=>({id:s.id,path:s.path,sha256:s.sha256,paragraphs:s.paragraphs.length,
   nonempty:s.paragraphs.filter(p=>p.text.trim()).length,blocks:s.blocks.length,
   explicitStateMoments:s.blocks.filter(b=>b.kind==='moment').length,
+  markedParagraphs:s.paragraphs.filter(p=>/[([](Antes|Durante|Depois|Padrão|Vazio)[)\]]/iu.test(p.text)).map(p=>p.ref),
+  numberedMarkedParagraphs:s.paragraphs.filter(p=>/^\d+\.\s.*[([](Antes|Durante|Depois|Padrão|Vazio)[)\]]/iu.test(p.text)).map(p=>p.ref),
+  definitionExamples:s.referenceBlocks.filter(b=>b.kind==='definition_example').length,
   numberedHeadings:s.paragraphs.filter(p=>/^\d+\./u.test(p.text.trim())).map(p=>p.ref)}));
-fs.mkdirSync('generated-artifacts/ex04',{recursive:true});
-fs.writeFileSync('generated-artifacts/ex04/catalog-counts.json',JSON.stringify({
+fs.mkdirSync('generated-artifacts/ex04-2',{recursive:true});
+fs.writeFileSync('generated-artifacts/ex04-2/catalog-counts.json',JSON.stringify({
   revision:corpus.revision,totalSources:sources.length,totalParagraphs:3141,
   counts,ambiguities:[
     'Explicit-state counts are occurrences, not deduplicated unique moments; numbered/top lists are preserved separately.',

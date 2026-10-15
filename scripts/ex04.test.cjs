@@ -137,7 +137,7 @@ test('Adaptador real usa uma classificação e uma geração simuladas com conte
  assert(calls[1].system.includes('S01:P0003'));
  assert.equal(calls[1].tools.length,1);
  assert.equal(values.length,0);
- fs.writeFileSync('generated-artifacts/ex04/adapter-payload-metadata.json',JSON.stringify({
+ fs.writeFileSync('generated-artifacts/ex04-2/adapter-payload-metadata.json',JSON.stringify({
    revision:ref.REVISION,simulatedCalls:calls.length,externalCalls:0,
    classificationSystemChars:calls[0].system.length,
    generationSystemChars:calls[1].system.length,

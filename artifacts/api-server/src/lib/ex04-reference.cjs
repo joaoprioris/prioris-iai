@@ -1,7 +1,8 @@
 'use strict';
 const corpus = require('./ex04-corpus.generated.json');
 const base = require('./agent-contract.json');
-const REVISION = 'EX04-1';
+const {extractBlock,canonicalRules}=require('./ex04-extraction.cjs');
+const REVISION = 'EX04-2';
 const MAX_REFERENCE_CHARS = 4800;
 const MAX_BLOCK_CHARS = 2000;
 const MAX_BLOCKS = 3;
@@ -19,6 +20,8 @@ const principles=corpus.sources.filter(s=>['S16','S17'].includes(s.id)).map(s=>{
   const paragraphs=s.id==='S16'?s.paragraphs.slice(0,55):s.paragraphs;
   return paragraphs.filter(p=>p.text.trim()).map(p=>`${s.id}:${p.ref} ${p.text}`).join('\n');
 }).join('\n');
+const operationalRules=canonicalRules.map(rule=>
+  rule.refs.map(ref=>'S16:'+ref).join(',')+' '+rule.text).join('\n');
 function section(source, number) {
   const start=source.paragraphs.findIndex(p=>new RegExp('^'+number+'\\.\\s','u').test(p.text.trim()));
   const end=source.paragraphs.findIndex((p,i)=>i>start&&/^\d\.\s/u.test(p.text.trim()));
@@ -37,18 +40,21 @@ function resolveContract(contract = base) {
         determinations:Object.fromEntries(['thinking','response','permissions','agent_lenses','limits','quality']
           .map((key,i)=>[key,section(source,i+3)])),
         prompt:common+'\nPRINCÍPIOS CANÔNICOS (não inferir fatos institucionais ausentes):\n'+principles+
+          '\nREGRAS OPERACIONAIS E REVISÃO CANÔNICA VIGENTE:\n'+operationalRules+
           '\nDEFINIÇÃO CANÔNICA (referências por parágrafo):\n'+definitions[a.id]+'\n'+tail};
     })};
 }
 const tokens = text => new Set(String(text).normalize('NFD').replace(/\p{M}/gu,'').toLowerCase()
   .match(/\p{L}{4,}/gu)?.filter(w=>!['para','como','estou','essa','esse','isso','ainda','sobre','quando','preciso','quero','antes','durante','depois','padrao','vazio','agente','feedback','crise','mentor','divida'].includes(w)) ?? []);
-const library = corpus.sources.filter(s=>s.role==='library').flatMap(s=>s.blocks.map(b=>({
+const library = corpus.sources.flatMap(s=>s.referenceBlocks.map(b=>({
   id:b.id,source:s.id,path:s.path,sourceSha256:s.sha256,
+  kind:b.kind,
   // No source paths, debt labels or agent labels enter the lexical score.
   paragraphs:b.paragraphs,
 })));
 function referenceText(block) {
-  return block.paragraphs.filter(p=>p.text.trim()&&!/^(Onboarding|Marketing):/iu.test(p.text.trim()))
+  return extractBlock(block.paragraphs).map(p=>({ref:p.ref,text:p.referenceText}))
+    .filter(p=>p.text.trim())
     .map(p=>`${p.ref} ${p.text}`).join('\n');
 }
 function retrieve(messages=[], {maxChars=MAX_REFERENCE_CHARS, blocks=library}={}) {
@@ -57,16 +63,16 @@ function retrieve(messages=[], {maxChars=MAX_REFERENCE_CHARS, blocks=library}={}
   const limit=Math.max(0,Math.min(MAX_REFERENCE_CHARS,maxChars));
   const ranked=blocks.map(b=>{
     const text=referenceText(b);
-    const contentTokens=tokens(b.paragraphs.filter(p=>!headingOnly(p.text)&&! /^(Onboarding|Marketing):/iu.test(p.text.trim()))
+    const contentTokens=tokens(extractBlock(b.paragraphs).map(p=>({text:p.referenceText})).filter(p=>!headingOnly(p.text))
       .map(p=>p.text.split(/[→|]/u)[0]).join(' '));
     const score=[...query].filter(t=>contentTokens.has(t)).length;
-    return {id:b.id,source:b.source,sourceSha256:b.sourceSha256,text,score};
+    return {id:b.id,source:b.source,sourceSha256:b.sourceSha256,kind:b.kind??'library_reference',text,score};
   }).filter(b=>b.score>=2&&b.text.length<=MAX_BLOCK_CHARS)
     .sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
   const selected=[];
   let size=2;
   for (const b of ranked) {
-    const item={id:b.id,source:b.source,sourceSha256:b.sourceSha256,text:b.text};
+    const item={id:b.id,source:b.source,sourceSha256:b.sourceSha256,kind:b.kind,text:b.text};
     const n=JSON.stringify(item).length+(selected.length?1:0);
     if (size+n>limit) continue; // never truncate a source paragraph to fit
     selected.push(item); size+=n;
@@ -98,7 +104,9 @@ function classifierAuthority() {
     return {agent:ids[i],source:s.id,text:s.paragraphs.slice(0,end).filter(p=>p.text.trim())
       .map(p=>`${p.ref} ${p.text}`).join('\n')};
   });
-  return common+'\nPRINCÍPIOS CANÔNICOS:\n'+principles+'\nDEFINIÇÕES DE INTERPRETAÇÃO:\n'+JSON.stringify(excerpts);
+  return common+'\nPRINCÍPIOS CANÔNICOS:\n'+principles+
+    '\nREGRAS OPERACIONAIS E REVISÃO CANÔNICA VIGENTE:\n'+operationalRules+
+    '\nDEFINIÇÕES DE INTERPRETAÇÃO:\n'+JSON.stringify(excerpts);
 }
 module.exports={REVISION,MAX_REFERENCE_CHARS,MAX_BLOCKS,common,definitions,resolveContract,
   retrieve,selectReferences,referenceMessage,classifierAuthority};

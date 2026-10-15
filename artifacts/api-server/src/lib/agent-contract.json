@@ -1,10 +1,10 @@
 {
   "version": "0.2.0",
-  "methodology_revision": "EX04-1",
+  "methodology_revision": "EX04-2",
   "date": "2026-10-12",
   "status": "Refinamento de desenvolvimento; não publicado nem validado integralmente",
   "business_reference": "Apoio ao julgamento e à elaboração do líder.",
-  "prompt_resolution": "EX04-1: ex04-reference.resolveContract compõe as definições canônicas e preserva controles transversais. Campos prompt brutos anteriores são compatibilidade, não o prompt efetivo do fluxo funcional.",
+  "prompt_resolution": "EX04-2: ex04-reference.resolveContract compõe definições, princípios e regras operacionais canônicas; exemplos finais são referências recuperáveis limitadas. Campos prompt brutos anteriores são compatibilidade, não o prompt efetivo do fluxo funcional.",
   "chat_agents": [
     "MNT",
     "CTN",

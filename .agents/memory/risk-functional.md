@@ -35,6 +35,17 @@ arquivo de origem, semelhança literal e dívida não determinam agente.
 Observações do modelo que não foram registradas não podem ser apresentadas como
 recuperadas: separar dedução do ramo executado de JSON efetivamente observado.
 
+Comparar falhas por nome não demonstra igualdade de causa. Usar código/motivo,
+operador e ponto efetivo da falha, distinguindo infraestrutura de teste, fixture
+antiga e verificações posteriores mascaradas; exportar só metadados seguros.
+
+**Why:** a revisão da entrega identificou falhas homônimas que paravam em Git,
+comparação de contrato ou revisão antes de chegar à asserção de orçamento.
+
+**How to apply:** manter originais e não concluir “falhas preexistentes
+equivalentes” apenas pelas contagens ou títulos; nunca exportar os objetos
+históricos incorporados em diagnósticos brutos.
+
 **Why:** o diagnóstico do primeiro piloto teve transcrição e consumo, mas não os
 JSONs de classificação. Refazer uma chamada produziria outra observação, não a
 evidência original.
