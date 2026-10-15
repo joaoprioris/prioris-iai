@@ -14,3 +14,17 @@ mtime_ms = 1792034194699
 storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:4ba82eb6-87ce-4b44-8498-2461103c0175/0883ab4f-e3ae-4d50-8d21-d21e3cdac4a2/bdcd30dc-687e-42fb-a78b-81985b602683"
 storage_version_token = "1792034260505174"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "SoOH6bgh8tUJRL5X751iA"
+uri = "file://generated-artifacts/exports/iai-handoff-corrected/iai-implementation-sanitized-corrected.zip"
+type = "unspecified"
+title = "IAí — exportação corrigida"
+description = "Manifests, lockfile e código preservados dos originais; 47 arquivos anteriormente saneados revisados. Inclui manifesto SHA256, auditoria da correção e exclusões atualizadas."
+logical_id = "110c922c-04bc-4e28-bd92-4ee27d00e0e1"
+content_hash = "sha256:bacb1f11420b83a8edc433a54110ff80c3fea3f84c17099646ada0ad893da972"
+size = 905306
+mtime_ms = 1792038980427
+storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:4ba82eb6-87ce-4b44-8498-2461103c0175/110c922c-04bc-4e28-bd92-4ee27d00e0e1/36709657-32b7-4d3f-9739-a30669a34ecc"
+storage_version_token = "1792039013993352"
+content_type = "application/octet-stream"
