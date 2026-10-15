@@ -29,3 +29,16 @@ to = "/index.html"
 [services.env]
 PORT = "22573"
 BASE_PATH = "/"
+
+# Disposable browser simulation; independent of the normal web/API services.
+[[services]]
+name = "Browser Simulation"
+paths = ["/technical-sim"]
+localPort = 3003
+
+[services.development]
+run = "node ../../scripts/iai-browser-sim.cjs"
+
+[services.env]
+PORT = "3003"
+BASE_PATH = "/technical-sim/"
