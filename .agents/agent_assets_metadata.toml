@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "7Yk2wbtA8oNcv3O1N1JO-"
+uri = "file://generated-artifacts/exports/iai-handoff-20261015T031630Z/iai-implementation-sanitized.zip"
+type = "unspecified"
+title = "IAí — implementação vigente sanitizada"
+description = "ZIP recuperável com fontes, configuração sem segredos, testes, documentação, relatórios e auditorias 11–16. Inclui manifesto SHA256 e exclusões; não inclui campanha ou autenticação."
+logical_id = "0883ab4f-e3ae-4d50-8d21-d21e3cdac4a2"
+content_hash = "sha256:87969e8a6f776571389d983c960ed90d9b9881b873b933606a77858082b4c305"
+size = 897028
+mtime_ms = 1792034194699
+storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:4ba82eb6-87ce-4b44-8498-2461103c0175/0883ab4f-e3ae-4d50-8d21-d21e3cdac4a2/bdcd30dc-687e-42fb-a78b-81985b602683"
+storage_version_token = "1792034260505174"
+content_type = "application/octet-stream"
