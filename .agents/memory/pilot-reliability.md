@@ -27,3 +27,15 @@ estado. O escritor do incidente histórico não foi identificado nos registros.
 **How to apply:** conservar versões conflitantes, suspender chamadas na divergência
 e reconciliar separadamente com pisos observados e incerteza explícita. Não
 confundir reprodução de um defeito com identificação completa da causa histórica.
+
+Persistência por arquivo é suportada somente em um host Linux com armazenamento
+local durável compartilhado pelos processos. Instâncias com discos independentes
+não podem executar a mesma campanha simultaneamente.
+
+**Why:** o proprietário exige continuidade de conversa e orçamento após interrupção;
+locks locais não coordenam servidores independentes nem recuperam resultado remoto
+nunca persistido.
+
+**How to apply:** manter incerteza e reservas ao recuperar um processo; recuperar
+lock apenas com término verificável do proprietário, nunca por idade. Não prometer
+garantias entre hosts ou converter testes de SIGKILL em prova de falha elétrica real.

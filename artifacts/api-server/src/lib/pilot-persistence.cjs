@@ -1,5 +1,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),{createHash,randomUUID}=require('node:crypto');
+const {spawnSync}=require('node:child_process');
+const {durableIO}=require('./pilot-durable-io.cjs');
 const sha=b=>createHash('sha256').update(b).digest('hex');
 function processIdentity(pid){
  try{
@@ -8,22 +10,25 @@ function processIdentity(pid){
  }catch{return null;}
 }
 function createPilotPersistence(file,state){
- const read=()=>{try{return fs.readFileSync(file,'utf8');}catch(e){if(e.code==='ENOENT')return null;throw e;}};
- let expected=read();const writer=randomUUID();
- const writeLock=file+'.write-lock',requestLock=file+'.request-lock';
- function save(){
+ file=path.resolve(file);
+ function io(action,input={}){
   fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});
-  try{fs.mkdirSync(writeLock,{mode:0o700});}catch{throw Object.assign(Error('STATE_WRITE_BUSY'),{code:'STORAGE_UNAVAILABLE'});}
-  try{
-   const actual=read();if(actual!==expected)throw Error('STATE_CONFLICT');
-   const serialized=JSON.stringify(state),directory=path.dirname(file)+'/snapshots';
-   fs.mkdirSync(directory,{recursive:true,mode:0o700});
-   const snapshot=directory+'/'+sha(serialized)+'.json';
-   try{fs.writeFileSync(snapshot,serialized,{flag:'wx',mode:0o600});}catch(e){if(e.code!=='EEXIST')throw e;}
-   const temp=file+'.'+writer+'.tmp';
-   fs.writeFileSync(temp,serialized,{flag:'w',mode:0o600});fs.renameSync(temp,file);expected=serialized;
-  }catch(err){err.code='STORAGE_UNAVAILABLE';throw err;}
-  finally{fs.rmdirSync(writeLock);}
+  const run=spawnSync('flock',['--exclusive','--wait','2',file+'.guard',process.execPath,'-e','('+durableIO.toString()+')(require)',file,action],{
+   input:JSON.stringify(input),encoding:'utf8',maxBuffer:64*1024*1024,
+  });
+  let output;try{output=JSON.parse(run.stdout||'{}');}catch{}
+  if(run.status!==0||!output||output.error){
+   const message=output?.error||'STORAGE_UNAVAILABLE';
+   const code=action==='acquire'&&['TURN_IN_PROGRESS','LOCK_OWNER_UNKNOWN'].includes(message)?message:'STORAGE_UNAVAILABLE';
+   throw Object.assign(Error(message),{code});
+  }
+  return output.result;
+ }
+ const read=()=>io('read');
+ let expected=null;const writer=randomUUID();
+ if(read()!==null)refresh();
+ function save(){
+  const serialized=JSON.stringify(state);io('save',{expected,next:serialized});expected=serialized;
  }
  function refresh(){
   const raw=read();if(raw===null)throw Error('PILOT_STATE_MISSING');
@@ -36,23 +41,11 @@ function createPilotPersistence(file,state){
   expected=raw;return true;
  }
  function acquireRequest(){
-  try{fs.mkdirSync(requestLock,{mode:0o700});}catch{throw Error('TURN_IN_PROGRESS');}
-  fs.writeFileSync(requestLock+'/owner.json',JSON.stringify({writer,pid:process.pid,processIdentity:processIdentity(process.pid)}),{mode:0o600});
-  return ()=>{
-   const owner=JSON.parse(fs.readFileSync(requestLock+'/owner.json','utf8'));
-   if(owner.writer!==writer)throw Error('REQUEST_LOCK_CHANGED');
-   fs.unlinkSync(requestLock+'/owner.json');fs.rmdirSync(requestLock);
-  };
+  io('acquire',{writer,pid:process.pid,processIdentity:processIdentity(process.pid)});
+  return ()=>io('release',{writer});
  }
  function requestActive(){
-  if(!fs.existsSync(requestLock))return false;
-  try{
-   const owner=JSON.parse(fs.readFileSync(requestLock+'/owner.json','utf8'));
-   if(owner.processIdentity && processIdentity(owner.pid)!==owner.processIdentity)return false;
-  }catch{return true;}
-  return true;
-  // An orphan lock is still retained by acquireRequest: recognizing local
-  // termination doesn't authorize another remote call or release its reserve.
+  return io('active');
  }
  return {save,refresh,acquireRequest,requestActive,sha};
 }

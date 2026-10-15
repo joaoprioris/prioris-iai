@@ -11,7 +11,10 @@ globalThis.require = createRequire(import.meta.url);
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
 async function buildAll() {
-  const distDir = path.resolve(artifactDir, "dist");
+  // Isolated build validation must not replace files used by a running preview.
+  const distDir = process.env.IAI_BUILD_DIR
+    ? path.resolve(process.env.IAI_BUILD_DIR)
+    : path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
   await esbuild({

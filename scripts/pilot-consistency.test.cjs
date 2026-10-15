@@ -37,8 +37,10 @@ test('Processo local ausente é incerteza, não execução ativa nem permissão 
   fs.writeFileSync(file,'{}');const p=createPilotPersistence(file,{});
   p.acquireRequest();
   fs.writeFileSync(file+'.request-lock/owner.json',JSON.stringify({pid:99999999,writer:'orphan-fixture',processIdentity:'absent'}));
-  assert.equal(p.requestActive(),false);assert.throws(()=>p.acquireRequest(),/TURN_IN_PROGRESS/);
-  assert(fs.existsSync(file+'.request-lock'));
+  assert.equal(p.requestActive(),false);
+  assert(!fs.existsSync(file+'.request-lock'));
+  assert.equal(fs.readdirSync(dir+'/lock-recovery').length,1);
+  const release=p.acquireRequest();release();
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 test('Recuperação externa mostra resposta uma vez e conserva segundo envio desconhecido',()=>{

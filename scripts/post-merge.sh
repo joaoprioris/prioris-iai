@@ -1,4 +1,5 @@
 #!/bin/bash
 set -e
 pnpm install --frozen-lockfile
-pnpm --filter db push
+# Schema changes require explicit review/application; never mutate a DB on merge.
+echo "Schema was not applied. See lib/db/migrations/README.md."
