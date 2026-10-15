@@ -39,3 +39,13 @@ nunca persistido.
 **How to apply:** manter incerteza e reservas ao recuperar um processo; recuperar
 lock apenas com término verificável do proprietário, nunca por idade. Não prometer
 garantias entre hosts ou converter testes de SIGKILL em prova de falha elétrica real.
+
+Perder o contexto do navegador automatizado não comprova defeito de login:
+a sessão proprietária ainda válida pode corretamente recusar outro contexto.
+
+**Why:** um lote longo de navegador perdeu seu contexto e a retomada recebeu 409;
+isso impediu concluir o teste, sem demonstrar falha do produto.
+
+**How to apply:** registrar contadores e evidências em passos curtos e persistidos;
+não contornar autenticação nem aprovar interrupção em andamento quando a recarga
+só ocorreu depois de a resposta terminar.

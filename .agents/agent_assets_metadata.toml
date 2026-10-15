@@ -28,3 +28,17 @@ mtime_ms = 1792038980427
 storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:4ba82eb6-87ce-4b44-8498-2461103c0175/110c922c-04bc-4e28-bd92-4ee27d00e0e1/36709657-32b7-4d3f-9739-a30669a34ecc"
 storage_version_token = "1792039013993352"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "jiCLdLcjEHgXQwqLgnNsw"
+uri = "file://generated-artifacts/browser-simulation/browser-validation-evidence.zip"
+type = "unspecified"
+title = "IAí — evidências da validação técnica"
+description = "Relatório consolidado e bruto, capturas, métricas, estados exclusivamente fictícios, hashes e confirmação de encerramento. Execução parcial; sem cookies ou autenticação persistida."
+logical_id = "661280e3-9b0d-4fa9-b88f-32ecac4b9466"
+content_hash = "sha256:b3748b046dbd29a7a53b5e07c2e95d871b138ebd8ac4ad8dd51619f15e2d6edc"
+size = 868284
+mtime_ms = 1792100852835
+storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:4ba82eb6-87ce-4b44-8498-2461103c0175/661280e3-9b0d-4fa9-b88f-32ecac4b9466/ee58f4c6-56b2-4161-9ffa-d1b4012351c7"
+storage_version_token = "1792100861245657"
+content_type = "application/octet-stream"

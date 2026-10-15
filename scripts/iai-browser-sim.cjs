@@ -57,9 +57,11 @@ async function main(){
  const app=express();app.disable('x-powered-by');app.set('trust proxy',true);
  app.use(express.json());app.use(express.urlencoded({extended:false}));app.use(cookies());
  app.use((_req,res,next)=>{res.set('Cache-Control','no-store');next();});
- const states={},routers={};
+ const states={},routers={},metrics={};
+ const saveMetrics=()=>fs.writeFileSync(dir+'/simulation-metrics.json',JSON.stringify(metrics,null,2),{mode:0o600});
  const {pilotIdentity}=require(root+'/artifacts/api-server/src/lib/pilot-next-round.cjs');
  for(const [name,round] of [['A',1001],['B',1002]]){
+  metrics[name]={classifications:0,generationsStarted:0,generationsCompleted:0};
   const identity=pilotIdentity(round),id='10000000-0000-4000-8000-'+(name==='A'?'000000000001':'000000000002');
   const file=dir+'/'+name+'.json';states[name]={file,id};
   fs.writeFileSync(file,JSON.stringify({version:'0.3.4',round,provider:'replit',
@@ -73,8 +75,9 @@ async function main(){
    buildAuthorizationUrl:()=>new URL(origin+prefix+'/api/pilot-0.3.0/callback'),
    authorizationCodeGrant:async()=>({claims:()=>({sub:'fictional-browser-owner'})})};
   const simulatedModel={
-   classify:async()=>({scope:'leadership',job:'compare_paths',confidence:'high'}),
-   respond:async()=>{await new Promise(resolve=>setTimeout(resolve,6000));
+   classify:async()=>{metrics[name].classifications++;saveMetrics();return {scope:'leadership',job:'compare_paths',confidence:'high'};},
+   respond:async()=>{metrics[name].generationsStarted++;saveMetrics();await new Promise(resolve=>setTimeout(resolve,6000));
+    metrics[name].generationsCompleted++;saveMetrics();
     return {text:'[SIMULAÇÃO TÉCNICA] Resposta determinística da identidade '+name+
      '. Não há interpretação por IA. Este conteúdo serve apenas para conferir envio e recuperação.'};},
   };
@@ -86,6 +89,7 @@ async function main(){
   next();
  }
  const choice=req=>req.cookies.iai_sim_choice==='B'?'B':'A';
+ app.get(prefix+'/metrics',(_req,res)=>res.json({simulation:true,externalModelCalls:0,identities:metrics}));
  app.post(prefix+'/choose',sameOrigin,(req,res)=>{
   if(!['A','B'].includes(req.body.identity))return res.sendStatus(400);
   // Switching tenant does not grant the new tenant's authentication cookie.
