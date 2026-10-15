@@ -151,9 +151,11 @@ test('Rodada 4 não transforma desistência em fechamento fictício nem perde cu
  const store=createPilotStore(s,()=>{},FOURTH_IDENTITY),scope={userId:FOURTH_IDENTITY.id,organizationId:FOURTH_IDENTITY.organizationId};
  const opened=store.open(scope);assert.equal(opened.exchangeCount,0);assert.deepEqual(opened.messages,[]);
  assert.throws(()=>store.open({userId:THIRD_IDENTITY.id,organizationId:THIRD_IDENTITY.organizationId}),/SCOPE_DENIED/);
- const b=createPilotBudget(s.budget);assert.equal(b.snapshot().remainingUSD,0.665587);assert.equal(b.snapshot().capUSD,1);
- s.budget.charged=999999;let sent=false;
- return assert.rejects(b.call({model:'claude-sonnet-4-5',max_tokens:2200,messages:[]},async()=>{sent=true;}),/BUDGET_LIMIT/).then(()=>assert.equal(sent,false));
+ const b=createPilotBudget(s.budget);assert.equal(b.snapshot().remainingUSD,4.665587);assert.equal(b.snapshot().capUSD,5);
+ const calls=s.budget.calls.length;s.budget.charged=4999999;let sent=false;
+ return assert.rejects(b.call({model:'claude-sonnet-4-5',max_tokens:2200,messages:[]},async()=>{sent=true;}),/BUDGET_LIMIT/).then(()=>{
+  assert.equal(sent,false);assert.equal(s.budget.charged,4999999);assert.equal(s.budget.calls.length,calls);
+ });
 });
 test('Proteção física pertinente não é subordinada à regra de autoria do Feedback',async()=>{
  const state={},scope={userId:FOURTH_IDENTITY.id,organizationId:FOURTH_IDENTITY.organizationId},store=createPilotStore(state,()=>{},FOURTH_IDENTITY),session=store.open(scope);
@@ -161,5 +163,6 @@ test('Proteção física pertinente não é subordinada à regra de autoria do F
  const service=createConversationService({repository:store.repository,classify:async()=>({...classify,immediateExternalRisk:true,riskKind:'physical',riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:threat,riskImpactEvidence:threat}),respond:async()=>{throw Error('SHOULD_NOT_GENERATE');},agentPrompts:prompts});
  const r=await service.turn(scope,{sessionId:session.id,requestId:'fictitious-physical-1',content:threat});
  assert.equal(r.route.agent,'CRS');assert.match(r.text,/não entre em confronto nem tente conter ou separar fisicamente/);
- assert.equal(ROUTING_VERSION,'0.3.3');
+ assert.equal(r.route.version,ROUTING_VERSION);assert.equal(r.exchangeCount,1);
+ assert.equal(state.audit[0].outcome,'completed');assert.equal(state.audit[0].analysis.riskImpactEvidence,threat);
 });

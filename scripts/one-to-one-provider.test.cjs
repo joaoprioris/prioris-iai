@@ -15,7 +15,7 @@ const {createModelProviders,createFunctionalRouter}=m.exports;
 const profile=require('../artifacts/api-server/src/lib/agent-contract.json').agents.find(a=>a.id==='OTO');
 const {ROUTING_VERSION}=require('../artifacts/api-server/src/lib/functional-policy.cjs');
 const calls=[];
-const envelope=text=>({text,stage:'direct',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],closingSummary:'',nextStep:''});
+const envelope=text=>({text,stage:'direct',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],closingSummary:'',nextStep:'',delivery:null,operationalClaims:[],authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}});
 function provider(values){
  return createModelProviders({client:{messages:{create:async payload=>{
   calls.push(payload);const input=values.shift();if(input instanceof Error)throw input;
@@ -33,14 +33,23 @@ test('Prompt e esquema reais usam condução ao vivo e cinco estados',async()=>{
  assert(request.tools[0].input_schema.properties.situationState.enum.includes(null));
 });
 test('Condução em tensão usa microdirecionamento sem exigir alvo',async()=>{
- const p=provider([{...envelope('A decisão está sendo questionada; a tensão relatada é começar a ceder.'),delivery:{kind:'micro_move',text:'Vamos retomar o ponto que vocês estão questionando, um de cada vez.'}}]);
- const result=await p.respond(payload);
+ const approach='Pretendo retomar o ponto questionado e escutar uma questão por vez.';
+ const p=provider([{...envelope('A decisão está sendo questionada; sua elaboração é retomar um ponto de cada vez.'),stage:'explore',
+  authorship:{supportMode:'optional_example',approachEvidence:[{message:1,quote:approach}],examplePurpose:'Revisar somente a retomada de foco que o líder elaborou.'},
+  delivery:{kind:'micro_move',text:'Podemos retomar o ponto questionado, um de cada vez?'}}]);
+ const before=calls.length;
+ const result=await p.respond({...payload,messages:[...payload.messages,{role:'user',content:approach}]});
  assert.equal(result.progress.deliveryKind,'micro_move');assert.equal(result.progress.version,ROUTING_VERSION);
- assert.match(calls.at(-1).system,/Não exija compromisso-alvo/);assert.match(result.text,/uma formulação|Uma formulação/);
+ assert.match(calls.at(-1).system,/Não exija compromisso-alvo/);assert.match(result.text,/Exemplo opcional/);
+ assert.equal(calls.length-before,1);assert.equal(result.progress.authorship.approachEvidence[0].quote,approach);
+ assert.equal(result.text.split('Podemos retomar o ponto questionado, um de cada vez?').length-1,1);
 });
 test('Duas respostas inválidas recuperam contexto sem perguntar por compromisso',async()=>{
  const p=provider([envelope('Quando? Onde? Por quê?'),envelope('Quando? Onde? Por quê?')]);
- const r=await p.respond(payload);assert.match(r.text,/Não consegui organizar/);assert.match(r.text,/acontecendo na conversa agora/);assert.doesNotMatch(r.text,/compromisso|bilateral/);
+ const before=calls.length,r=await p.respond(payload);
+ assert.match(r.text,/Não consegui organizar/);assert(r.text.includes(payload.messages[0].content));
+ assert.doesNotMatch(r.text,/compromisso|bilateral|\?/);
+ assert.equal(calls.length-before,2);assert.equal(r.progress.stage,'clarify');assert.match(r.progress.evidenceStatus,/Recovery/);
 });
 test('Falha do serviço não vira resposta falsa',async()=>{
  await assert.rejects(provider([new Error('SYNTHETIC_OUTAGE')]).respond(payload),/SYNTHETIC_OUTAGE/);

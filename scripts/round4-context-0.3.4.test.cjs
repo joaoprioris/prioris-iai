@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),Module=require('node:module');
 const original=JSON.parse(fs.readFileSync('generated-artifacts/pilot-0.3.3-round-4-preserved/state.original.json'));
-const {decideRoute,readSituation}=require('../artifacts/api-server/src/lib/functional-policy.cjs');
+const {decideRoute,readSituation,ROUTING_VERSION}=require('../artifacts/api-server/src/lib/functional-policy.cjs');
 const {readFunctionalNeed,focalQuestion}=require('../artifacts/api-server/src/lib/functional-context.cjs');
 const {validateGrounding}=require('../artifacts/api-server/src/lib/response-grounding.cjs');
 const {prepareFifthRound,FIFTH_IDENTITY,FOURTH_IDENTITY}=require('../artifacts/api-server/src/lib/pilot-rounds.cjs');
@@ -119,7 +119,7 @@ test('Serviço persiste contexto/objetos em memória isolada; triagem não reini
 });
 test('Rodada5 preserva integralmente rodada4/custo, recusa escopo anterior e reserva insuficiente antes de chamar SDK',async()=>{
  const before=JSON.stringify(original),state=prepareFifthRound(original,1000);
- assert.equal(JSON.stringify(original),before);assert.equal(state.version,'0.3.4');assert.equal(state.round,5);
+ assert.equal(JSON.stringify(original),before);assert.equal(state.version,ROUTING_VERSION);assert.equal(state.round,5);
  assert.deepEqual(state.archivedRounds.at(-1).original,original);
  assert.equal(state.archivedRounds.at(-1).original.session.exchangeCount,3);
  assert.equal(state.budget.charged,412818);assert.equal(state.budget.calls.length,26);
@@ -129,8 +129,9 @@ test('Rodada5 preserva integralmente rodada4/custo, recusa escopo anterior e res
  assert.throws(()=>store.open({userId:FOURTH_IDENTITY.id,organizationId:FOURTH_IDENTITY.organizationId}),/SCOPE_DENIED/);
  assert.deepEqual(state.audit,[]);
  assert.throws(()=>prepareFifthRound({...original,budget:{...original.budget,calls:[{status:'reserved'}]}},1000),/STATE_MISMATCH/);
- const b=createPilotBudget(state.budget);assert.equal(b.snapshot().remainingUSD,0.587182);assert.equal(b.snapshot().capUSD,1);
- state.budget.charged=999999;let sent=false;
+ const b=createPilotBudget(state.budget);assert.equal(b.snapshot().remainingUSD,4.587182);assert.equal(b.snapshot().capUSD,5);
+ const calls=state.budget.calls.length;state.budget.charged=4999999;let sent=false;
  await assert.rejects(b.call({model:'claude-sonnet-4-5',max_tokens:2200,messages:[]},async()=>{sent=true;}),/BUDGET_LIMIT/);
  assert.equal(sent,false);
+ assert.equal(state.budget.charged,4999999);assert.equal(state.budget.calls.length,calls);
 });

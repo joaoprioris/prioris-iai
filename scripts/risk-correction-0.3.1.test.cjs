@@ -32,13 +32,13 @@ test('Sem qualificação ou com citação inventada/do assistente, não há prio
 test('Risco físico explicitamente relatado mantém prioridade e proteção sem geração',async()=>{
  const text='Um funcionário está ameaçando me agredir agora na sala.';
  let generations=0;
- const f=fixture(observations({riskKind:'physical',immediateExternalRisk:true,riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:text}),async()=>{generations++;return 'não usado';});
+ const f=fixture(observations({riskKind:'physical',immediateExternalRisk:true,riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:text,riskImpactEvidence:text}),async()=>{generations++;return 'não usado';});
  const r=await f.send(text);assert.equal(r.route.agent,'CRS');assert.match(r.text,/segurança|integridade física/);assert.match(r.text,/não entre em confronto/);assert.equal(generations,0);
 });
 test('Crise organizacional concreta usa função documentada/geração, não resposta fixa de emergência física',async()=>{
  const text='A publicação com dados confidenciais continua acessível a terceiros agora.';
  let received;
- const f=fixture(observations({immediateExternalRisk:true,riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:text}),
+ const f=fixture(observations({immediateExternalRisk:true,riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:text,riskImpactEvidence:text}),
   async p=>{received=p;return 'Considere conter a exposição com quem tem atribuição para isso; falta saber qual acesso está disponível.';});
  const r=await f.send(text);assert.equal(r.route.agent,'CRS');assert(received);assert.match(received.system,/Organizar próximo passo seguro/);
  assert.match(received.system,/Não acrescente instruções de afastamento físico/);
@@ -47,7 +47,7 @@ test('Crise organizacional concreta usa função documentada/geração, não res
 test('Correção do líder muda risco, estado e agente; contagem global não reinicia',async()=>{
  const danger='Há ameaça concreta de agressão acontecendo agora.';
  const sequence=[
-  observations({immediateExternalRisk:true,riskBasis:'concrete_immediate_threat_or_harm',riskKind:'physical',riskEvidence:danger,situationState:'DURING',stateEvidence:danger}),
+  observations({immediateExternalRisk:true,riskBasis:'concrete_immediate_threat_or_harm',riskKind:'physical',riskEvidence:danger,riskImpactEvidence:danger,situationState:'DURING',stateEvidence:danger}),
   observations({situationState:'DURING',stateEvidence:'O que eu digo agora?'}),
  ];
  let received;
@@ -67,7 +67,7 @@ test('T1/T2 locais geram ajuda com lacuna e próxima fala sem data/execução/cu
   return 'Há duas informações e falta a confirmação da segunda. Uma fala possível: “Tenho duas informações de prazo; preciso confirmar a base antes de assumir uma data.”';
  });
  const a=await f.send(t1),b=await f.send(t2);assert.equal(a.route.agent,'OTO');assert.equal(b.route.agent,'OTO');assert.equal(b.exchangeCount,2);
- assert.equal(f.state.audit[0].version,'0.3.1');assert.equal(f.state.audit[1].outcome,'completed');
+ assert.equal(f.state.audit[0].version,ROUTING_VERSION);assert.equal(f.state.audit[1].outcome,'completed');
  // The response above is a fixture, not an observed AI reply.
 });
 test('Fronteiras funcionais não são forçadas pelo caso, reunião ou Durante',()=>{
@@ -80,7 +80,10 @@ test('Fronteiras funcionais não são forçadas pelo caso, reunião ou Durante',
 test('Falha após classificação conserva observação estruturada sem declarar turno concluído',async()=>{
  const f=fixture(observations(),async()=>{throw Error('LOCAL_PROVIDER_OUTAGE');});
  await assert.rejects(f.send(t1),e=>e.code==='MODEL_UNAVAILABLE');
- assert.equal(f.state.session.exchangeCount,0);assert.equal(f.state.audit[0].outcome,'classified');
+ assert.equal(f.state.session.exchangeCount,0);assert.equal(f.state.audit[0].outcome,'failed');
+ assert.equal(f.state.audit[0].failure.code,'MODEL_UNAVAILABLE');
+ assert.equal(f.state.audit[0].version,ROUTING_VERSION);
+ assert.equal(f.state.session.context.messages,undefined);
  assert.equal(f.state.audit[0].analysis.job,'conduct_live');
 });
 test('Rodada 2 preserva rodada 1 byte-logicamente, observações antigas ausentes e gasto acumulado',()=>{
@@ -97,13 +100,26 @@ test('Rodada 2 preserva rodada 1 byte-logicamente, observações antigas ausente
 test('Teto conjunto não se renova na rodada 2; uso novo soma ao anterior',async()=>{
  const state={charged:8771,calls:[],currentRound:2},b=createPilotBudget(state);
  await b.call({model:'claude-haiku-4-5',max_tokens:600,system:'fictício',messages:[]},async()=>({usage:{input_tokens:100,output_tokens:20}}));
- assert.equal(state.charged,8971);assert.equal(state.calls[0].round,2);assert.equal(b.snapshot().capUSD,1);
- state.charged=999999;let sent=false;
+ assert.equal(state.charged,8971);assert.equal(state.calls[0].round,2);assert.equal(b.snapshot().capUSD,5);
+ const calls=state.calls.length;state.charged=4999999;let sent=false;
  await assert.rejects(b.call({model:'claude-sonnet-4-5',max_tokens:2200,messages:[]},async()=>{sent=true;}),/BUDGET_LIMIT/);assert.equal(sent,false);
+ assert.equal(state.charged,4999999);assert.equal(state.calls.length,calls);
 });
 test('Metodologia original de Crises e definições dos demais agentes preservadas',()=>{
  const fs=require('node:fs');
- const original=JSON.parse(require('node:child_process').execFileSync('git',['show','HEAD:artifacts/api-server/src/lib/agent-contract.json'],{encoding:'utf8'}));
- assert.deepEqual(contract,original);assert.equal(ROUTING_VERSION,'0.3.1');
+ const original=require('../prioris-routing-consolidation-20261012/agent_contract.json');
+ const {resolveAgentProfile,revision}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
+ assert.equal(contract.agents.length,8);assert.equal(contract.methodology_revision,revision);
+ for(const current of contract.agents){
+  const source=original.agents.find(a=>a.id===current.id);assert(source);
+  for(const key of ['source_definition','determinations','allowed_transversal_lenses'])assert.deepEqual(current[key],source[key]);
+ }
+ // The approved EX04 effective resolution is allowed to differ from the old
+ // emergency-only interpretation, not from the preserved source definitions.
+ const crises=resolveAgentProfile('CRS');
+ assert.match(crises.prompt,/antes, durante e depois/i);
+ assert.match(crises.prompt,/dano em curso|ameaça concreta/i);
+ assert.throws(()=>resolveAgentProfile('EVL'),/unavailable|disabled|INVALID|indispon|conversacional/i);
+ assert.equal(decideRoute(observations()).background.length,0);
  assert.equal(fs.existsSync('generated-artifacts/pilot-0.3.0-round-1-preserved/state.original.json'),true);
 });

@@ -52,7 +52,15 @@ for(const [job,agent,extra] of [
 ]){
  test('Fronteira '+job+' não é capturada por 1:1',()=>assert.equal(decideRoute({...base,job,...extra}).agent,agent));
 }
-test('Risco imediato precede condução ao vivo',()=>assert.equal(decideRoute({...base,immediateExternalRisk:true,riskEvidence:'Ameaça imediata fictícia',ownClarityImpaired:true}).agent,'CRS'));
+test('Risco imediato precede condução ao vivo',()=>{
+ const threat='Uma pessoa está ameaçando agredir a equipe agora.';
+ const analysis={...base,immediateExternalRisk:true,riskKind:'physical',
+  riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:threat,riskImpactEvidence:threat,ownClarityImpaired:true};
+ const context={reportedMessages:[{role:'user',content:threat}]};
+ assert.equal(decideRoute(analysis,context).agent,'CRS');
+ assert.equal(decideRoute({...analysis,riskImpactEvidence:''},context).agent,'OTO');
+ assert.equal(decideRoute(analysis,{reportedMessages:[{role:'assistant',content:threat}]}).agent,'OTO');
+});
 test('Emergência pessoal mantém apoio humano',()=>assert.equal(decideRoute({...base,personalEmergency:true}).mode,'human_support'));
 for(const state of SITUATION_STATES){
  test('Leitura '+state+' é interna e não determina agente',async()=>{
@@ -98,10 +106,15 @@ test('Transições preservam dez trocas globais e recusam décima primeira',asyn
 test('Fechamento antecipado requer próximo passo com evidência, não compromisso',async()=>{
  const content='Posso pedir que retomemos o ponto que estávamos discutindo.';
  const completed=[{criterion:'OTO.next',evidence:[{message:0,quote:content}]}];
- const payload={text:'Há um próximo movimento possível.',stage:'close',completed,pending:profile.diagnostic_criteria.filter(c=>c.id!=='OTO.next').map(c=>c.id),lenses:[],closingSummary:'Você identificou como retomar a conversa; a reação do grupo ainda não foi relatada.',nextStep:'Peça a retomada do ponto discutido, se ainda fizer sentido na conversa.'};
+ const payload={text:'Há um próximo movimento possível.',stage:'close',completed,pending:profile.diagnostic_criteria.filter(c=>c.id!=='OTO.next').map(c=>c.id),lenses:[],closingSummary:'Você identificou como retomar a conversa; a reação do grupo ainda não foi relatada.',nextStep:'A retomada do ponto discutido é o movimento que você considera; a reação permanece em aberto.',authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}};
  const {turn}=fixture(undefined,async p=>validateProgress(payload,profile,p.messages,p.turn));
  const r=await turn(content);assert.equal(r.status,'closed');assert.equal(r.exchangeCount,1);assert.match(r.text,/ainda não foi relatada/);
- assert.throws(()=>validateProgress({...payload,completed:[],pending:profile.diagnostic_criteria.map(c=>c.id)},profile,[{role:'user',content}],{number:1}),/INVALID_CLOSURE/);
+ // Pending criteria alone are not absence of clarity or of reported evidence.
+ const messages=[{role:'user',content}];
+ assert.equal(validateProgress({...payload,completed:[],pending:profile.diagnostic_criteria.map(c=>c.id)},profile,messages,{number:1}).progress.stage,'close');
+ assert.throws(()=>validateProgress({...payload,nextStep:''},profile,messages,{number:1}),/INVALID_CLOSURE/);
+ assert.throws(()=>validateProgress({...payload,completed:[{criterion:'OTO.next',evidence:[{message:0,quote:'Eu já executei e resolveu.'}]}]},profile,messages,{number:1}),/INVALID_PROGRESS_EVIDENCE/);
+ assert.throws(()=>validateProgress({...payload,authorship:undefined},profile,messages,{number:1}),/AUTONOMY_CONSTRAINT_FAILED/);
 });
 test('Recuperação final de 1:1 não exige compromisso nem inventa execução',()=>{
  const text=closingFallback('OTO',[{role:'user',content:'Estou tentando retomar o foco.'}]);
@@ -117,7 +130,7 @@ test('Contrato preserva definições de origem e remove apenas a restrição pre
 });
 test('Router continua opt-in e camada Evolução não é acionada',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../routes/functional-orchestrator.ts'),'utf8');
- assert.match(source,/process\.env\.PRIORIS_FUNCTIONAL_ROUTING_V1==='true'/);
+ assert.match(source,/process\.env\.PRIORIS_FUNCTIONAL_ROUTING_V1\s*===\s*["']true["']/);
  const trusted={userId:'f',organizationId:'f',memoryOwnerId:'f',memoryOrganizationId:'f',historyAuthorized:true,historyCorroborated:true,historyCompatibleWithCurrent:true};
  assert.deepEqual(decideRoute(base,trusted).background,[]);
 });
