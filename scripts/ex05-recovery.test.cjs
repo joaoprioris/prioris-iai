@@ -583,6 +583,87 @@ function opening27(messages,request){
     {message:0,quote:'Ela entrega muito bem tecnicamente e cumpriu os dois últimos projetos'},
     {message:0,quote:'Nunca conversei com ela sobre isso e já adiei a avaliação duas vezes'}]}};
 }
+test('Condução integrada: formulações novas mantêm apoio opcional, fatos e autoria sem frase-senha',()=>{
+ const requests=['Me ajuda a formular uma abertura?','Queria uma frase inicial para adaptar.','Preciso de uma frase inicial para ajustar ao meu jeito.','Por favor, me auxilie a elaborar uma abertura curta.','Consegue rascunhar uma sugestão de início?','Seria possível me dar um ponto de partida em palavras, para eu ajustar ao meu jeito?','Você pode me apoiar com algumas palavras de início, para eu reescrever depois?','Tem como me dar um ponto de partida que eu reescreva depois?'];
+ for(const request of requests){
+  const messages=messages27(request),v=opening27(messages,request);
+  v.authorship.requestIntent='brief_adaptable_example';
+  const r=validateProgress(v,profile,messages,{number:2});
+  assert.equal(r.progress.authorship.requestEvidence[0].quote,request);
+  assert.equal(r.progress.authorship.requestIntent,'brief_adaptable_example');
+  assert.equal(r.text.split(v.delivery.text).length-1,1);
+  assert(v.delivery.text.trim().split(/\s+/).length<=40);
+ }
+ // The two demonstrated failures also work with older payloads lacking annotation.
+ for(const request of requests.slice(0,2))assert.doesNotThrow(()=>validateProgress(opening27(messages27(request),request),profile,messages27(request),{number:2}));
+});
+test('Condução integrada: interpretação não ultrapassa negativa, retirada, terceiro, fonte e base factual',()=>{
+ for(const request of ['Não me ajude a formular uma abertura.','Não quero que você elabore uma frase inicial.','Não queria uma frase inicial.','Sem frases iniciais.','Retiro meu pedido de exemplo.','Camila perguntou: “Me ajuda a formular uma abertura?”','Camila gostaria de um exemplo.','O colega queria uma frase inicial para adaptar.','Meu chefe gostaria de um exemplo.','Gostaria de um discurso completo para toda a conversa.','Esse é o problema que quero entender.']){
+  const v=opening27(messages27(request),request);v.authorship.requestIntent='brief_adaptable_example';
+  assert.throws(()=>validateProgress(v,profile,messages27(request),{number:2}),e=>e.message==='AUTONOMY_CONSTRAINT_FAILED',request);
+ }
+ const request='Me ajuda a formular uma abertura?',messages=messages27(request),v=opening27(messages,request);
+ v.authorship.requestIntent='brief_adaptable_example';v.authorship.basisEvidence=[];
+ assert.throws(()=>validateProgress(v,profile,messages,{number:2}),e=>e.validationReason==='FACTUAL_BASIS_MISSING');
+ v.authorship.basisEvidence=[{message:0,quote:'Fato que ninguém relatou.'}];
+ assert.throws(()=>validateProgress(v,profile,messages,{number:2}),/INVALID_PROGRESS_EVIDENCE/);
+});
+test('Condução integrada: reparo recebe candidato, medida real e limite, preserva exemplo permitido e revalida',async()=>{
+ const request='Me ajuda a formular uma abertura?',messages=messages27(request),first=opening27(messages,request),fixed=opening27(messages,request);
+ first.authorship.requestIntent='brief_adaptable_example';fixed.authorship.requestIntent='brief_adaptable_example';
+ first.delivery.text=Array(45).fill('palavra').join(' ');
+ const h=provider([first,fixed]);
+ const result=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}});
+ assert.equal(h.calls.length,2);assert.equal(result.progress.delivery.text,fixed.delivery.text);
+ const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').at(-1));
+ assert.equal(data.code,'AUTONOMY_CONSTRAINT_FAILED');assert.equal(data.reason,'EXAMPLE_TOO_LONG');
+ assert.deepEqual(data.rejectedCandidate,first);
+ assert.deepEqual(data.measurement,{field:'delivery.text',found:45,maximum:40,target:30});
+ assert.equal(h.calls[0].max_tokens,h.calls[1].max_tokens);
+ assert.equal(messages.filter(m=>m.role==='assistant'&&m.content===first.text).length,0);
+ assert.equal(result.text.split(fixed.delivery.text).length-1,1);
+});
+test('Condução integrada: reparo preserva correção do líder sem aceitar impacto inventado',async()=>{
+ const request='Queria uma frase inicial para adaptar.',messages=[...messages27(request),{role:'user',content:'Só confirmei retrabalho. Não confirmei impacto no planejamento nem na confiança.'}];
+ const first=opening27(messages,request),fixed=opening27(messages,request);
+ first.text='Isso prejudicou o planejamento do cliente.';
+ first.operationalClaims=[];
+ const h=provider([first,fixed]);
+ const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:3,max:10}});
+ assert.equal(h.calls.length,2);assert(!r.text.includes('prejudicou'));
+ const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').at(-1));
+ assert.equal(data.code,'UNSUPPORTED_FACT');assert.equal(data.measurement,undefined);
+ assert(h.calls[1].messages.some(m=>m.content===messages.at(-1).content));
+ assert.deepEqual(data.rejectedCandidate,first);
+});
+test('Condução integrada: candidato interno não vira fonte do líder; segunda recusa não causa terceira chamada',async()=>{
+ const request='Queria uma frase inicial para adaptar.',messages=messages27(request),first=opening27(messages,request),bad=opening27(messages,request);
+ first.delivery.text=Array(44).fill('palavra').join(' ');
+ bad.authorship.requestEvidence=[{message:messages.filter(m=>m.role==='user').length,quote:first.text}];
+ const h=provider([first,bad]);
+ await assert.rejects(()=>h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}}),/INVALID_PROGRESS_EVIDENCE/);
+ assert.equal(h.calls.length,2);
+ assert(h.calls[1].messages.at(-1).content.includes('NÃO CONFIÁVEL'));
+ const again=provider([first,first]);
+ await assert.rejects(()=>again.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
+ assert.equal(again.calls.length,2);
+});
+test('Condução integrada: sete especializações preservam autoridade, referências e Evolução desativada',async()=>{
+ const agents=contract.agents.filter(a=>a.mode==='conversacional');assert.equal(agents.length,7);
+ const rows=[];
+ for(const a of agents){
+  let call;const h=mod.exports.createModelProviders({client:{messages:{create:async payload=>{call=payload;throw Error('CAPTURE_ONLY');}}}});
+  await assert.rejects(()=>h.respond({agent:a.id,system:a.prompt,messages:[{role:'user',content:'Conteúdo fictício para medir composição.'}],history:[],turn:{number:1,max:10}}),/CAPTURE_ONLY/);
+  assert(call.system.startsWith(a.prompt));assert.equal(call.system.split('CONDUÇÃO COMUM (').length-1,1);
+  assert.equal(call.system.includes('APOIO À COMUNICAÇÃO:'),['FBK','OTO'].includes(a.id));
+  rows.push({agent:a.id,systemChars:call.system.length,canonicalChars:a.prompt.length,systemSHA256:require('node:crypto').createHash('sha256').update(call.system).digest('hex'),messages:call.messages.length});
+ }
+ // Measurement only goes to /tmp during tests; historical/campaign state is never opened.
+ fs.writeFileSync(path.join(os.tmpdir(),'iai-conversation-composition-after.json'),JSON.stringify(rows,null,2)+'\n');
+ for(const a of contract.agents.filter(a=>a.mode!=='conversacional')){
+  const h=provider([]);await assert.rejects(()=>h.p.respond({agent:a.id,system:a.prompt,messages:[],history:[],turn:{number:1,max:10}}),/INVALID_PROGRESSION/);assert.equal(h.calls.length,0);
+ }
+});
 test('Pedido explícito: gerações T02 arquivadas avançam do falso negativo para recusa real por tamanho, sem aprová-las',()=>{
  for(const raw of l27.attempts){
   const before=JSON.stringify(raw);

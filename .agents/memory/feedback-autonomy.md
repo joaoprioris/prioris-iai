@@ -50,3 +50,14 @@ e efeitos/capacidade presumidos nas rodadas fictícias e autorizou esta correç�
 **How to apply:** oferecer distinções concretas e provocar elaboração sem roteiro
 fixo; exemplo opcional revisa elaboração existente. Preservar hipótese identificada,
 efeito efetivamente relatado e proteção pertinente diante de perigo físico.
+
+Materiais APP antigos são subsidiários às definições canônicas atuais e D01–D03.
+Momento, tensão, ampliação de leitura e apoio prático são orientação invisível
+flexível, não quatro títulos, frases ou sequência de perguntas. Pedidos
+equivalentes devem receber o mesmo apoio permitido sem expressão-senha.
+
+**Why:** o proprietário autorizou consolidar a condução sem substituir a
+metodologia atual nem exigir rascunho completo antes de ajudar.
+
+**How to apply:** preservar autoria, especialização e fatos ao revisar orientações;
+redução de instruções e testes estruturais não equivalem a aprovação conversacional.

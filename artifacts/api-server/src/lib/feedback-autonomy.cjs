@@ -44,22 +44,31 @@ function validateFeedbackAuthorship(value,messages,parts){
  const reject=reason=>{throw Object.assign(Error('AUTONOMY_CONSTRAINT_FAILED'),{validationReason:reason});};
  const a=value.authorship;
  if(!a||!['explore','review','optional_example'].includes(a.supportMode)||!Array.isArray(a.approachEvidence)||a.approachEvidence.length>4||typeof a.examplePurpose!=='string')reject('INVALID_AUTHORSHIP_SHAPE');
+ if(a.requestIntent!==undefined&&!['brief_adaptable_example','not_requested'].includes(a.requestIntent))reject('INVALID_AUTHORSHIP_SHAPE');
  const resolved=a.approachEvidence.map(e=>resolveUserEvidence(e,messages));
  const request=(a.requestEvidence??[]),basis=(a.basisEvidence??[]);
  if(!Array.isArray(request)||!Array.isArray(basis)||request.length>2||basis.length>4)reject('INVALID_REQUEST_BASIS_SHAPE');
  const requested=request.map(e=>resolveUserEvidence(e,messages)),grounded=basis.map(e=>resolveUserEvidence(e,messages));
- const negative=q=>/\b(?:n[aã]o\s+(?:quero|preciso|gostaria|me d[eê]|d[eê]|mostre)|evite|dispenso)\s+(?:um(?:a)?\s+)?(?:exemplos?|sugest[aã]o|(?:uma )?falas?|abertura)\b|\bsem\s+(?:nenhum[a]?\s+)?(?:exemplos?|sugest[aã]o|abertura)\b/i.test(q)||
+ const negative=q=>/\b(?:n[aã]o\s+(?:quero|queria|preciso|gostaria|me d[eê]|d[eê]|mostre)|evite|dispenso)\s+(?:um(?:a)?\s+)?(?:exemplos?|sugest[aã]o|(?:uma )?falas?|frases?(?:\s+iniciais?)?|abertura)\b|\bsem\s+(?:nenhum[a]?\s+)?(?:exemplos?|sugest[aã]o|frases?(?:\s+iniciais?)?|abertura)\b/i.test(q)||
   /\b(?:n[aã]o|nunca)\s+(?:(?:quero|preciso|precisa|gostaria)\s+(?:que\s+)?)?(?:(?:voc[eê]|me)\s+)?(?:(?:pode|poderia|deve)\s+)?(?:sugerir|sugira|propor|redigir|escrever|dar|d[eê]|mostrar|mostre|preparar|elaborar)\b[^.!?\n]{0,60}\b(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q);
  const reported=q=>/\b(?:perguntou|pediu|disse|falou|solicitou)\b[^.!?\n]{0,80}(?:[:—-]|\b(?:se|que|para)\b)/i.test(q)||
   /\b(?:pedido|fala|pergunta)\s+(?:de|do|da)\b[^.!?\n]{0,60}\b(?:foi|é)\s*[:“"']/i.test(q)||
   /^\s*[“"‘']*(?:ele|ela|[oa] colega|minh[oa] chefe)\s+(?:pode|poderia|consegue|quer|gostaria|vai)\b/i.test(q);
- const asks=q=>!negative(q)&&(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:exemplo|sugest[aã]o|uma fala)\b/i.test(q)||
+ const normalized=q=>q.normalize('NFD').replace(/\p{M}/gu,'').toLowerCase();
+ // Speech-act constructions, not whole-sentence exceptions. Semantic intent is
+ // supplied by the existing generation, and never replaces literal provenance.
+ const direct=q=>/(?:^|[.!?;]\s*|\beu\s+)(?:por favor,?\s*)?(?:voce\s+)?(?:pode(?:ria)?|consegue|seria possivel|quero|queria|gostaria|preciso|me ajude|me ajuda|me auxilie|me apoie|ajude[- ]me|ajuda[- ]me)\b/.test(normalized(q).trim().replace(/^[“"'‘\s]+/,''));
+ const brief=q=>/\b(?:abertura|frase inicial|frase de inicio|inicio da conversa|comeco da conversa|exemplo|sugestao|uma fala)\b/.test(normalized(q));
+ const formulation=q=>/\b(?:formul\w*|elabor\w*|escrev\w*|redig\w*|mont\w*|rascunh\w*|suger\w*|propo\w*|adapt\w*)\b/.test(normalized(q));
+ const tooBroad=q=>/\b(?:discurso|roteiro)\s+(?:completo|inteiro)|\btoda a conversa\b|\bdecida por mim\b/.test(normalized(q));
+ const requestVoice=q=>direct(q)||/^\s*(?:por favor,?\s*)?(?:me\s+)?(?:sugira|proponha|redija|escreva|prepare|mostre|d[eê]|d[aá]|como (?:eu )?(?:abro|come[cç]o|digo))\b/i.test(q)||(a.requestIntent==='brief_adaptable_example'&&(/\?\s*[”"'’]?\s*$/.test(q)||/\b(?:me|eu)\b/i.test(q)));
+ const asks=q=>!negative(q)&&!tooBroad(q)&&requestVoice(q)&&(a.requestIntent==='brief_adaptable_example'||(direct(q)&&brief(q)&&(formulation(q)||/\b(?:quero|queria|gostaria|preciso)\b/.test(normalized(q))))||(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:exemplo|sugest[aã]o|uma fala)\b/i.test(q)||
   /\b(?:pode(?:ria)?|consegue)\b[^.!?\n]{0,40}\b(?:sugerir|propor|mostrar|redigir|escrever|rascunhar|preparar|elaborar)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
   /\b(?:quero|gostaria(?: de)?|me (?:sugira|proponha|mostre|d[eê]|d[aá])|sugira|proponha|redija|escreva|prepare)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
-  /\bcomo (?:eu )?(?:abro|come[cç]o|digo)\b/i.test(q));
+  /\bcomo (?:eu )?(?:abro|come[cç]o|digo)\b/i.test(q)));
  const users=messages.filter(m=>m.role==='user'),last=users.at(-1)?.content??'';
- const withdrawn=negative(last);
- const explicit=!withdrawn&&requested.some(r=>{const q=r.evidence.quote,source=users[r.evidence.message]?.content??'',at=source.indexOf(q),prefix=source.slice(0,at).split(/[.!?\n]/).at(-1)??'';return asks(q)&&!negative(prefix+q)&&!reported(prefix+q);});
+ const withdrawn=negative(last)||/\b(?:n[aã]o|nunca)\s+(?:(?:quero|preciso|gostaria|me|voc[eê]|pode|poderia|que)\s+){0,4}(?:ajude|ajudar|formule|formular|elabore|elaborar|redija|redigir|sugira|sugerir)\b|\b(?:retiro|cancelo|desisto d[oa]|deixa (?:isso )?pra l[aá]|deixe (?:isso )?para l[aá])\b/i.test(last);
+ const explicit=!withdrawn&&requested.some(r=>{const q=r.evidence.quote,source=users[r.evidence.message]?.content??'',at=source.indexOf(q),prefix=source.slice(0,at).split(/[.!?\n]/).at(-1)??'';return asks(q)&&!negative(prefix+q)&&!reported(prefix+q)&&!/\b(?:n[aã]o|nunca)\b[^.!?\n]{0,35}\b(?:ajud\w*|formul\w*|elabor\w*|frase inicial)\b/i.test(prefix+q)&&!/^\s*(?:ele|ela|meu chefe|minha chefe|minh[oa] colega)\b/i.test(prefix+q);});
  const factual=grounded.some(r=>!r.evidence.quote.includes('?')&&!/^(?:quero|preciso|gostaria|tenho que)\b/i.test(r.evidence.quote.trim()));
  const requestedSupport=explicit&&factual;
  const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote));
@@ -91,6 +100,6 @@ function validateFeedbackAuthorship(value,messages,parts){
    }
   }
  }
- return {authorship:{supportMode:a.supportMode,approachEvidence:resolved.map(r=>r.evidence),examplePurpose:a.examplePurpose,...(requested.length?{requestEvidence:requested.map(r=>r.evidence)}:{}),...(grounded.length?{basisEvidence:grounded.map(r=>r.evidence)}:{})},normalizations:[...resolved,...requested,...grounded].flatMap(r=>r.normalization?[r.normalization]:[])};
+ return {authorship:{supportMode:a.supportMode,...(a.requestIntent?{requestIntent:a.requestIntent}:{}),approachEvidence:resolved.map(r=>r.evidence),examplePurpose:a.examplePurpose,...(requested.length?{requestEvidence:requested.map(r=>r.evidence)}:{}),...(grounded.length?{basisEvidence:grounded.map(r=>r.evidence)}:{})},normalizations:[...resolved,...requested,...grounded].flatMap(r=>r.normalization?[r.normalization]:[])};
 }
 module.exports={FEEDBACK_AUTONOMY_PROMPT,validateFeedbackAuthorship};

@@ -104,6 +104,11 @@
           "examplePurpose"
         ],
         "properties": {
+        "requestIntent": {
+          "type": "string",
+          "enum": ["brief_adaptable_example", "not_requested"],
+          "description": "Interpretação do pedido real pelo gerador existente, independentemente da formulação literal. Nunca dispensa requestEvidence, negativas, retirada, autoria, destinatário ou base factual; não autoriza discurso completo."
+        },
           "supportMode": {
             "type": "string",
             "enum": [
