@@ -71,3 +71,15 @@ armazenamento, contexto ou custo e que dados apagados não reapareçam.
 **How to apply:** contar falhas junto com admissões, preservar idempotência e
 reservas, verificar invalidação entre chamadas e separar arquivo de auditoria
 fictícia de contexto operacional que pode voltar ao modelo.
+
+Recuperar recibo interrompido exige prova da identidade e término do executor
+no mesmo domínio Linux, não apenas ausência de resposta ou PID isolado.
+Resultado remoto continua incerto e reservas permanecem retidas. Escritas
+atrasadas precisam de cerca por execução, além do contador de trocas.
+
+**Why:** reinício podia manter `processing` indefinidamente; só o contador não
+impede uma conclusão antiga de sobrescrever continuação ainda não concluída.
+
+**How to apply:** origem ausente/inverificável deve oferecer recuperação explícita
+sem reenvio; não extrapolar a prova local para servidores ou armazenamentos
+independentes. Não tratar propriedades herdadas de mapas como recibos reais.

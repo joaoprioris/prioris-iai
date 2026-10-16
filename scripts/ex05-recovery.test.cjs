@@ -196,6 +196,10 @@ test('Interrupção focal: resposta atrasada não sobrescreve continuação mesm
  release();await assert.rejects(()=>old,e=>e.code==='CONVERSATION_CHANGED');
  assert.deepEqual(state.session.context,before);assert.equal(state.session.exchangeCount,0);
  assert.equal(state.session.context.messages.at(-1).content,'Correção mais recente.');
+ const newToken=state.session.context.inputReceipts['new-response'].executionToken;
+ state.session.status='closed';state.session.context=null;
+ const afterErasure=await store.repository.commitTurn(scope,{sessionId:session.id,requestId:'new-response',executionToken:newToken,expectedCount:0,settingsRevision:'pilot-history-off',context:{messages:[{role:'assistant',content:'Não restaurar após apagamento.'}]},status:'active',nextCount:1});
+ assert.equal(afterErasure,false);assert.equal(state.session.context,null);assert.equal(state.session.status,'closed');
 });
 test('Interrupção focal: constructor e toString são envios próprios com replay e conflitos sem geração duplicada',async()=>{
  const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
@@ -215,6 +219,12 @@ test('Interrupção focal: constructor e toString são envios próprios com repl
   assert(Object.hasOwn(state.requests,id));assert(Object.hasOwn(state.session.context.inputReceipts,id));
  }
  assert.equal(calls,4);assert.equal(state.session.exchangeCount,2);
+ const content='Falha fictícia já registrada.';
+ const legacy={session:{id:'legacy-session',status:'active',context:{}},audit:[{requestId:'constructor',inputHash:require('node:crypto').createHash('sha256').update(content).digest('hex'),outcome:'failed',failure:{code:'INVALID_MODEL_RESPONSE'},messages:[{role:'user',content}]}]};
+ const prior=createPilotDelivery(legacy,()=>assert.fail('Replay não deve gravar nem gerar'));
+ assert.equal(prior.view().deliveries[0].requestId,'constructor');
+ assert.equal(prior.begin({sessionId:'legacy-session',requestId:'constructor',content},0).replay,true);
+ assert.throws(()=>prior.begin({sessionId:'legacy-session',requestId:'constructor',content:'Conflito.'},0),/IDEMPOTENCY_CONFLICT/);
 });
 test('Capacidade operacional: apagamento e novo consentimento durante resposta não restauram envio antigo',async()=>{
  const {createConversationService,NOTICE_VERSION}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
