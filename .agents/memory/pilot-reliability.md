@@ -49,3 +49,13 @@ isso impediu concluir o teste, sem demonstrar falha do produto.
 **How to apply:** registrar contadores e evidências em passos curtos e persistidos;
 não contornar autenticação nem aprovar interrupção em andamento quando a recarga
 só ocorreu depois de a resposta terminar.
+
+Reprovar uma resposta não invalida a informação nem a correção enviada pelo líder.
+Ela deve orientar a tentativa seguinte, sem transformar candidato recusado em
+fala exibida ou tentativa falha em troca concluída.
+
+**Why:** o proprietário exige continuidade após erros; perder a correção preservava
+uma leitura anterior inadequada e obrigava o líder a repetir sua explicação.
+
+**How to apply:** separar retenção do envio, aceitação da resposta e conclusão da
+troca; conservar idempotência, consentimento, isolamento e incerteza financeira.

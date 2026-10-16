@@ -13,6 +13,17 @@ class ConversationError extends Error {
 function requireScope(scope) {
   if (!scope || typeof scope.userId !== 'string' || !scope.userId || typeof scope.organizationId !== 'string' || !scope.organizationId) throw new ConversationError('AUTH_REQUIRED', 401);
 }
+// Operational input journal, not private history or a completed exchange.
+function retainUserInput(session, entry) {
+  if (!session || session.status !== 'active' || session.exchangeCount !== entry.expectedCount) throw new ConversationError('CONVERSATION_CHANGED',409);
+  const context=structuredClone(session.context||{});
+  const receipts=context.inputReceipts||{};
+  if(receipts[entry.requestId])throw new ConversationError(receipts[entry.requestId].contentHash===entry.contentHash?'REQUEST_ALREADY_SUBMITTED':'IDEMPOTENCY_CONFLICT',409);
+  if(Object.values(receipts).some(r=>r.status==='processing'))throw new ConversationError('TURN_IN_PROGRESS',409);
+  context.messages=[...(Array.isArray(context.messages)?context.messages:[]),{role:'user',content:entry.content}];
+  context.inputReceipts={...receipts,[entry.requestId]:{contentHash:entry.contentHash,status:'processing'}};
+  return context;
+}
 function readAnalysis(value) {
   const v = typeof value === 'string' ? JSON.parse(value.trim().replace(/^```(?:json)?\s*|\s*```$/g, '').trim()) : value;
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
@@ -33,10 +44,13 @@ function createConversationService({ repository, classify, respond, agentPrompts
     const key = scope.organizationId + ':' + scope.userId + ':' + input.sessionId;
     if (busy.has(key)) throw new ConversationError('TURN_IN_PROGRESS', 409);
     busy.add(key);
+    let inputRecorded=false;
+    let sessionAuthorized=false;
     try {
       const session = await repository.getSession(scope, input.sessionId);
       if (!session) throw new ConversationError('SESSION_NOT_FOUND', 404);
-      const ctx = session.context || {};
+      sessionAuthorized=true;
+      let ctx = session.context || {};
       if (ctx.lastRequest && ctx.lastRequest.id === input.requestId) {
         if (ctx.lastRequest.content !== input.content.trim()) throw new ConversationError('IDEMPOTENCY_CONFLICT', 409);
         return { ...ctx.lastRequest.result, replayed: true };
@@ -49,19 +63,23 @@ function createConversationService({ repository, classify, respond, agentPrompts
       if (session.status !== 'active' || session.exchangeCount >= MAX_EXCHANGES) throw new ConversationError('SESSION_CLOSED', 400);
       const fetchedSettings = await repository.getHistorySettings(scope);
       const settings = Object.freeze({...fetchedSettings,enabled:fetchedSettings.enabled===true&&fetchedSettings.noticeVersion===NOTICE_VERSION});
+      if(repository.recordInput){
+        ctx=await repository.recordInput(scope,{sessionId:input.sessionId,requestId:input.requestId,contentHash,content:input.content.trim(),expectedCount:session.exchangeCount,settingsRevision:settings.revision});
+        inputRecorded=true;
+      }
       const history = settings.enabled && settings.noticeVersion === NOTICE_VERSION ? await repository.readPrivateHistory(scope, 4, input.sessionId) : [];
       const currentMessages = Array.isArray(ctx.messages) ? ctx.messages : [];
+      const allMessages=inputRecorded?currentMessages:[...currentMessages,{role:'user',content:input.content.trim()}];
       let analysis,classificationRaw;
-      try { classificationRaw=await classify({ messages: [...currentMessages, { role: 'user', content: input.content.trim() }], history, previousAgent: ctx.agentType || null,functionalNeed:ctx.functionalNeed??null });analysis = readAnalysis(classificationRaw); }
+      try { classificationRaw=await classify({ messages: allMessages, history, previousAgent: ctx.agentType || null,functionalNeed:ctx.functionalNeed??null });analysis = readAnalysis(classificationRaw); }
       catch (err) { if(err.code==='STORAGE_UNAVAILABLE')throw new ConversationError('STORAGE_UNAVAILABLE',503);const invalid=err.code==='INVALID_MODEL_RESPONSE'||['INCOMPLETE_CLASSIFICATION','MISSING_CLASSIFICATION'].includes(err.message)||err instanceof TypeError||err instanceof SyntaxError;throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE',invalid?502:503); }
       // Stored history can give context, but is not automatically a verified pattern.
-      const allMessages=[...currentMessages,{role:'user',content:input.content.trim()}];
       const functionalNeed=readFunctionalNeed(analysis,allMessages,ctx.functionalNeed);
       const trusted = { userId: scope.userId, organizationId: scope.organizationId, historyAuthorized: settings.enabled && settings.noticeVersion === NOTICE_VERSION, historyCorroborated: false, historyCompatibleWithCurrent: false,reportedMessages:allMessages,functionalNeed:ctx.functionalNeed };
       const previous = AGENTS.includes(ctx.agentType) ? ctx.agentType : null;
       const route = decideRoute(analysis, trusted, previous);
       // Re-read on every turn; do not inherit a stale state after a correction.
-      const situationReading = readSituation(analysis, [...currentMessages, {role:'user',content:input.content.trim()}]);
+      const situationReading = readSituation(analysis, allMessages);
       const count=session.exchangeCount+1;
       const riskReading=readRisk(analysis,allMessages);
       const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading,riskReading,
@@ -87,9 +105,10 @@ function createConversationService({ repository, classify, respond, agentPrompts
       if(count===MAX_EXCHANGES&&progress===null&&text.includes('?'))text=closingFallback(route.agent,allMessages);
       const closing = earlyClose || count >= MAX_EXCHANGES || route.mode === 'human_support';
       const result = { text, exchangeCount: count, maxExchanges: MAX_EXCHANGES, status: closing ? 'closed' : 'active', lowConfidence: route.mode === 'clarify', route: { mode: route.mode, agent: route.agent, transition: route.transition, reason: route.reason }, historyUsed: history.length > 0 };
-      const messages = [...currentMessages, { role: 'user', content: input.content.trim() }, { role: 'assistant', content: text }];
+      const messages = [...allMessages, { role: 'assistant', content: text }];
       const progressTrail=[...(Array.isArray(ctx.progressTrail)?ctx.progressTrail:[]),{turn:count,agent:route.agent,stage:progress?.stage??route.mode,completed:progress?.completed?.map(c=>c.criterion)??[],pending:progress?.pending??[]}].slice(-MAX_EXCHANGES);
-      const context = { messages: closing && !settings.enabled ? [] : messages, agentType: route.agent || previous,progress,progressTrail,situationReading,functionalNeed,routingVersion: ROUTING_VERSION, lastRequest: { id: input.requestId, content: input.content.trim(), result } };
+      const inputReceipts=inputRecorded?{...ctx.inputReceipts,[input.requestId]:{contentHash,status:'completed'}}:undefined;
+      const context = { messages: closing && !settings.enabled ? [] : messages, ...(inputReceipts?{inputReceipts}:{}), agentType: route.agent || previous,progress,progressTrail,situationReading,functionalNeed,routingVersion: ROUTING_VERSION, lastRequest: { id: input.requestId, content: input.content.trim(), result } };
       // Disabling history still permits operational context while a conversation is active.
       // Once it closes, retain no conversation text or replay payload in that context.
       const persistedContext = closing && !settings.enabled ? { agentType:context.agentType, routingVersion:context.routingVersion } : context;
@@ -97,10 +116,11 @@ function createConversationService({ repository, classify, respond, agentPrompts
       if (!committed) throw new ConversationError('CONVERSATION_CHANGED', 409);
       return result;
     } catch(err) {
-      if(repository.recordFailure)await repository.recordFailure(scope,{sessionId:input.sessionId,requestId:input.requestId,code:err.code??'MODEL_UNAVAILABLE'});
+      if(inputRecorded&&repository.recordInputFailure)await repository.recordInputFailure(scope,{sessionId:input.sessionId,requestId:input.requestId});
+      if(sessionAuthorized&&repository.recordFailure)await repository.recordFailure(scope,{sessionId:input.sessionId,requestId:input.requestId,code:err.code??'MODEL_UNAVAILABLE'});
       throw err;
     } finally { busy.delete(key); }
   }
   return { turn };
 }
-module.exports = { createConversationService, ConversationError, readAnalysis, NOTICE_VERSION, MAX_EXCHANGES };
+module.exports = { createConversationService, ConversationError, readAnalysis, NOTICE_VERSION, MAX_EXCHANGES, retainUserInput };

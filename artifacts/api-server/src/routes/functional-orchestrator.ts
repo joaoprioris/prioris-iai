@@ -286,8 +286,19 @@ export function createModelProviders(
           throw e;
         }
       }
+      const questionCounts = (r: any) => {
+        const example = r.progress?.delivery?.text?.trim() || "";
+        // validateProgress already enforces exact, single displayed delivery.
+        const leaderText = example ? r.text.replace(example, "") : r.text;
+        return {
+          leader: (leaderText.match(/\?/g) ?? []).length,
+          interlocutor: (example.match(/\?/g) ?? []).length,
+        };
+      };
       const usable = (r: any) =>
-        (r.text.match(/\?/g) ?? []).length <= 1 &&
+        questionCounts(r).leader <= 1 &&
+        questionCounts(r).interlocutor <= 1 &&
+        (r.progress?.stage !== "close" || !r.text.includes("?")) &&
         r.text.trim().split(/\s+/).length <= 180 &&
         !/antes de (?:sugerir|oferecer)[^.!?]*(?:preciso|necessário)/i.test(
           r.text,
@@ -311,7 +322,7 @@ export function createModelProviders(
       if (first && usable(first)) return first;
       if (first) {
         lastFailure = "RESPONSE_CONSTRAINT_FAILED";
-        presentationRepairHint = " A tentativa continha " + (first.text.match(/\?/g) ?? []).length + " sinais de pergunta e " + first.text.trim().split(/\s+/).length + " palavras. Entregue apenas uma pergunta sobre uma lacuna, sem segunda pergunta nem subperguntas; se houver reparo de apresentação, mantenha a elaboração em vez de encerrar.";
+        presentationRepairHint = " A tentativa continha " + questionCounts(first).leader + " perguntas ao líder, " + questionCounts(first).interlocutor + " ao interlocutor do exemplo e " + first.text.trim().split(/\s+/).length + " palavras. Mantenha no máximo uma questão focal por destinatário, sem cascata; nenhuma pergunta em fechamento proibido. Se houver reparo de apresentação, mantenha a elaboração em vez de encerrar.";
         await options.onValidationObservation?.({
           turn: turn.number,
           agent,

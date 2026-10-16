@@ -1,5 +1,6 @@
 'use strict';
 const {randomUUID,createHash}=require('node:crypto');
+const {retainUserInput,ConversationError}=require('./conversation-service.cjs');
 const IDENTITY=Object.freeze({id:'00000000-0000-4000-8000-000000000301',organizationId:'00000000-0000-4000-8000-000000000302',organizationName:'Empresa fictícia — piloto',email:'piloto@example.invalid',role:'leader'});
 function createPilotStore(state,save=()=>{},identity=IDENTITY) {
  const owned=s=>s?.userId===identity.id&&s?.organizationId===identity.organizationId;
@@ -7,6 +8,16 @@ function createPilotStore(state,save=()=>{},identity=IDENTITY) {
  const getSession=async(s,id)=>owned(s)&&state.session?.id===id?structuredClone(state.session):null;
  const repository={
   getSession,
+  recordInput:async(s,entry)=>{
+   if(!owned(s)||state.session?.id!==entry.sessionId)throw Error('PILOT_SCOPE_DENIED');
+   const context=retainUserInput(state.session,entry);
+   state.session.context=context;save();return structuredClone(context);
+  },
+  recordInputFailure:async(s,entry)=>{
+   if(!owned(s)||state.session?.id!==entry.sessionId)throw Error('PILOT_SCOPE_DENIED');
+   const receipt=state.session.context?.inputReceipts?.[entry.requestId];
+   if(receipt?.status==='processing'){receipt.status='failed';save();}
+  },
   getHistorySettings:async s=>{if(!owned(s))throw Error('PILOT_SCOPE_DENIED');return {enabled:false,noticeVersion:null,revision:'pilot-history-off'};},
   readPrivateHistory:async()=>{throw Error('PILOT_HISTORY_DISABLED');},
   getCompletedRequest:async(s,id,requestId)=>owned(s)&&state.session?.id===id?state.requests[requestId]:null,
@@ -51,13 +62,13 @@ function createPilotStore(state,save=()=>{},identity=IDENTITY) {
   },
  };
  // Restore operational memory on failed writes; never roll back provider costs.
- for(const key of ['recordObservation','recordGeneration','recordGenerationObservation','recordValidation','recordFailure','commitTurn']){
+ for(const key of ['recordInput','recordInputFailure','recordObservation','recordGeneration','recordGenerationObservation','recordValidation','recordFailure','commitTurn']){
   const operation=repository[key];
   repository[key]=async(...args)=>{
    const before={};
    for(const field of ['session','requests','audit','delivery'])before[field]=structuredClone(state[field]);
    try{return await operation(...args);}
-   catch(err){for(const field of Object.keys(before)){if(before[field]===undefined)delete state[field];else state[field]=before[field];}err.code='STORAGE_UNAVAILABLE';throw err;}
+   catch(err){for(const field of Object.keys(before)){if(before[field]===undefined)delete state[field];else state[field]=before[field];}if(!(err instanceof ConversationError))err.code='STORAGE_UNAVAILABLE';throw err;}
   };
  }
  function open(s){

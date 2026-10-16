@@ -59,6 +59,7 @@ function validateProgress(value, profile, messages, turn = {}) {
   const methodologyRevision=validateMethodologicalFidelity(value,messages,[...visibleParts,...(deliveryText?[deliveryText]:[])]);
   const displayedDelivery = deduplicated.append ? delivery : '';
   const text = terminal ? visibleParts.filter(Boolean).join('\n\n') + displayedDelivery + '\n\nPodemos retomar o próximo passo em uma nova conversa.' : visibleParts.join('\n\n').replace(/\s*\[ENCERRAR\]\s*$/, '') + displayedDelivery;
+  if(terminal&&text.includes('?'))throw new Error('INVALID_CLOSURE');
   const reported = users.map(u => u.content).join(' ').toLowerCase();
   if (/(?:expõe|produziu|gerou|houve|revela)\s+(?:uma\s+)?ruptura[^.!?]*segurança psicológica/i.test(text) && !reported.includes('ruptura')) throw new Error('UNSUPPORTED_FACT');
   if (/(?:medo|desconfiança)[^.!?]*permanecem/i.test(text) && !reported.includes('medo') && !reported.includes('desconfiança')) throw new Error('UNSUPPORTED_FACT');

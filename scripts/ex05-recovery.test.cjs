@@ -31,6 +31,105 @@ function corrected() {
   delivery:{kind:'message',text:'Quero conversar sobre as interrupções nas reuniões e ouvir sua leitura sobre esses episódios.'},
   authorship:{...structuredClone(l26.attempts[0].authorship),approachEvidence:[]}};
 }
+test('Recuperação focal: falha conserva correção, recarga, isolamento e idempotência sem completar troca',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId};
+ let disk;const state={};let store=createPilotStore(state,()=>{disk=JSON.stringify(state);});
+ const session=store.open(scope),seen=[];let calls=0,fail=true;
+ const classify=async({messages})=>{seen.push(structuredClone(messages));return {
+  scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,
+  immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,
+  decisionSufficientlyClear:true,ownRecurrenceReported:false};};
+ const respond=async()=>{calls++;if(fail)throw Error('UNSUPPORTED_FACT');return 'Uma resposta simulada aceita.';};
+ const service=()=>createConversationService({repository:store.repository,classify,respond,agentPrompts:{FBK:'Simulado'}});
+ const input={sessionId:session.id,requestId:'focal-failed-01',content:'Quero preparar a conversa; corrigi: só confirmei retrabalho.'};
+ await assert.rejects(()=>service().turn(scope,input),e=>e.code==='INVALID_MODEL_RESPONSE');
+ assert.equal(state.session.exchangeCount,0);
+ // Reload repository/service from persisted synthetic state, not in-memory busy.
+ store=createPilotStore(JSON.parse(disk),()=>{});const reloaded=service();
+ await assert.rejects(()=>reloaded.turn(scope,input),e=>e.code==='REQUEST_ALREADY_SUBMITTED');
+ assert.equal(calls,1);
+ await assert.rejects(()=>reloaded.turn({...scope,userId:'other'}, {...input,requestId:'focal-other-01'}),e=>e.code==='SESSION_NOT_FOUND');
+ fail=false;
+ const result=await reloaded.turn(scope,{...input,requestId:'focal-retry-02',content:'Não assuma impacto no planejamento; pode retomar?'});
+ assert.equal(result.exchangeCount,1);assert.equal(calls,2);
+ assert.deepEqual(seen.at(-1).map(m=>m.content),[input.content,'Não assuma impacto no planejamento; pode retomar?']);
+ const saved=await store.repository.getSession(scope,session.id);
+ assert.deepEqual(saved.context.messages.map(m=>m.role),['user','user','assistant']);
+ const replayed=await reloaded.turn(scope,{...input,requestId:'focal-retry-02',content:'Não assuma impacto no planejamento; pode retomar?'});
+ assert.equal(replayed.replayed,true);assert.equal(calls,2);
+});
+test('Recuperação focal: pergunta ao líder e ao interlocutor não somam destinatários',async()=>{
+ const v=corrected();v.text='Os episódios são o ponto de partida. O que você quer esclarecer?';
+ v.delivery.text='Quero conversar sobre as interrupções nas reuniões. Como você vê esses episódios?';
+ const h=provider([v]);
+ const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages:l26.messages,history:[],turn:{number:3,max:10}});
+ assert.equal(h.calls.length,1);assert.equal((r.text.match(/\?/g)||[]).length,2);
+});
+test('Recuperação focal: duas perguntas ao mesmo destinatário continuam recusadas',async()=>{
+ for(const target of ['leader','interlocutor']){
+  const v=corrected();
+  if(target==='leader')v.text='Os episódios são a base. O que quer esclarecer? Como pretende abordar?';
+  else v.delivery.text='Quero conversar sobre as interrupções nas reuniões. Como vê isso? O que mudaria?';
+  const h=provider([v,v]);
+  const result=await h.p.respond({agent:'FBK',system:profile.prompt,messages:l26.messages,history:[],turn:{number:3,max:10}});
+  assert(h.events.some(e=>e.phase==='presentation'&&e.code==='RESPONSE_CONSTRAINT_FAILED'));
+  assert.equal(result.progress.evidenceStatus,'Recovery; no diagnosis asserted');
+  assert(!result.text.includes(target==='leader'?v.text:v.delivery.text));
+  assert.equal(h.calls.length,2);
+ }
+});
+test('Recuperação focal: fechamento não permite pergunta ao líder nem no exemplo',async()=>{
+ for(const target of ['leader','interlocutor']){
+  const v=corrected();v.stage='close';
+  v.closingSummary='Os episódios relatados e sua elaboração continuam sendo a base da conversa.';
+  v.nextStep='Retomar sua abordagem a partir dos fatos relatados.';
+  if(target==='leader')v.nextStep='O que você pretende rever nessa abordagem?';
+  else v.delivery.text='Quero conversar sobre as interrupções nas reuniões. Como vê isso?';
+  assert.throws(()=>validateProgress(v,profile,l26.messages,{number:10}),/INVALID_CLOSURE/);
+ }
+});
+test('Recuperação focal: escrita falha impede geração; entrada ativa e sessão encerrada continuam bloqueadas',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId},state={};
+ let broken=false,calls=0;
+ const store=createPilotStore(state,()=>{if(broken)throw Object.assign(Error('simulated storage failure'),{code:'EIO'});});
+ const session=store.open(scope),input={sessionId:session.id,requestId:'write-fail-01',content:'Correção fictícia.'};
+ const service=()=>createConversationService({repository:store.repository,classify:async()=>{calls++;throw Error('not reached');},respond:async()=>{throw Error('not reached');},agentPrompts:{}});
+ broken=true;
+ await assert.rejects(()=>service().turn(scope,input),e=>e.code==='STORAGE_UNAVAILABLE');
+ assert.equal(calls,0);assert.deepEqual(state.session.context,{});
+ broken=false;
+ await store.repository.recordInput(scope,{...input,contentHash:'synthetic',expectedCount:0});
+ await assert.rejects(()=>service().turn(scope,{...input,requestId:'concurrent-02'}),e=>e.code==='TURN_IN_PROGRESS');
+ assert.equal(calls,0);
+ state.session.status='closed';
+ await assert.rejects(()=>service().turn(scope,{...input,requestId:'closed-case-03'}),e=>e.code==='SESSION_CLOSED');
+});
+test('Recuperação focal: erro de classificação conserva envio, consentimento desligado e fechamento apaga contexto operacional',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId},state={};
+ const store=createPilotStore(state),session=store.open(scope);let fail=true,seen;
+ const service=createConversationService({repository:store.repository,agentPrompts:{FBK:'Simulado'},
+  classify:async ({messages,history})=>{seen=messages;assert.deepEqual(history,[]);if(fail)throw Error('MISSING_CLASSIFICATION');
+   return {scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,decisionSufficientlyClear:true,ownRecurrenceReported:false};},
+  respond:async()=> 'Retome sua elaboração sem presumir efeitos não relatados. [ENCERRAR]'});
+ const input={sessionId:session.id,requestId:'class-fail-01',content:'Só retrabalho foi confirmado.'};
+ await assert.rejects(()=>service.turn(scope,input),e=>e.code==='INVALID_MODEL_RESPONSE');
+ assert.equal(state.session.exchangeCount,0);assert.equal(state.session.context.messages.length,1);
+ const before=JSON.stringify(state);
+ await assert.rejects(()=>service.turn({...scope,organizationId:'other-org'},{...input,requestId:'org-other-01'}),e=>e.code==='SESSION_NOT_FOUND');
+ assert.equal(JSON.stringify(state),before);
+ fail=false;
+ const result=await service.turn(scope,{...input,requestId:'class-retry-02',content:'Minha correção permanece; já tenho clareza para encerrar.'});
+ assert.equal(seen.length,2);assert.equal(result.exchangeCount,1);assert.equal(result.status,'closed');
+ assert.equal(result.historyUsed,false);assert.equal(state.session.context.messages,undefined);
+ assert.equal(state.session.context.inputReceipts,undefined);
+ await assert.rejects(()=>service.turn(scope,{...input,requestId:'after-close-03'}),e=>e.code==='SESSION_CLOSED');
+});
 test('Replay L26 mantém as duas recusas e identifica o motivo específico, sem texto privado no diagnóstico',()=>{
  const expected=['EXAMPLE_TOO_LONG','IMPERATIVE_PRESENTATION'];
  l26.attempts.forEach((v,i)=>assert.throws(()=>validateProgress(v,profile,l26.messages,{number:3}),

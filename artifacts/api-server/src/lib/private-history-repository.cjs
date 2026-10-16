@@ -1,5 +1,5 @@
 'use strict';
-const { NOTICE_VERSION } = require('./conversation-service.cjs');
+const { NOTICE_VERSION, retainUserInput } = require('./conversation-service.cjs');
 function createPostgresRepository(pool) {
   const scoped = scope => [scope.userId, scope.organizationId];
   async function transaction(scope, work) {
@@ -15,6 +15,21 @@ function createPostgresRepository(pool) {
     finally { client.release(); }
   }
   return {
+    async recordInput(scope,entry){
+      return transaction(scope,async(client,settings)=>{
+        if(String(settings.revision)!==String(entry.settingsRevision))throw Object.assign(Error('CONVERSATION_CHANGED'),{code:'CONVERSATION_CHANGED'});
+        const {rows}=await client.query('SELECT context,status,exchange_count FROM sessions WHERE user_id=$1 AND organization_id=$2 AND id=$3 FOR UPDATE',[...scoped(scope),entry.sessionId]);
+        const row=rows[0];
+        const context=retainUserInput(row?{context:row.context,status:row.status,exchangeCount:row.exchange_count||0}:null,entry);
+        await client.query('UPDATE sessions SET context=$4::jsonb WHERE user_id=$1 AND organization_id=$2 AND id=$3',[...scoped(scope),entry.sessionId,JSON.stringify(context)]);
+        return context;
+      });
+    },
+    async recordInputFailure(scope,entry){
+      return transaction(scope,async client=>{
+        await client.query("UPDATE sessions SET context=jsonb_set(context,ARRAY['inputReceipts',$4::text,'status'],to_jsonb('failed'::text)) WHERE user_id=$1 AND organization_id=$2 AND id=$3 AND status='active' AND context->'inputReceipts'->$4::text->>'status'='processing'",[...scoped(scope),entry.sessionId,entry.requestId]);
+      });
+    },
     async getCompletedRequest(scope,sessionId,requestId){
       const {rows}=await pool.query('SELECT content_hash FROM prioris_completed_requests WHERE user_id=$1 AND organization_id=$2 AND session_id=$3 AND request_id=$4',[...scoped(scope),sessionId,requestId]);
       return rows.length?{contentHash:rows[0].content_hash}:null;
