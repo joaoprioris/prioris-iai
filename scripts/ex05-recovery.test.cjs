@@ -572,6 +572,113 @@ const l27=replay['L27-T02-a'];
 const t03='Deu erro aqui. Pode tentar de novo e me dar uma sugestão concreta de abertura, incluindo como assumir que eu deveria ter falado antes?';
 const request27='Você pode sugerir uma abertura concreta, reconhecendo a entrega dela e assumindo que eu demorei a trazer isso?';
 const messages27=content=>[...l27.messages.slice(0,2),{role:'user',content}];
+function revised28(record='L28-T04-a'){
+ const archived=replay[record],users=archived.messages.filter(m=>m.role==='user');
+ const draft=users[1].content.match(/Pensei em dizer\s*[‘'][^’']+[’']/)[0];
+ return {...structuredClone(archived.attempts[0]),
+  stage:'explore',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],
+  text:'O reconhecimento que você propõe pode ficar separado da conclusão sobre priorização. Uma opção para adaptar à sua abordagem:',
+  closingSummary:'',nextStep:'',operationalClaims:[],
+  delivery:{kind:'message',text:'Queria conversar sobre a avaliação. Reconheço que não deixei claro o impacto das mudanças de prioridade nos prazos. O que você esperava que eu tivesse feito quando as prioridades mudaram?'},
+  authorship:{supportMode:'optional_example',requestIntent:'brief_adaptable_example',
+   approachEvidence:[{message:1,quote:draft}],
+   requestEvidence:[{message:1,quote:'Você pode me sugerir uma abertura'}],
+   basisEvidence:[{message:0,quote:'reconheço que não deixei claro o impacto dessas mudanças nos prazos'}],
+   examplePurpose:'Apoiar a revisão do esboço próprio com convite à gerente, sem substituir autoria nem acrescentar responsabilidade.'}};
+}
+test('L28 focal: quatro candidatos arquivados continuam recusados pelos controles originais',()=>{
+ for(const id of ['L28-T02-a','L28-T04-a']){
+  const a=replay[id],snapshot=JSON.stringify(a);
+  a.attempts.forEach((v,i)=>assert.throws(()=>validateProgress(v,profile,a.messages,{number:3}),e=>e.message===a.validations[i][0].code&&e.validationReason===a.validations[i][0].reason));
+  assert.equal(JSON.stringify(a),snapshot);
+ }
+});
+test('L28 focal: reparo explica modo, apresentação ou evidência e aceita somente revisão fundamentada',async()=>{
+ for(const id of ['L28-T02-a','L28-T04-a'])for(const original of replay[id].attempts){
+  const h=provider([original,revised28(id)]),messages=replay[id].messages;
+  const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:3,max:10}});
+  assert.equal(h.calls.length,2);assert.equal(h.events.at(-1).code,'ACCEPTED');
+  const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
+  assert.deepEqual(data.rejectedCandidate,original);
+  if(data.reason==='EXAMPLE_MODE_MISMATCH'){
+   assert.equal(data.correction.foundSupportMode,'review');
+   assert.equal(data.correction.requiredSupportMode,'optional_example');
+   assert(data.correction.instruction.includes('abordagem própria literal'));
+  }
+  if(data.reason==='EXAMPLE_TOO_LONG'){
+   assert.equal(data.measurement.found,54);assert.equal(data.measurement.maximum,40);
+   assert(data.correction.instruction.includes('não a lacuna ou o pedido'));
+  }
+  if(data.reason==='IMPERATIVE_PRESENTATION')assert(data.correction.instruction.includes('somente delivery'));
+  assert.equal(r.progress.authorship.supportMode,'optional_example');
+  assert(r.progress.authorship.approachEvidence[0].quote.includes('Pensei em dizer'));
+  assert.equal(r.text.split(r.progress.delivery.text).length-1,1);
+  assert(!r.text.includes('isso prejudicou')&&!r.text.includes('isso criou'));
+ }
+});
+test('L28 focal: falha repetida não é relabelada, truncada nem produz terceira geração',async()=>{
+ const a=replay['L28-T04-a'],h=provider(structuredClone(a.attempts));
+ await assert.rejects(()=>h.p.respond({agent:'FBK',system:profile.prompt,messages:a.messages,history:[],turn:{number:3,max:10}}),e=>e.validationReason==='EXAMPLE_MODE_MISMATCH');
+ assert.equal(h.calls.length,2);assert.deepEqual(h.events.map(e=>e.reason),['EXAMPLE_MODE_MISMATCH','EXAMPLE_MODE_MISMATCH']);
+ assert.equal(a.attempts[0].authorship.supportMode,'review');
+});
+test('L28 focal: corrigir modo não aprova causalidade inventada e comentário sem exemplo continua revisão',()=>{
+ const a=replay['L28-T04-a'],bad=revised28();
+ bad.delivery=structuredClone(a.attempts[0].delivery);
+ assert.throws(()=>validateProgress(bad,profile,a.messages,{number:3}),/UNSUPPORTED_FACT/);
+ const review=revised28();review.delivery=null;review.authorship.supportMode='review';
+ assert.equal(validateProgress(review,profile,a.messages,{number:3}).progress.authorship.supportMode,'review');
+ const wrong=revised28();wrong.authorship.supportMode='review';
+ assert.throws(()=>validateProgress(wrong,profile,a.messages,{number:3}),e=>e.validationReason==='EXAMPLE_MODE_MISMATCH');
+});
+test('L28 focal: retirada, reflexão sem exemplo e pedido de terceiros não são autorização',()=>{
+ const a=replay['L28-T04-a'];
+ for(const last of ['Não quero mais um exemplo. Quero refletir sobre minha abordagem.','Dispenso uma frase; quero só pensar na conversa.']){
+  const messages=[...a.messages,{role:'user',content:last}],v=revised28();
+  assert.throws(()=>validateProgress(v,profile,messages,{number:3}),e=>e.validationReason==='EXAMPLE_WITHDRAWN');
+  v.delivery=null;v.authorship.supportMode='review';
+  assert.doesNotThrow(()=>validateProgress(v,profile,messages,{number:3}));
+ }
+ const messages=[a.messages[0],{role:'user',content:'Minha colega perguntou: “Pode me sugerir uma abertura?”'}],v=revised28();
+ v.authorship.approachEvidence=[];v.authorship.requestEvidence=[{message:1,quote:'Pode me sugerir uma abertura?'}];
+ assert.throws(()=>validateProgress(v,profile,messages,{number:3}),e=>e.validationReason==='EXPLICIT_REQUEST_MISSING');
+});
+test('L28 focal: ajuste de abertura admite perguntas por destinatário sem fechar atendimento',async()=>{
+ const a=replay['L28-T04-a'],v=revised28();v.text+=' O que você quer manter da sua abordagem?';
+ const h=provider([v]),r=await h.p.respond({agent:'FBK',system:profile.prompt,messages:a.messages,history:[],turn:{number:3,max:10}});
+ assert.equal(h.calls.length,1);assert.equal(r.progress.stage,'explore');
+ assert.equal((r.text.match(/\?/g)||[]).length,2);
+ for(const audience of ['leader','manager']){
+  const bad=revised28();if(audience==='leader')bad.text+=' O que manter? O que mudar?';else bad.delivery.text+=' O que faltou?';
+  const deny=provider([bad,bad]);
+  const recovered=await deny.p.respond({agent:'FBK',system:profile.prompt,messages:a.messages,history:[],turn:{number:3,max:10}});
+  assert.equal(deny.calls.length,2);
+  assert.equal(recovered.progress.evidenceStatus,'Recovery; no diagnosis asserted');
+  assert.equal(recovered.progress.delivery,undefined);
+  assert(!recovered.text.includes('O que mudar?')&&!recovered.text.includes('O que faltou?'));
+  assert.deepEqual(deny.events.filter(e=>e.phase==='presentation').map(e=>e.code),['RESPONSE_CONSTRAINT_FAILED','RESPONSE_CONSTRAINT_FAILED']);
+ }
+});
+test('L28 focal: encerramento real e décima troca preservam síntese e proibição de perguntas',()=>{
+ const a=replay['L28-T04-a'],v=revised28();v.stage='close';
+ v.closingSummary='Você reconhece que faltou clareza sobre o impacto das mudanças e quer entender as expectativas da gerente.';
+ v.nextStep='Uma possibilidade é revisar a abertura com os fatos já relatados.';
+ assert.throws(()=>validateProgress(v,profile,a.messages,{number:3}),/INVALID_CLOSURE/);
+ v.delivery=null;v.authorship.supportMode='review';
+ assert.equal(validateProgress(v,profile,[...a.messages,{role:'user',content:'Era o que eu precisava. Vou encerrar por aqui.'}],{number:3}).progress.stage,'close');
+ assert.equal(validateProgress(v,profile,a.messages,{number:10}).progress.stage,'close');
+ assert.throws(()=>validateProgress(revised28(),profile,a.messages,{number:10}),/INVALID_CLOSURE/);
+});
+test('L28 focal: efeitos exigem relato próprio, hipótese e recusa de causalidade permanecem possíveis',()=>{
+ const a=replay['L28-T04-a'],statement='Isso prejudicou a leitura da avaliação.';
+ assert.throws(()=>validateMethodologicalFidelity({},a.messages,[statement]),/UNSUPPORTED_FACT/);
+ const forged={operationalClaims:[{kind:'impact',role:'user',message:0,quote:'reconheço que não deixei claro o impacto dessas mudanças nos prazos',text:statement}]};
+ assert.throws(()=>validateMethodologicalFidelity(forged,a.messages,[statement]),/UNSUPPORTED_FACT/);
+ const messages=[...a.messages,{role:'user',content:statement}],supported={operationalClaims:[{kind:'impact',role:'user',message:4,quote:statement,text:statement}]};
+ assert.doesNotThrow(()=>validateMethodologicalFidelity(supported,messages,[statement]));
+ for(const text of ['Como hipótese, isso prejudicou a leitura da avaliação.','Não posso afirmar que isso prejudicou a leitura da avaliação.','Não vou dizer que isso criou uma conclusão sobre priorização.'])
+  assert.doesNotThrow(()=>validateMethodologicalFidelity({},a.messages,[text]));
+});
 function opening27(messages,request){
  return {...structuredClone(l27.attempts[1]),
   text:'Uma opção breve para você adaptar ao reconhecimento e ao atraso que relatou.',

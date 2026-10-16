@@ -33,6 +33,7 @@ funções e a proteção pertinente diante de perigo físico realmente relatado.
 const patterns=[
  {name:'inner_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+(?:dificuldade|quest[aã]o|tens[aã]o|problema)\s+real\s+(?:n[aã]o\s+)?(?:é|est[aá])(?=\s|[,.!?;:]|$)/i},
  {name:'corrective_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+dificuldade\s+n[aã]o\s+é(?=\s)[^.!?\n]*[—–:-]\s*é\s+(?:que\s+)?voc[eê](?=\s|[,.!?;:]|$)/i},
+ {name:'communication_effect_assertion',kind:'impact',match:/\b(?:isso|falha de comunica[cç][aã]o|falta de comunica[cç][aã]o)\b[^.!?]*\b(?:prejudicou|prejudica|criou|gerou|causou)\b[^.!?]*\b(?:leitura|avalia[cç][aã]o|conclus[aã]o|interpreta[cç][aã]o|entendimento)\b/i},
  {name:'embedded_causal_assertion',kind:'impact',embeddedCausal:true,match:/\b(?:dizendo|dizer|afirmar|falar|explicar|pontuar)\b[^.!?]*\b(?:isso|epis[oó]dios|comportamentos)\b[^.!?]*\b(?:criou|causou|gerou|provocou)\b/i,sourceMatch:/\b(?:isso|epis[oó]dios|comportamentos)\b[^.!?]*\b(?:criou|causou|gerou|provocou)\b/i},
  {name:'silence_processing',kind:'impact',match:/\bsil[eê]ncio\b[^.!?]*(?:\b(?:é|foi)\b[^.!?]*processamento|processamento[^.!?]*,\s*n[aã]o\s+evas[aã]o)/i},
  {name:'moment_protection',kind:'impact',match:/\b(?:rea[cç][aã]o|ceder|isso|movimento)\b[^.!?]*\bprote(?:ge|geu)\b[^.!?]*\bmomento\b/i},
@@ -46,6 +47,7 @@ function validateMethodologicalFidelity(value,messages,parts){
   for(const rule of patterns){
    const match=rule.embeddedCausal&&part===value.delivery?.text?(rule.sourceMatch??rule.match):rule.match;
    if(!match.test(sentence))continue;
+   if(rule.name==='communication_effect_assertion'&&/\bn[aã]o\s+(?:(?:vou|posso|podemos)\s+)?(?:afirmar|dizer|confirmar|confirmo)\s+que\s*$/i.test(sentence.slice(0,sentence.search(match))))continue;
    // "pode ser X, não Y" still rules out Y. A possibility for X doesn't
    // establish exclusion of Y, even if another clause is conditional.
    const excludesAlternative=rule.name==='silence_processing'&&/,\s*n[aã]o\s+evas[aã]o/i.test(sentence);
