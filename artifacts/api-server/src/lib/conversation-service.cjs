@@ -5,6 +5,9 @@ const {selectReferences}=require('./ex04-reference.cjs');
 const {createHash}=require('node:crypto');
 const {turnDirective,closingFallback}=require('./conversation-guidance.cjs');
 const MAX_EXCHANGES = 10;
+const MAX_OPERATIONAL_INPUTS = 20;
+const MAX_OPERATIONAL_INPUT_BYTES = 64 * 1024;
+const OPERATIONAL_CAPACITY_MESSAGE = 'Esta conversa atingiu o limite operacional de 20 envios ou 64 KiB de texto do líder, incluindo tentativas falhas. Nenhum fato foi cortado e este envio não iniciou uma nova chamada de IA. Encerre a conversa ou apague os dados pelos controles disponíveis antes de iniciar outra.';
 const NOTICE_VERSION = 'history-v1-20261012';
 const CLOSE_SIGNAL = '[ENCERRAR]';
 class ConversationError extends Error {
@@ -14,12 +17,20 @@ function requireScope(scope) {
   if (!scope || typeof scope.userId !== 'string' || !scope.userId || typeof scope.organizationId !== 'string' || !scope.organizationId) throw new ConversationError('AUTH_REQUIRED', 401);
 }
 // Operational input journal, not private history or a completed exchange.
+function assertOperationalCapacity(context, content, externalCount=0) {
+  const users=(Array.isArray(context?.messages)?context.messages:[]).filter(m=>m.role==='user');
+  const count=Math.max(users.length,Object.keys(context?.inputReceipts||{}).length,externalCount);
+  const bytes=users.reduce((n,m)=>n+Buffer.byteLength(m.content||'','utf8'),0);
+  if(count>=MAX_OPERATIONAL_INPUTS||bytes+Buffer.byteLength(content,'utf8')>MAX_OPERATIONAL_INPUT_BYTES)
+    throw new ConversationError('OPERATIONAL_CAPACITY_REACHED',409);
+}
 function retainUserInput(session, entry) {
   if (!session || session.status !== 'active' || session.exchangeCount !== entry.expectedCount) throw new ConversationError('CONVERSATION_CHANGED',409);
   const context=structuredClone(session.context||{});
   const receipts=context.inputReceipts||{};
   if(receipts[entry.requestId])throw new ConversationError(receipts[entry.requestId].contentHash===entry.contentHash?'REQUEST_ALREADY_SUBMITTED':'IDEMPOTENCY_CONFLICT',409);
   if(Object.values(receipts).some(r=>r.status==='processing'))throw new ConversationError('TURN_IN_PROGRESS',409);
+  assertOperationalCapacity(context,entry.content);
   context.messages=[...(Array.isArray(context.messages)?context.messages:[]),{role:'user',content:entry.content}];
   context.inputReceipts={...receipts,[entry.requestId]:{contentHash:entry.contentHash,status:'processing'}};
   return context;
@@ -70,9 +81,16 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const history = settings.enabled && settings.noticeVersion === NOTICE_VERSION ? await repository.readPrivateHistory(scope, 4, input.sessionId) : [];
       const currentMessages = Array.isArray(ctx.messages) ? ctx.messages : [];
       const allMessages=inputRecorded?currentMessages:[...currentMessages,{role:'user',content:input.content.trim()}];
+      if(!inputRecorded)assertOperationalCapacity(ctx,input.content.trim());
+      const verifyInput=async()=>{
+        if(inputRecorded&&repository.assertInputCurrent)
+          await repository.assertInputCurrent(scope,{sessionId:input.sessionId,requestId:input.requestId,expectedCount:session.exchangeCount,settingsRevision:settings.revision});
+      };
+      await verifyInput();
       let analysis,classificationRaw;
       try { classificationRaw=await classify({ messages: allMessages, history, previousAgent: ctx.agentType || null,functionalNeed:ctx.functionalNeed??null });analysis = readAnalysis(classificationRaw); }
       catch (err) { if(err.code==='STORAGE_UNAVAILABLE')throw new ConversationError('STORAGE_UNAVAILABLE',503);const invalid=err.code==='INVALID_MODEL_RESPONSE'||['INCOMPLETE_CLASSIFICATION','MISSING_CLASSIFICATION'].includes(err.message)||err instanceof TypeError||err instanceof SyntaxError;throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE',invalid?502:503); }
+      await verifyInput();
       // Stored history can give context, but is not automatically a verified pattern.
       const functionalNeed=readFunctionalNeed(analysis,allMessages,ctx.functionalNeed);
       const trusted = { userId: scope.userId, organizationId: scope.organizationId, historyAuthorized: settings.enabled && settings.noticeVersion === NOTICE_VERSION, historyCorroborated: false, historyCompatibleWithCurrent: false,reportedMessages:allMessages,functionalNeed:ctx.functionalNeed };
@@ -96,8 +114,8 @@ function createConversationService({ repository, classify, respond, agentPrompts
       else {
         if (typeof agentPrompts[route.agent] !== 'string') throw new ConversationError('AGENT_CONFIGURATION_MISSING', 503);
         const proportionate=riskReading.kind==='physical'&&riskReading.verified?'':'\nNão há base verificada para ameaça física nesta leitura. Não acrescente instruções de afastamento físico, segurança ou emergência física sem relato pertinente. Atualize a ajuda com a correção atual do líder; risco organizacional não é automaticamente emergência física. Preserve a função documentada do agente selecionado. Incerteza não autoriza inventar data, execução, culpa, política ou obrigação.';
-        try { const response=await respond({ agent: route.agent, system:agentPrompts[route.agent]+'\n'+turnDirective(turnControl)+proportionate,messages:allMessages,history,turn:turnControl });if(repository.recordGeneration)await repository.recordGeneration(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,response});if(typeof response==='string')text=response;else {text=response.text;progress=response.progress??null;} }
-        catch (err) { if(err.code==='STORAGE_UNAVAILABLE')throw new ConversationError('STORAGE_UNAVAILABLE',503);const invalid=['RESPONSE_CONSTRAINT_FAILED','INCOMPLETE_RESPONSE','INVALID_PROGRESSION','INVALID_PROGRESS_EVIDENCE','INVALID_CLOSURE','UNSUPPORTED_FACT','DUPLICATE_DELIVERY','AUTONOMY_CONSTRAINT_FAILED'].includes(err?.message);throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE', invalid?502:503); }
+        try { const response=await respond({ agent: route.agent, system:agentPrompts[route.agent]+'\n'+turnDirective(turnControl)+proportionate,messages:allMessages,history,turn:turnControl });await verifyInput();if(repository.recordGeneration)await repository.recordGeneration(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,response});if(typeof response==='string')text=response;else {text=response.text;progress=response.progress??null;} }
+        catch (err) { if(err.code==='CONVERSATION_CHANGED')throw err;if(err.code==='STORAGE_UNAVAILABLE')throw new ConversationError('STORAGE_UNAVAILABLE',503);const invalid=['RESPONSE_CONSTRAINT_FAILED','INCOMPLETE_RESPONSE','INVALID_PROGRESSION','INVALID_PROGRESS_EVIDENCE','INVALID_CLOSURE','UNSUPPORTED_FACT','DUPLICATE_DELIVERY','AUTONOMY_CONSTRAINT_FAILED'].includes(err?.message);throw new ConversationError(invalid?'INVALID_MODEL_RESPONSE':'MODEL_UNAVAILABLE', invalid?502:503); }
       }
       if (typeof text !== 'string' || !text.trim() || text.length > 30000) throw new ConversationError('INVALID_MODEL_RESPONSE', 502);
       const earlyClose = progress?progress.stage==='close':text.trimEnd().endsWith(CLOSE_SIGNAL);
@@ -107,7 +125,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const result = { text, exchangeCount: count, maxExchanges: MAX_EXCHANGES, status: closing ? 'closed' : 'active', lowConfidence: route.mode === 'clarify', route: { mode: route.mode, agent: route.agent, transition: route.transition, reason: route.reason }, historyUsed: history.length > 0 };
       const messages = [...allMessages, { role: 'assistant', content: text }];
       const progressTrail=[...(Array.isArray(ctx.progressTrail)?ctx.progressTrail:[]),{turn:count,agent:route.agent,stage:progress?.stage??route.mode,completed:progress?.completed?.map(c=>c.criterion)??[],pending:progress?.pending??[]}].slice(-MAX_EXCHANGES);
-      const inputReceipts=inputRecorded?{...ctx.inputReceipts,[input.requestId]:{contentHash,status:'completed'}}:undefined;
+      const inputReceipts=inputRecorded&&!closing?{...ctx.inputReceipts,[input.requestId]:{contentHash,status:'completed'}}:undefined;
       const context = { messages: closing && !settings.enabled ? [] : messages, ...(inputReceipts?{inputReceipts}:{}), agentType: route.agent || previous,progress,progressTrail,situationReading,functionalNeed,routingVersion: ROUTING_VERSION, lastRequest: { id: input.requestId, content: input.content.trim(), result } };
       // Disabling history still permits operational context while a conversation is active.
       // Once it closes, retain no conversation text or replay payload in that context.
@@ -123,4 +141,4 @@ function createConversationService({ repository, classify, respond, agentPrompts
   }
   return { turn };
 }
-module.exports = { createConversationService, ConversationError, readAnalysis, NOTICE_VERSION, MAX_EXCHANGES, retainUserInput };
+module.exports = { createConversationService, ConversationError, readAnalysis, NOTICE_VERSION, MAX_EXCHANGES, retainUserInput, assertOperationalCapacity, MAX_OPERATIONAL_INPUTS, MAX_OPERATIONAL_INPUT_BYTES, OPERATIONAL_CAPACITY_MESSAGE };

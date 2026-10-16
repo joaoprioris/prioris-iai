@@ -6,6 +6,7 @@ import {
   createConversationService,
   ConversationError,
   NOTICE_VERSION,
+  OPERATIONAL_CAPACITY_MESSAGE,
 } from "../lib/conversation-service.cjs";
 import { createPostgresRepository } from "../lib/private-history-repository.cjs";
 import baseContract from "../lib/agent-contract.json";
@@ -480,6 +481,7 @@ export function createFunctionalRouter(
       SESSION_NOT_FOUND: "Sessão não encontrada.",
       SESSION_CLOSED: "Conversa encerrada. Inicie uma nova.",
       INVALID_INPUT: "Mensagem ou identificador da requisição inválido.",
+      OPERATIONAL_CAPACITY_REACHED: OPERATIONAL_CAPACITY_MESSAGE,
       IDEMPOTENCY_CONFLICT:
         "O identificador desta requisição já foi usado com outro conteúdo.",
     };

@@ -93,12 +93,14 @@ function abandonPilotConversation(state, { expectedRound, sessionId, reason = ''
     kind: 'abandonment', approval: false, at: now, reason,
     recordedBy: 'authenticated-owner',
   };
-  state.session = { ...session, status: 'closed' };
+  state.session = { ...session, status: 'closed', context: {
+    agentType: session.context?.agentType, routingVersion: session.context?.routingVersion,
+  } };
   state.abandonment = abandonment;
   state.audit = [...audit, {
     ...abandonment,
     kind: 'owner_abandonment', outcome: 'abandoned', round: state.round,
-    sessionId,
+    sessionId, conversationSnapshot: structuredClone(session.context ?? {}),
   }];
   try { save(); }
   catch (error) {

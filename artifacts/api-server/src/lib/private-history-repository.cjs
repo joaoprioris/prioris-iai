@@ -1,5 +1,5 @@
 'use strict';
-const { NOTICE_VERSION, retainUserInput } = require('./conversation-service.cjs');
+const { NOTICE_VERSION, retainUserInput, ConversationError } = require('./conversation-service.cjs');
 function createPostgresRepository(pool) {
   const scoped = scope => [scope.userId, scope.organizationId];
   async function transaction(scope, work) {
@@ -15,6 +15,10 @@ function createPostgresRepository(pool) {
     finally { client.release(); }
   }
   return {
+    async assertInputCurrent(scope,entry){
+      const {rows}=await pool.query("SELECT s.id FROM sessions s JOIN prioris_history_preferences p USING(user_id,organization_id) WHERE s.user_id=$1 AND s.organization_id=$2 AND s.id=$3 AND s.status='active' AND s.exchange_count=$4 AND p.revision::text=$5 AND s.context->'inputReceipts'->$6::text->>'status'='processing'",[...scoped(scope),entry.sessionId,entry.expectedCount,String(entry.settingsRevision),entry.requestId]);
+      if(rows.length!==1)throw new ConversationError('CONVERSATION_CHANGED',409);
+    },
     async recordInput(scope,entry){
       return transaction(scope,async(client,settings)=>{
         if(String(settings.revision)!==String(entry.settingsRevision))throw Object.assign(Error('CONVERSATION_CHANGED'),{code:'CONVERSATION_CHANGED'});

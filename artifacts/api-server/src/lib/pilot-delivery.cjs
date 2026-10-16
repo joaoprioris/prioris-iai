@@ -1,5 +1,6 @@
 'use strict';
 const {createHash}=require('node:crypto');
+const {assertPilotInputCapacity}=require('./pilot-store.cjs');
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const descriptions={
  processing:'Envio registrado; processamento em andamento. Não reenvie.',
@@ -57,6 +58,7 @@ function createPilotDelivery(state,save){
   if(old){if(old.contentHash!==digest(input.content.trim()))throw Error('IDEMPOTENCY_CONFLICT');return {replay:true,entry:old};}
   if(inFlight||Object.values(state.delivery||{}).some(d=>d.status==='processing'))throw Error('TURN_IN_PROGRESS');
   if(state.session.status!=='active')throw Error('SESSION_CLOSED');
+  assertPilotInputCapacity(state,input.content.trim(),input.requestId);
   return transaction(()=>{
    state.delivery??={};
    const entry={requestId:input.requestId,sessionId:input.sessionId,content:input.content.trim(),contentHash:digest(input.content.trim()),status:'processing',at:Date.now()};

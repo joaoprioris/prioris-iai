@@ -8,7 +8,7 @@ const priorHash='1c67f23e622e277eeefd2e52bbbb00261bf978cd2e1005122cb2b67979881d2
 if(digest(prior)!==priorHash)throw Error('ORIGINAL_PILOT_CHANGED');
 const {createPilotPersistence}=require('../artifacts/api-server/src/lib/pilot-persistence.cjs');
 const {createPilotBudget}=require('../artifacts/api-server/src/lib/pilot-budget.cjs');
-const {createPilotStore}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+const {createPilotStore,assertPilotInputCapacity}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
 const {pilotIdentity}=require('../artifacts/api-server/src/lib/pilot-next-round.cjs');
 const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
 const {resolveContract}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
@@ -53,6 +53,7 @@ async function main(){
  const requestId=input.requestId;
  if(!/^L\d\d-T\d\d-[a-z0-9-]+$/.test(requestId))throw Error('INVALID_REQUEST_ID');
  if(campaign.operations[requestId])return inspectOperation(campaign,id,requestId,{activeRequest:false});
+ assertPilotInputCapacity(campaign.cases[id]??{},input.content.trim(),requestId);
  const admission=admitIndependentCase(campaign,id,file);
  for(const {requestId:pendingId,proof} of admission.pending)
   campaign.operations[pendingId].independentRecovery=proof;

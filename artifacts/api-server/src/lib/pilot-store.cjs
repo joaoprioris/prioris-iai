@@ -1,6 +1,11 @@
 'use strict';
 const {randomUUID,createHash}=require('node:crypto');
-const {retainUserInput,ConversationError}=require('./conversation-service.cjs');
+const {retainUserInput,ConversationError,assertOperationalCapacity}=require('./conversation-service.cjs');
+function assertPilotInputCapacity(state,content,requestId) {
+ const ids=new Set([...Object.keys(state.delivery||{}),...Object.keys(state.requests||{}),...(state.audit||[]).filter(a=>a.sessionId===state.session?.id&&a.requestId).map(a=>a.requestId)]);
+ ids.delete(requestId); // The current delivery may already have been admitted.
+ assertOperationalCapacity(state.session?.context,content,ids.size);
+}
 const IDENTITY=Object.freeze({id:'00000000-0000-4000-8000-000000000301',organizationId:'00000000-0000-4000-8000-000000000302',organizationName:'Empresa fictícia — piloto',email:'piloto@example.invalid',role:'leader'});
 function createPilotStore(state,save=()=>{},identity=IDENTITY) {
  const owned=s=>s?.userId===identity.id&&s?.organizationId===identity.organizationId;
@@ -11,12 +16,16 @@ function createPilotStore(state,save=()=>{},identity=IDENTITY) {
   recordInput:async(s,entry)=>{
    if(!owned(s)||state.session?.id!==entry.sessionId)throw Error('PILOT_SCOPE_DENIED');
    const context=retainUserInput(state.session,entry);
+   assertPilotInputCapacity(state,entry.content,entry.requestId);
    state.session.context=context;save();return structuredClone(context);
   },
   recordInputFailure:async(s,entry)=>{
    if(!owned(s)||state.session?.id!==entry.sessionId)throw Error('PILOT_SCOPE_DENIED');
    const receipt=state.session.context?.inputReceipts?.[entry.requestId];
    if(receipt?.status==='processing'){receipt.status='failed';save();}
+  },
+  assertInputCurrent:async(s,entry)=>{
+   if(!owned(s)||state.session?.id!==entry.sessionId||state.session.status!=='active'||state.session.exchangeCount!==entry.expectedCount||entry.settingsRevision!=='pilot-history-off'||state.session.context?.inputReceipts?.[entry.requestId]?.status!=='processing')throw new ConversationError('CONVERSATION_CHANGED',409);
   },
   getHistorySettings:async s=>{if(!owned(s))throw Error('PILOT_SCOPE_DENIED');return {enabled:false,noticeVersion:null,revision:'pilot-history-off'};},
   readPrivateHistory:async()=>{throw Error('PILOT_HISTORY_DISABLED');},
@@ -78,4 +87,4 @@ function createPilotStore(state,save=()=>{},identity=IDENTITY) {
  }
  return {repository,open,identity};
 }
-module.exports={createPilotStore,IDENTITY};
+module.exports={createPilotStore,IDENTITY,assertPilotInputCapacity};

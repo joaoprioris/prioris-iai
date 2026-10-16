@@ -59,3 +59,15 @@ uma leitura anterior inadequada e obrigava o líder a repetir sua explicação.
 
 **How to apply:** separar retenção do envio, aceitação da resposta e conclusão da
 troca; conservar idempotência, consentimento, isolamento e incerteza financeira.
+
+Retenção de envios falhos precisa de capacidade finita, sem descartar fatos para
+abrir espaço. Ao atingir o limite, recusar antes de nova chamada e manter a
+correção do líder. Apagamento invalida resultados atrasados, mesmo se houver
+novo consentimento depois; não restaurar contexto por conclusão tardia.
+
+**Why:** o proprietário exige que falhas repetidas não ampliem indefinidamente
+armazenamento, contexto ou custo e que dados apagados não reapareçam.
+
+**How to apply:** contar falhas junto com admissões, preservar idempotência e
+reservas, verificar invalidação entre chamadas e separar arquivo de auditoria
+fictícia de contexto operacional que pode voltar ao modelo.

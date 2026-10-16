@@ -31,6 +31,148 @@ function corrected() {
   delivery:{kind:'message',text:'Quero conversar sobre as interrupções nas reuniões e ouvir sua leitura sobre esses episódios.'},
   authorship:{...structuredClone(l26.attempts[0].authorship),approachEvidence:[]}};
 }
+test('Capacidade operacional: 20 falhas ficam limitadas, correções intactas e nenhum custo no 21º envio',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createPilotDelivery}=require('../artifacts/api-server/src/lib/pilot-delivery.cjs');
+ const {createConversationService,MAX_OPERATIONAL_INPUTS}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId},state={budget:{charged:700,calls:[]}};
+ const store=createPilotStore(state),session=store.open(scope),delivery=createPilotDelivery(state,()=>{});
+ let calls=0;
+ const service=createConversationService({repository:store.repository,agentPrompts:{},respond:async()=>assert.fail('generation not expected'),
+  classify:async()=>{calls++;state.budget.charged+=100;throw Error('MISSING_CLASSIFICATION');}});
+ for(let i=0;i<MAX_OPERATIONAL_INPUTS;i++){
+  const input={sessionId:session.id,requestId:'capacity-'+String(i).padStart(3,'0'),content:'Correção literal '+i+': apenas retrabalho confirmado.'};
+  delivery.begin(input,0);
+  await assert.rejects(()=>service.turn(scope,input),e=>e.code==='INVALID_MODEL_RESPONSE');
+  delivery.finish(input.requestId,'INVALID_MODEL_RESPONSE');
+ }
+ assert.equal(state.session.exchangeCount,0);assert.equal(calls,20);
+ assert.equal(Object.keys(state.session.context.inputReceipts).length,20);
+ assert.equal(state.session.context.messages.length,20);
+ assert.equal(state.session.context.messages.at(-1).content,'Correção literal 19: apenas retrabalho confirmado.');
+ const before=JSON.stringify(state);
+ for(let i=0;i<4;i++){
+  const next={sessionId:session.id,requestId:'capacity-denied-'+i,content:'Não apague minha correção.'};
+  assert.throws(()=>delivery.begin(next,0),e=>e.code==='OPERATIONAL_CAPACITY_REACHED');
+  await assert.rejects(()=>service.turn(scope,next),e=>e.code==='OPERATIONAL_CAPACITY_REACHED');
+ }
+ assert.equal(JSON.stringify(state),before);assert.equal(calls,20);assert.equal(state.budget.charged,2700);
+ const old={sessionId:session.id,requestId:'capacity-019',content:'Correção literal 19: apenas retrabalho confirmado.'};
+ assert.equal(delivery.begin(old,0).replay,true);
+ await assert.rejects(()=>service.turn(scope,old),e=>e.code==='REQUEST_ALREADY_SUBMITTED');
+ await assert.rejects(()=>service.turn(scope,{...old,content:'Conteúdo diferente.'}),e=>e.code==='IDEMPOTENCY_CONFLICT');
+ assert.equal(JSON.stringify(state),before);
+});
+test('Capacidade operacional: 64 KiB UTF-8 exatos, sem corte de fatos ou geração após o limite',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createConversationService,MAX_OPERATIONAL_INPUT_BYTES}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId},state={};
+ const store=createPilotStore(state),session=store.open(scope);let calls=0;
+ const service=createConversationService({repository:store.repository,agentPrompts:{},
+  classify:async()=>{calls++;throw Error('MISSING_CLASSIFICATION');},respond:async()=>assert.fail('unexpected')});
+ const content='é'.repeat(4096);
+ for(let i=0;i<8;i++)await assert.rejects(()=>service.turn(scope,{sessionId:session.id,requestId:'byte-limit-'+i,content}),e=>e.code==='INVALID_MODEL_RESPONSE');
+ assert.equal(state.session.context.messages.reduce((n,m)=>n+Buffer.byteLength(m.content),0),MAX_OPERATIONAL_INPUT_BYTES);
+ assert(state.session.context.messages.every(m=>m.content===content));
+ const before=JSON.stringify(state);
+ await assert.rejects(()=>service.turn(scope,{sessionId:session.id,requestId:'bytes-denied',content:'x'}),e=>e.code==='OPERATIONAL_CAPACITY_REACHED');
+ assert.equal(calls,8);assert.equal(state.session.exchangeCount,0);assert.equal(JSON.stringify(state),before);
+});
+// PostgreSQL repository with an injected, in-memory SQL transport only. No DB connection.
+function operationalPgFixture(){
+ const {createPostgresRepository}=require('../artifacts/api-server/src/lib/private-history-repository.cjs');
+ const row={id:'synthetic-session',context:{},status:'active',exchange_count:0};
+ const prefs={enabled:false,notice_version:null,revision:0},queries=[],records=[];
+ const scope={userId:'synthetic-user',organizationId:'synthetic-org'};
+ const query=async(sql,v=[])=>{
+  queries.push(sql);
+  const result=rows=>({rows,rowCount:rows.length});
+  if(['BEGIN','COMMIT','ROLLBACK'].includes(sql)||sql.startsWith('INSERT INTO prioris_history_preferences'))return result([]);
+  assert.equal(v[0],scope.userId);assert.equal(v[1],scope.organizationId);
+  if(sql.startsWith('SELECT enabled,notice_version,revision'))return result([{...prefs}]);
+  if(sql.startsWith('SELECT content_hash')||sql.startsWith('SELECT 1 FROM prioris_completed_requests')||sql.startsWith('SELECT h.record'))return result([]);
+  if(sql.startsWith('SELECT id,context,status,exchange_count')||sql.startsWith('SELECT context,status,exchange_count'))return result([structuredClone(row)]);
+  if(sql.startsWith('SELECT s.id')){
+   assert(sql.includes("s.status='active'")&&sql.includes('p.revision::text=$5')&&sql.includes("->>'status'='processing'"));
+   return result(row.status==='active'&&row.exchange_count===v[3]&&String(prefs.revision)===v[4]&&row.context?.inputReceipts?.[v[5]]?.status==='processing'?[{id:row.id}]:[]);
+  }
+  if(sql.startsWith('UPDATE prioris_history_preferences')){
+   prefs.revision++;prefs.enabled=sql.includes('SET enabled=false')?false:v[2];prefs.notice_version=prefs.enabled?v[3]:null;return result([]);
+  }
+  if(sql.startsWith('UPDATE sessions SET context=NULL')){row.context=null;row.status='closed';return result([]);}
+  if(sql.startsWith('DELETE FROM prioris_')){records.length=0;return result([]);}
+  if(sql.startsWith('UPDATE sessions SET context=jsonb_set')){
+   if(row.status==='active'&&row.context?.inputReceipts?.[v[3]]?.status==='processing')row.context.inputReceipts[v[3]].status='failed';
+   return result([]);
+  }
+  if(sql.startsWith('UPDATE sessions SET context=$4::jsonb')){
+   if(sql.includes('exchange_count=$8')&&(row.status!=='active'||row.exchange_count!==v[7]))return result([]);
+   row.context=JSON.parse(v[3]);if(sql.includes('agent_type=$5')){row.status=v[5];row.exchange_count=v[6];}
+   return result([{id:row.id}]);
+  }
+  if(sql.startsWith('INSERT INTO prioris_private_history')){records.push(JSON.parse(v[3]));return result([]);}
+  if(sql.startsWith('INSERT INTO prioris_completed_requests'))return result([]);
+  assert.fail('Unexpected SQL shape');
+ };
+ const repo=createPostgresRepository({query,connect:async()=>({query,release(){}})});
+ return {repo,row,prefs,scope,queries,records};
+}
+test('Capacidade operacional: apagamento durante classificação impede geração e não ressuscita contexto',async()=>{
+ const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const f=operationalPgFixture();let release,entered;
+ const gate=new Promise(r=>release=r),started=new Promise(r=>entered=r);let generation=0;
+ const service=createConversationService({repository:f.repo,agentPrompts:{FBK:'Simulado'},
+  classify:async()=>{entered();await gate;return {scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,decisionSufficientlyClear:true,ownRecurrenceReported:false};},
+  respond:async()=>{generation++;return 'Resposta não autorizada.';}});
+ const operation=service.turn(f.scope,{sessionId:f.row.id,requestId:'erase-during-classify',content:'Correção a apagar.'});
+ await started;await f.repo.eraseHistory(f.scope);release();
+ await assert.rejects(()=>operation,e=>e.code==='CONVERSATION_CHANGED');
+ assert.equal(generation,0);assert.equal(f.row.context,null);assert.equal(f.row.status,'closed');
+ assert.equal(f.row.exchange_count,0);assert.deepEqual(f.records,[]);
+});
+test('Capacidade operacional: apagamento e novo consentimento durante resposta não restauram envio antigo',async()=>{
+ const {createConversationService,NOTICE_VERSION}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const f=operationalPgFixture();let release,entered;
+ const gate=new Promise(r=>release=r),started=new Promise(r=>entered=r);
+ const service=createConversationService({repository:f.repo,agentPrompts:{FBK:'Simulado'},
+  classify:async()=>({scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,decisionSufficientlyClear:true,ownRecurrenceReported:false}),
+  respond:async()=>{entered();await gate;return 'Resposta antiga não pode ser exibida.';}});
+ const operation=service.turn(f.scope,{sessionId:f.row.id,requestId:'erase-during-answer',content:'Envio antigo.'});
+ await started;await f.repo.eraseHistory(f.scope);await f.repo.setHistorySettings(f.scope,true,NOTICE_VERSION);release();
+ await assert.rejects(()=>operation,e=>e.code==='CONVERSATION_CHANGED');
+ assert.equal(f.row.context,null);assert.equal(f.row.exchange_count,0);assert.deepEqual(f.records,[]);
+});
+test('Capacidade operacional: mudança de consentimento invalida geração posterior e admissão com revisão antiga',async()=>{
+ const {createConversationService,NOTICE_VERSION}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const f=operationalPgFixture();await f.repo.setHistorySettings(f.scope,true,NOTICE_VERSION);
+ let release,entered,generation=0;
+ const gate=new Promise(r=>release=r),started=new Promise(r=>entered=r);
+ const service=createConversationService({repository:f.repo,agentPrompts:{FBK:'Simulado'},
+  classify:async()=>{entered();await gate;return {scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,decisionSufficientlyClear:true,ownRecurrenceReported:false};},
+  respond:async()=>{generation++;return 'Resposta simulada.';}});
+ const operation=service.turn(f.scope,{sessionId:f.row.id,requestId:'consent-during-classify',content:'Correção operacional não é histórico pessoal.'});
+ await started;await f.repo.setHistorySettings(f.scope,false,null);release();
+ await assert.rejects(()=>operation,e=>e.code==='CONVERSATION_CHANGED');assert.equal(generation,0);
+ assert.equal(f.row.exchange_count,0);assert.equal(f.records.length,0);
+ await assert.rejects(()=>f.repo.recordInput(f.scope,{sessionId:f.row.id,requestId:'stale-settings',settingsRevision:'1',expectedCount:0,contentHash:'fake',content:'Não admitir.'}),e=>e.code==='CONVERSATION_CHANGED');
+});
+test('Capacidade operacional: fechamento consentido remove recibos; abandono fictício limpa contexto sem mexer em auditoria e reserva',async()=>{
+ const {createConversationService,NOTICE_VERSION}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const {abandonPilotConversation}=require('../artifacts/api-server/src/lib/pilot-next-round.cjs');
+ const f=operationalPgFixture();await f.repo.setHistorySettings(f.scope,true,NOTICE_VERSION);
+ const service=createConversationService({repository:f.repo,agentPrompts:{FBK:'Simulado'},
+  classify:async()=>({scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,decisionSufficientlyClear:true,ownRecurrenceReported:false}),
+  respond:async()=> 'Uma conclusão simulada, sem afirmar execução. [ENCERRAR]'});
+ const r=await service.turn(f.scope,{sessionId:f.row.id,requestId:'close-operational',content:'Tenho clareza suficiente.'});
+ assert.equal(r.status,'closed');assert.equal(f.row.context.inputReceipts,undefined);assert.equal(f.records.length,1);
+ const state={round:1,expiresAt:100,session:{id:'fake',status:'active',context:{messages:[{role:'user',content:'Correção preservada em auditoria.'}],inputReceipts:{one:{status:'failed'}}}},audit:[{kind:'immutable-fixture'}],budget:{charged:1000,calls:[{status:'uncertain',reservedMicroUSD:900}]}};
+ const budget=JSON.stringify(state.budget),audit=JSON.stringify(state.audit[0]);
+ abandonPilotConversation(state,{expectedRound:1,sessionId:'fake',now:1},()=>{});
+ assert.equal(state.session.status,'closed');assert.equal(state.session.context.messages,undefined);assert.equal(state.session.context.inputReceipts,undefined);
+ assert.equal(JSON.stringify(state.budget),budget);assert.equal(JSON.stringify(state.audit[0]),audit);
+ assert.equal(state.audit.at(-1).conversationSnapshot.messages[0].content,'Correção preservada em auditoria.');
+ assert.equal(state.abandonment.approval,false);
+});
 test('Recuperação focal: falha conserva correção, recarga, isolamento e idempotência sem completar troca',async()=>{
  const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
  const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');

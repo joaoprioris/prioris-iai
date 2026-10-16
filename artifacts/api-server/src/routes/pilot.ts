@@ -12,6 +12,7 @@ import { resolve, dirname } from "node:path";
 import { createPilotBudget } from "../lib/pilot-budget.cjs";
 import { createPilotStore } from "../lib/pilot-store.cjs";
 import { createPilotDelivery } from "../lib/pilot-delivery.cjs";
+import { OPERATIONAL_CAPACITY_MESSAGE } from "../lib/conversation-service.cjs";
 import { createPilotPersistence } from "../lib/pilot-persistence.cjs";
 import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
 import { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation } from "../lib/pilot-next-round.cjs";
@@ -435,7 +436,7 @@ export function createPilotRouter(
     }
     let releaseRequest:(()=>void)|undefined;
     try { releaseRequest=persistence.acquireRequest();delivery.begin(req.body,inFlight); }
-    catch(err) {releaseRequest?.();res.status((err as any).code==="STORAGE_UNAVAILABLE"?503:409).json({code:(err as any).code??(err as Error).message,error:"O envio não foi iniciado. Consulte o estado registrado."});return;}
+    catch(err) {releaseRequest?.();const code=(err as any).code??(err as Error).message;res.status(code==="STORAGE_UNAVAILABLE"?503:409).json({code,error:code==="OPERATIONAL_CAPACITY_REACHED"?OPERATIONAL_CAPACITY_MESSAGE:"O envio não foi iniciado. Consulte o estado registrado."});return;}
     inFlight += 1;
     // A disconnected browser must not unlock a still-running provider call.
     let released = false;

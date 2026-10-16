@@ -148,7 +148,9 @@ test('Desistência mantém falas, falhas, custo incerto e janela; não aprova, n
   const decision = abandonPilotConversation(s, { ...request, reason }, () => { writes++; });
   assert.equal(writes, 1); assert.equal(decision.approval, false); assert.equal(decision.kind, 'abandonment');
   assert.equal(s.session.status, 'closed'); assert.equal(s.session.exchangeCount, 3);
-  assert.deepEqual(s.session.context, before.session.context);
+  assert.equal(s.session.context.messages, undefined);
+  assert.equal(s.session.context.inputReceipts, undefined);
+  assert.deepEqual(s.audit.at(-1).conversationSnapshot, before.session.context);
   assert.deepEqual(s.audit.slice(0, -1), before.audit);
   assert.equal(s.audit.at(-1).outcome, 'abandoned'); assert.equal(s.audit.at(-1).approval, false);
   assert.equal(s.audit.at(-1).reason, reason);
