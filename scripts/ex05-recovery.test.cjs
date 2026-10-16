@@ -22,7 +22,10 @@ function provider(values) {
  const p=mod.exports.createModelProviders({onGenerationObservation:e=>observations.push(e),onValidationObservation:e=>events.push(e),client:{messages:{create:async payload=>{
   calls.push(payload);assert(values.length>0,'Unexpected model invocation');
   const value=structuredClone(values.shift());
-  const input=payload.tool_choice.name==='revisar_exemplo'&&value.delivery?{text:value.delivery.text}:value;
+  const input=payload.tool_choice.name==='revisar_exemplo'&&value.delivery?
+   (payload.tools[0].input_schema.required.includes('presentation')?
+    {text:value.delivery.text,presentation:value.text,closingSummary:value.closingSummary??'',nextStep:value.nextStep??''}:
+    {text:value.delivery.text}):value;
   return {stop_reason:'tool_use',content:[{type:'tool_use',name:payload.tool_choice.name,input}],usage:{input_tokens:0,output_tokens:0}};
  }}}});
  return {p,calls,events,observations};
@@ -915,26 +918,129 @@ const short29='Em duas ocasiões, os dados atrasaram e refiz a consolidação. T
 // Synthetic positive control only: the raw archive has an invalid assistant claim.
 // Runtime repair never removes or rewrites that claim; full validation refuses it.
 const scopeSeed29=()=>({...structuredClone(l29.attempts[0]),operationalClaims:[]});
+const exampleEdit=(text,presentation='Uma opção curta para você adaptar:')=>({text,presentation,closingSummary:'',nextStep:''});
+const b4=replay['EX05-C3-COMPARE-L29-T02-preflight'].regressionConversation4;
+const b4Candidates=b4.checkpoint.audit.at(-1).generationAttempts.map(g=>g.input);
+const edit5=()=>exampleEdit('Em duas entregas, os dados chegaram após o prazo e precisei refazer a consolidação. Em uma, mudei o formato perto do prazo.');
+const compose5=(candidate=b4Candidates[0],edit=edit5())=>require('../artifacts/api-server/src/lib/conversation-instructions.cjs').applyExampleRepair(candidate,edit,true);
+test('Composição 5: cópia dividida real não é apagável por busca literal, mas recomposição não a reutiliza',()=>{
+ const {applyExampleRepair}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+ const original=structuredClone(b4Candidates[0]),before=JSON.stringify(original);
+ const legacy=applyExampleRepair(original,{text:edit5().text});
+ assert.equal(legacy.normalizations.length,0);assert(legacy.candidate.text.includes('recentes'));
+ const revised=compose5(original);
+ assert.equal(revised.candidate.text,edit5().presentation);
+ assert(!JSON.stringify([revised.candidate.text,revised.candidate.delivery]).includes('recentes'));
+ assert.equal(JSON.stringify(original),before);
+ assert.doesNotThrow(()=>validateProgress(revised.candidate,profile,b4.messages,{number:2}));
+});
+test('Composição 5: cópia contínua e exemplo sem cópia recebem somente campos exibíveis novos',()=>{
+ const {applyExampleRepair}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+ const continuous={...b4Candidates[0],text:'Apresentação antiga.\n\n"'+b4Candidates[0].delivery.text+'"'};
+ assert(applyExampleRepair(continuous,{text:edit5().text}).normalizations.length>0);
+ for(const text of [continuous.text,'Apresentação antiga sem exemplo, com recência: recentes.']){
+  const r=compose5({...b4Candidates[0],text});
+  assert.equal(r.candidate.text,edit5().presentation);assert(!r.candidate.text.includes('antiga'));
+  assert.doesNotThrow(()=>validateProgress(r.candidate,profile,b4.messages,{number:2}));
+ }
+});
+test('Composição 5: dois candidatos reais continuam recusados com 64 e 48 palavras',()=>{
+ for(const [i,v] of b4Candidates.entries()){
+  assert.equal(v.delivery.text.trim().split(/\s+/).length,[64,48][i]);
+  assert.throws(()=>validateProgress(v,profile,b4.messages,{number:2}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
+ }
+});
+test('Composição 5: recência da apresentação antiga não pode ser reintroduzida no reparo',()=>{
+ const r=compose5(b4Candidates[0],exampleEdit(edit5().text,'Foram entregas recentes.'));
+ assert.throws(()=>validateProgress(r.candidate,profile,b4.messages,{number:2}),e=>e.message==='UNSUPPORTED_FACT'&&e.validationReason==='UNSUPPORTED_TEMPORAL_FACT');
+ const copied=compose5(b4Candidates[0],exampleEdit(edit5().text,b4Candidates[0].text));
+ assert.throws(()=>validateProgress(copied.candidate,profile,b4.messages,{number:2}));
+});
+test('Composição 5: instruções ao líder dentro de exemplo curto são recusadas sem alterar destinatário',()=>{
+ for(const text of ['Você pode descrever: "Os dados chegaram depois do prazo." Depois registre a expectativa: "Quero aviso antecipado."','Depois registre a expectativa: "Gostaria de combinar prazos."']){
+  const r=compose5(b4Candidates[0],exampleEdit(text));
+  assert.throws(()=>validateProgress(r.candidate,profile,b4.messages,{number:2}),e=>e.validationReason==='EXAMPLE_NOT_INTERLOCUTOR_SPEECH');
+ }
+ const question=compose5(b4Candidates[0],exampleEdit('Como você está vendo esses dois episódios?'));
+ assert.doesNotThrow(()=>validateProgress(question.candidate,profile,b4.messages,{number:2}));
+});
+test('Composição 5: duplicação contínua ou parcial na nova apresentação é recusada, não removida por aproximação',()=>{
+ for(const text of ['Uma opção: "'+edit5().text+'"','Uma opção: "Em uma, mudei o formato perto do prazo."']){
+  const r=compose5(b4Candidates[0],exampleEdit(edit5().text,text));
+  assert.throws(()=>validateProgress(r.candidate,profile,b4.messages,{number:2}),/DUPLICATE_DELIVERY/);
+ }
+});
+test('Composição 5: nenhuma preservação parcial silenciosa se campos exibíveis ou controle faltarem',()=>{
+ const {applyExampleRepair}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+ for(const edit of [{text:edit5().text},{...edit5(),presentation:''},{...edit5(),nextStep:'Próximo passo antigo.'},{...edit5(),authorship:{supportMode:'review'}}]){
+  assert.throws(()=>applyExampleRepair(b4Candidates[0],edit,true),/INVALID_PROGRESSION/);
+ }
+ const r=compose5();
+ for(const k of Object.keys(b4Candidates[0]).filter(k=>!['text','delivery','closingSummary','nextStep'].includes(k)))assert.deepEqual(r.candidate[k],b4Candidates[0][k],k);
+});
+test('Composição 5: fluxo real injetado recompõe apresentação e exemplo, preserva bruto e exibe uma cópia',async()=>{
+ const initial=structuredClone(b4Candidates[0]),snapshot=JSON.stringify(initial),edit=edit5(),h=provider([initial,edit]);
+ const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages:b4.messages,history:[],turn:{number:2,max:10}});
+ assert.equal(h.calls.length,2);assert.equal(h.calls[1].max_tokens,600);
+ assert.deepEqual(h.calls[1].tools[0].input_schema.required,['text','presentation','closingSummary','nextStep']);
+ assert.equal(h.observations[1].repairScope,'display_and_delivery');
+ assert.equal(r.text.split(edit.text).length-1,1);assert(r.text.startsWith(edit.presentation));
+ assert(!r.text.includes('recentes'));assert(!r.text.includes('Depois registre'));assert(!r.text.includes(initial.text));
+ assert.deepEqual(h.observations[0].input,initial);assert.equal(JSON.stringify(initial),snapshot);
+ assert.deepEqual(h.observations[1].input.authorship,initial.authorship);
+});
+test('Composição 5: reparo continua inválido sem terceira chamada nem aceitação por relabeling',async()=>{
+ const h=provider([b4Candidates[0],exampleEdit(b4Candidates[1].delivery.text)]);
+ await assert.rejects(()=>h.p.respond({agent:'FBK',system:profile.prompt,messages:b4.messages,history:[],turn:{number:2,max:10}}),/AUTONOMY_CONSTRAINT_FAILED/);
+ assert.equal(h.calls.length,2);assert.deepEqual(h.events.map(e=>e.reason),['EXAMPLE_TOO_LONG','EXAMPLE_TOO_LONG']);
+});
+test('Composição 5: quarenta palavras não autoriza fato inventado ou pedido retirado',()=>{
+ const temporal=compose5(b4Candidates[0],exampleEdit('Nos últimos meses, precisei refazer a consolidação.'));
+ assert.throws(()=>validateProgress(temporal.candidate,profile,b4.messages,{number:2}),/UNSUPPORTED_FACT/);
+ const valid=compose5().candidate;
+ assert.throws(()=>validateProgress(valid,profile,[...b4.messages,{role:'user',content:'Não quero exemplo. Prefiro refletir sobre a abordagem.'}],{number:2}),e=>e.validationReason==='EXAMPLE_WITHDRAWN');
+ const tooLong=compose5(b4Candidates[0],exampleEdit(Array(41).fill('palavra').join(' ')));
+ assert.throws(()=>validateProgress(tooLong.candidate,profile,b4.messages,{number:2}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
+});
+test('Composição 5: fechamento recompõe síntese e próximo passo e mantém proibição de pergunta',()=>{
+ const initial={...b4Candidates[0],stage:'close',closingSummary:'Resumo antigo com entregas recentes.',nextStep:'Voltar ainda hoje, sem fonte.'};
+ const edit={...edit5(),closingSummary:'Você quer registrar os episódios sem tratá-los como padrão. A causa não foi esclarecida.',nextStep:'Revisar o registro e a parte que você reconheceu, sem atribuir culpa.'};
+ const r=compose5(initial,edit);
+ const validated=validateProgress(r.candidate,profile,b4.messages,{number:2});
+ assert(!validated.text.includes('recentes'));assert(!validated.text.includes('hoje'));
+ assert.equal(validated.text.split(edit.text).length-1,1);
+ const bad=compose5(initial,{...edit,nextStep:'Qual seria o próximo passo?'}).candidate;
+ assert.throws(()=>validateProgress(bad,profile,b4.messages,{number:2}),/INVALID_CLOSURE/);
+});
+test('Composição 5: orientações dos outros agentes e caminho legado de edição ficam idênticos',()=>{
+ const source=fs.readFileSync('generated-artifacts/ex05-2/delivery/previous-files/EX05-2-conversation-4/artifacts/api-server/src/lib/conversation-instructions.cjs','utf8');
+ const filename=path.resolve('artifacts/api-server/src/lib/previous-instructions-for-test.cjs'),old=new Module(filename,module);
+ old.filename=filename;old.paths=Module._nodeModulePaths(path.dirname(filename));old._compile(source,filename);
+ const current=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+ for(const agent of ['MNT','CTN','PRF','IMP','OTO','CRS'])assert.equal(current.responseInstructions(agent),old.exports.responseInstructions(agent),agent);
+ const legacy=structuredClone(b4Candidates[0]);
+ assert.deepEqual(current.applyExampleRepair(legacy,{text:edit5().text}),old.exports.applyExampleRepair(legacy,{text:edit5().text}));
+});
 test('L29 focal: candidatos brutos preservam recusa 65/45 e reparo repetido não ganha terceira chamada',async()=>{
  assert.deepEqual(l29.attempts.map(v=>v.delivery.text.trim().split(/\s+/).length),[65,45]);
  for(const v of l29.attempts)assert.throws(()=>validateProgress(v,profile,l29.messages,{number:2}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
- const h=provider([l29.attempts[0],{text:l29.attempts[1].delivery.text}]);
+ const h=provider([l29.attempts[0],exampleEdit(l29.attempts[1].delivery.text)]);
  await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
  assert.equal(h.calls.length,2);assert.deepEqual(h.events.map(e=>e.reason),['EXAMPLE_TOO_LONG','EXAMPLE_TOO_LONG']);
 });
-test('L29 focal: reparo altera só exemplo, remove cópia antiga e preserva autoria, estágio e fontes',async()=>{
- const original=scopeSeed29(),snapshot=JSON.stringify(original),h=provider([original,{text:short29}]);
+test('L29 focal: reparo recompõe parte exibida e preserva autoria, estágio e fontes',async()=>{
+ const original=scopeSeed29(),snapshot=JSON.stringify(original),edit=exampleEdit(short29),h=provider([original,edit]);
  const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}});
  assert.equal(h.calls.length,2);assert.equal(h.calls[1].tool_choice.name,'revisar_exemplo');assert.equal(h.calls[1].max_tokens,600);
- assert.deepEqual(h.calls[1].tools[0].input_schema.required,['text']);assert.equal(h.calls[1].tools[0].input_schema.additionalProperties,false);
+ assert.deepEqual(h.calls[1].tools[0].input_schema.required,['text','presentation','closingSummary','nextStep']);assert.equal(h.calls[1].tools[0].input_schema.additionalProperties,false);
  const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
  assert.deepEqual(data.measurement,{field:'delivery.text',found:65,maximum:40,target:30});assert.deepEqual(data.rejectedCandidate,original);
  const merged=h.observations[1].input;
  for(const k of Object.keys(original).filter(k=>!['text','delivery'].includes(k)))assert.deepEqual(merged[k],original[k],k);
  assert.equal(merged.delivery.kind,original.delivery.kind);assert.equal(merged.delivery.text,short29);
- assert.equal(h.observations[1].repairScope,'delivery.text');assert.deepEqual(h.observations[1].rawRepairInput,{text:short29});
- assert(h.observations[1].repairNormalizations.some(n=>n.field==='text'));
- assert(r.text.startsWith(original.text.split('\n\n"')[0]));
+ assert.equal(h.observations[1].repairScope,'display_and_delivery');assert.deepEqual(h.observations[1].rawRepairInput,edit);
+ assert(h.observations[1].repairNormalizations.some(n=>n.kind==='display_recomposed_for_example_repair'));
+ assert(r.text.startsWith(edit.presentation));
  assert(!r.text.includes(original.delivery.text));assert.equal(r.text.split(short29).length-1,1);
  assert.equal(JSON.stringify(original),snapshot);assert.equal(r.progress.authorship.supportMode,'optional_example');
 });
@@ -952,17 +1058,17 @@ test('L29 focal: tempo inventado é recusado; relato afirmativo e hipótese iden
  assert.doesNotThrow(()=>validateProgress(v,profile,l29.messages,{number:2}));
 });
 test('L29 focal: reparo não salva fatos inválidos fora do exemplo nem permite mudar contrato',async()=>{
- const raw=provider([l29.attempts[0],{text:short29}]);
+ const raw=provider([l29.attempts[0],exampleEdit(short29)]);
  // Unused raw metadata no longer vetoes a valid displayed response; the
  // visible false fact and attempted contract mutation below still fail.
  await raw.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}});
  assert.deepEqual(raw.observations[1].input.operationalClaims,l29.attempts[0].operationalClaims);
  assert.equal(raw.calls.length,2);
  const bad=scopeSeed29();bad.text+=' Foram entregas recentes.';
- const h=provider([bad,{text:short29}]);
+ const h=provider([bad,exampleEdit(short29,bad.text)]);
  await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),/UNSUPPORTED_FACT/);
  assert.equal(h.calls.length,2);
- const injected=provider([l29.attempts[0],{text:short29,authorship:{supportMode:'review'}}]);
+ const injected=provider([l29.attempts[0],{...exampleEdit(short29),authorship:{supportMode:'review'}}]);
  await assert.rejects(injected.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),/INVALID_PROGRESSION/);
  assert.equal(injected.calls.length,2);
 });
@@ -984,7 +1090,7 @@ test('Condução focal 4: reparo recebe o termo temporal real e só entrega uma 
  // Positive fixture has valid presentation; original archive stays unchanged
  // and its unsupported categorical reading is covered separately below.
  first.text=good.text+'\n\n'+first.delivery.text;
- const h=provider([first,{text:good.delivery.text}]);
+ const h=provider([first,exampleEdit(good.delivery.text,good.text)]);
  const result=await h.p.respond({agent:'FBK',system:profile.prompt,messages:ab29.messages,history:[],turn:{number:2,max:10}});
  assert.equal(h.calls.length,2);
  const internal=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
@@ -993,8 +1099,8 @@ test('Condução focal 4: reparo recebe o termo temporal real e só entrega uma 
  assert.equal(result.text.split(good.delivery.text).length-1,1);
  assert(!result.text.includes(first.delivery.text));
 });
-test('Condução focal 4: encurtar exemplo não legitima interpretação categórica sem fonte',async()=>{
- const h=provider([ab29Audit.generationAttempts[0].input,{text:validAb29().delivery.text}]);
+test('Condução focal 4: interpretação categórica exibida no reparo continua sem fonte',async()=>{
+ const h=provider([ab29Audit.generationAttempts[0].input,exampleEdit(validAb29().delivery.text,ab29Audit.generationAttempts[0].input.text)]);
  await assert.rejects(()=>h.p.respond({agent:'FBK',system:profile.prompt,messages:ab29.messages,history:[],turn:{number:2,max:10}}),/UNSUPPORTED_FACT/);
  assert.equal(h.calls.length,2);
  assert(h.observations[1].input.text.includes('A dificuldade real está'));
@@ -1041,7 +1147,7 @@ test('Condução focal 4: retirada atual de exemplo vence pedido anterior preser
 test('Condução focal 4: composição usa um exemplo canônico limitado por função sem ativar Evolução',()=>{
  const {canonicalExample}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
  const {responseInstructions,CONVERSATION_REVISION}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
- assert.equal(CONVERSATION_REVISION,'EX05-2-conversation-4');
+ assert.equal(CONVERSATION_REVISION,'EX05-2-conversation-5');
  for(const id of ['MNT','CTN','PRF','IMP','FBK','OTO','CRS']){
   const example=canonicalExample(id);assert(example.length>0&&example.length<2300);
   assert.equal(responseInstructions(id).split(example).length-1,1);

@@ -2,7 +2,7 @@
 const { ROUTING_VERSION } = require('./functional-policy.cjs');
 const { validateGrounding } = require('./response-grounding.cjs');
 const { resolveUserEvidence, deduplicateDelivery } = require('./evidence-source.cjs');
-const { validateFeedbackAuthorship } = require('./feedback-autonomy.cjs');
+const { validateFeedbackAuthorship, validateExampleComposition } = require('./feedback-autonomy.cjs');
 const { validateMethodologicalFidelity } = require('./methodological-fidelity.cjs');
 const STAGES = ['clarify', 'structure', 'explore', 'direct', 'close'];
 function turnDirective(turn = {}) {
@@ -51,6 +51,7 @@ function validateProgress(value, profile, messages, turn = {}) {
   let authorship = null;
   if (['FBK','OTO'].includes(profile.id)) {
     const checked = validateFeedbackAuthorship(value, messages, [...visibleParts, ...(deliveryText ? [deliveryText] : [])]);
+    if(profile.id==='FBK')validateExampleComposition(value,rawParts);
     authorship = checked.authorship; referenceNormalizations.push(...checked.normalizations);
     if (deliveryText && !deduplicated.append && !visibleParts.some(p => /\b(?:opcional|opção|exemplo)\b/i.test(p))) throw Error('AUTONOMY_CONSTRAINT_FAILED');
   }

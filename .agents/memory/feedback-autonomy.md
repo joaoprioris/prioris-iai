@@ -72,3 +72,12 @@ primeira contribuição segura. Não é obrigação de sempre dar exemplo.
 
 **Why:** o proprietário explicitou que perguntas já respondidas e lacunas
 imateriais não devem adiar o apoio à formulação, preservando autoria e recusa.
+
+Na revisão de um exemplo, a parte exibida deve ser coerente com a versão final;
+não preservar apresentação antiga por supor que sua cópia foi removida.
+
+**Why:** citações divididas deixaram instruções e recência recusada na apresentação.
+Remoção por aproximação não oferece proveniência verificável.
+
+**How to apply:** recompor os campos exibíveis juntos e revalidá-los, mantendo o
+candidato anterior somente na auditoria e nunca como fonte do líder.

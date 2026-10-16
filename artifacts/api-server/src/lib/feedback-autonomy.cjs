@@ -102,4 +102,22 @@ function validateFeedbackAuthorship(value,messages,parts){
  }
  return {authorship:{supportMode:a.supportMode,...(a.requestIntent?{requestIntent:a.requestIntent}:{}),approachEvidence:resolved.map(r=>r.evidence),examplePurpose:a.examplePurpose,...(requested.length?{requestEvidence:requested.map(r=>r.evidence)}:{}),...(grounded.length?{basisEvidence:grounded.map(r=>r.evidence)}:{})},normalizations:[...resolved,...requested,...grounded].flatMap(r=>r.normalization?[r.normalization]:[])};
 }
-module.exports={FEEDBACK_AUTONOMY_PROMPT,validateFeedbackAuthorship};
+// FBK-only composition checks. Never select a function or delete ambiguous text.
+function validateExampleComposition(value,parts){
+ const example=value.delivery?.text;
+ if(typeof example!=='string'||!example.trim())return;
+ const reject=reason=>{throw Object.assign(Error('AUTONOMY_CONSTRAINT_FAILED'),{validationReason:reason});};
+ if(example.trim().split(/\s+/).length>40)reject('EXAMPLE_TOO_LONG');
+ if(/(?:^|[.!?\n]\s*)(?:voc[eê]\s+pode\s+(?:descrever|dizer|abrir|come[cç]ar|escrever|registrar)\s*:|(?:depois|em seguida)\s+registre\b|(?:diga|descreva|use a frase)\s*:)/i.test(example))
+  reject('EXAMPLE_NOT_INTERLOCUTOR_SPEECH');
+ const {locatePresentation}=require('./evidence-source.cjs');
+ for(const part of parts){
+  // Exact contiguous excerpts only: reject, never silently remove a fragment.
+  const quoted=[...part.matchAll(/["“]([^"“”]+)["”]/gu)].map(m=>m[1]);
+  const sentences=example.split(/(?<=[.!?])\s+/);
+  if(quoted.some(q=>q.trim().split(/\s+/).length>=4&&locatePresentation(example,q).length)||
+     sentences.some(s=>s.trim().split(/\s+/).length>=4&&locatePresentation(part,s).length))
+    throw Error('DUPLICATE_DELIVERY');
+ }
+}
+module.exports={FEEDBACK_AUTONOMY_PROMPT,validateFeedbackAuthorship,validateExampleComposition};
