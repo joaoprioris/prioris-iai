@@ -18,12 +18,14 @@ const built=api('esbuild').buildSync({entryPoints:['artifacts/api-server/src/rou
 const filename=path.resolve('artifacts/api-server/ex05-recovery-test.cjs'),mod=new Module(filename,module);
 mod.filename=filename;mod.paths=Module._nodeModulePaths(path.dirname(filename));mod._compile(built.outputFiles[0].text,filename);
 function provider(values) {
- const calls=[],events=[];
- const p=mod.exports.createModelProviders({onValidationObservation:e=>events.push(e),client:{messages:{create:async payload=>{
+ const calls=[],events=[],observations=[];
+ const p=mod.exports.createModelProviders({onGenerationObservation:e=>observations.push(e),onValidationObservation:e=>events.push(e),client:{messages:{create:async payload=>{
   calls.push(payload);assert(values.length>0,'Unexpected model invocation');
-  return {stop_reason:'tool_use',content:[{type:'tool_use',name:payload.tool_choice.name,input:structuredClone(values.shift())}],usage:{input_tokens:0,output_tokens:0}};
+  const value=structuredClone(values.shift());
+  const input=payload.tool_choice.name==='revisar_exemplo'&&value.delivery?{text:value.delivery.text}:value;
+  return {stop_reason:'tool_use',content:[{type:'tool_use',name:payload.tool_choice.name,input}],usage:{input_tokens:0,output_tokens:0}};
  }}}});
- return {p,calls,events};
+ return {p,calls,events,observations};
 }
 function corrected() {
  return {...structuredClone(l26.attempts[0]),text:'Os episódios observados são a base; esta é uma opção de abertura para você adaptar.',
@@ -596,6 +598,15 @@ test('L28 focal: quatro candidatos arquivados continuam recusados pelos controle
 test('L28 focal: reparo explica modo, apresentação ou evidência e aceita somente revisão fundamentada',async()=>{
  for(const id of ['L28-T02-a','L28-T04-a'])for(const original of replay[id].attempts){
   const h=provider([original,revised28(id)]),messages=replay[id].messages;
+  if(id==='L28-T02-a'&&original===replay[id].attempts[0]){
+   // Restricted example repair cannot fix the original imperative presentation.
+   await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:3,max:10}}),e=>e.validationReason==='IMPERATIVE_PRESENTATION');
+   assert.equal(h.calls.length,2);assert.equal(h.calls[1].tool_choice.name,'revisar_exemplo');
+   const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
+   assert.equal(data.measurement.found,54);assert.equal(data.measurement.maximum,40);
+   assert.deepEqual(h.observations[1].input.authorship,original.authorship);
+   continue;
+  }
   const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:3,max:10}});
   assert.equal(h.calls.length,2);assert.equal(h.events.at(-1).code,'ACCEPTED');
   const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
@@ -726,7 +737,8 @@ test('Condução integrada: reparo recebe candidato, medida real e limite, prese
  assert.equal(data.code,'AUTONOMY_CONSTRAINT_FAILED');assert.equal(data.reason,'EXAMPLE_TOO_LONG');
  assert.deepEqual(data.rejectedCandidate,first);
  assert.deepEqual(data.measurement,{field:'delivery.text',found:45,maximum:40,target:30});
- assert.equal(h.calls[0].max_tokens,h.calls[1].max_tokens);
+ assert.equal(h.calls[0].max_tokens,2200);assert.equal(h.calls[1].max_tokens,600);
+ assert.equal(h.calls[1].tool_choice.name,'revisar_exemplo');
  assert.equal(messages.filter(m=>m.role==='assistant'&&m.content===first.text).length,0);
  assert.equal(result.text.split(fixed.delivery.text).length-1,1);
 });
@@ -747,8 +759,9 @@ test('Condução integrada: candidato interno não vira fonte do líder; segunda
  const request='Queria uma frase inicial para adaptar.',messages=messages27(request),first=opening27(messages,request),bad=opening27(messages,request);
  first.delivery.text=Array(44).fill('palavra').join(' ');
  bad.authorship.requestEvidence=[{message:messages.filter(m=>m.role==='user').length,quote:first.text}];
- const h=provider([first,bad]);
- await assert.rejects(()=>h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}}),/INVALID_PROGRESS_EVIDENCE/);
+ assert.throws(()=>validateProgress(bad,profile,messages,{number:2}),/INVALID_PROGRESS_EVIDENCE/);
+ const h=provider([first,{text:bad.delivery.text,authorship:bad.authorship}]);
+ await assert.rejects(()=>h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}}),/INVALID_PROGRESSION/);
  assert.equal(h.calls.length,2);
  assert(h.calls[1].messages.at(-1).content.includes('NÃO CONFIÁVEL'));
  const again=provider([first,first]);
@@ -842,7 +855,8 @@ test('Reparo EXAMPLE_TOO_LONG: pedido recebe contagem real arquivada de 53 ou 42
  for(const [index,words] of [53,42].entries()){
   const original=archived.attempts[index],snapshot=JSON.stringify(original);
   assert.equal(original.delivery.text.trim().split(/\s+/).length,words);
-  const h=provider([original,opening27(messages,t03)]);
+  // Keep archived example/count, supply valid presentation for this scope control.
+  const h=provider([{...structuredClone(original),text:opening27(messages,t03).text},opening27(messages,t03)]);
   const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}});
   assert.equal(h.calls.length,2);
   assert(!h.calls[0].system.includes('DIAGNÓSTICO EXAMPLE_TOO_LONG:'));
@@ -890,10 +904,142 @@ test('Reparo EXAMPLE_TOO_LONG: ser curto não contorna fonte, pedido, fatos, mod
   ['UNSUPPORTED_FACT',undefined,v=>{v.text='Clareza garante a relação.';}],
  ]){
   const short=opening27(messages,t03);change(short);
-  const h=provider([archived.attempts[0],short]);
-  await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}}),
-   e=>e.message===code&&e.validationReason===reason);
-  assert.equal(h.calls.length,2);assert.equal(h.events[0].reason,'EXAMPLE_TOO_LONG');
-  assert.equal(h.events[1].code,code);assert.equal(h.events[1].reason,reason);
+  const {applyExampleRepair}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+  const merged=applyExampleRepair(short,{text:short.delivery.text}).candidate;
+  assert.throws(()=>validateProgress(merged,profile,messages,{number:2,max:10}),e=>e.message===code&&e.validationReason===reason);
  }
+});
+
+const l29=replay['L29-T02-a'],resume29=replay['L29-T03-a'];
+const short29='Em duas ocasiões, os dados atrasaram e refiz a consolidação. Também mudei o formato em uma delas. Quero combinar prazos e avisos antecipados.';
+// Synthetic positive control only: the raw archive has an invalid assistant claim.
+// Runtime repair never removes or rewrites that claim; full validation refuses it.
+const scopeSeed29=()=>({...structuredClone(l29.attempts[0]),operationalClaims:[]});
+test('L29 focal: candidatos brutos preservam recusa 65/45 e reparo repetido não ganha terceira chamada',async()=>{
+ assert.deepEqual(l29.attempts.map(v=>v.delivery.text.trim().split(/\s+/).length),[65,45]);
+ for(const v of l29.attempts)assert.throws(()=>validateProgress(v,profile,l29.messages,{number:2}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
+ const h=provider([l29.attempts[0],{text:l29.attempts[1].delivery.text}]);
+ await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
+ assert.equal(h.calls.length,2);assert.deepEqual(h.events.map(e=>e.reason),['EXAMPLE_TOO_LONG','EXAMPLE_TOO_LONG']);
+});
+test('L29 focal: reparo altera só exemplo, remove cópia antiga e preserva autoria, estágio e fontes',async()=>{
+ const original=scopeSeed29(),snapshot=JSON.stringify(original),h=provider([original,{text:short29}]);
+ const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}});
+ assert.equal(h.calls.length,2);assert.equal(h.calls[1].tool_choice.name,'revisar_exemplo');assert.equal(h.calls[1].max_tokens,600);
+ assert.deepEqual(h.calls[1].tools[0].input_schema.required,['text']);assert.equal(h.calls[1].tools[0].input_schema.additionalProperties,false);
+ const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
+ assert.deepEqual(data.measurement,{field:'delivery.text',found:65,maximum:40,target:30});assert.deepEqual(data.rejectedCandidate,original);
+ const merged=h.observations[1].input;
+ for(const k of Object.keys(original).filter(k=>!['text','delivery'].includes(k)))assert.deepEqual(merged[k],original[k],k);
+ assert.equal(merged.delivery.kind,original.delivery.kind);assert.equal(merged.delivery.text,short29);
+ assert.equal(h.observations[1].repairScope,'delivery.text');assert.deepEqual(h.observations[1].rawRepairInput,{text:short29});
+ assert(h.observations[1].repairNormalizations.some(n=>n.field==='text'));
+ assert(r.text.startsWith(original.text.split('\n\n"')[0]));
+ assert(!r.text.includes(original.delivery.text));assert.equal(r.text.split(short29).length-1,1);
+ assert.equal(JSON.stringify(original),snapshot);assert.equal(r.progress.authorship.supportMode,'optional_example');
+});
+test('L29 focal: tempo inventado é recusado; relato afirmativo e hipótese identificada são distintos',()=>{
+ const {applyExampleRepair}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+ for(const text of ['Em duas entregas recentes, refiz a consolidação.','Nos últimos meses, refiz a consolidação.']){
+  const v=applyExampleRepair(scopeSeed29(),{text}).candidate;
+  assert.throws(()=>validateProgress(v,profile,l29.messages,{number:2}),/UNSUPPORTED_FACT/);
+  const source={role:'user',content:text};
+  assert.doesNotThrow(()=>validateProgress(v,profile,[...l29.messages,source],{number:2}));
+  assert.throws(()=>validateProgress(v,profile,[...l29.messages,{role:'user',content:'Não confirmei: '+text.replace('.','?')}],{number:2}),/UNSUPPORTED_FACT/);
+ }
+ const v=applyExampleRepair(scopeSeed29(),{text:short29}).candidate;
+ v.text='Não sabemos se foram recentes. A base disponível são os dois episódios.';
+ assert.doesNotThrow(()=>validateProgress(v,profile,l29.messages,{number:2}));
+});
+test('L29 focal: reparo não salva fatos inválidos fora do exemplo nem permite mudar contrato',async()=>{
+ const raw=provider([l29.attempts[0],{text:short29}]);
+ await assert.rejects(raw.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),/UNSUPPORTED_FACT/);
+ assert.deepEqual(raw.observations[1].input.operationalClaims,l29.attempts[0].operationalClaims);
+ assert.equal(raw.calls.length,2);
+ const bad=scopeSeed29();bad.text+=' Foram entregas recentes.';
+ const h=provider([bad,{text:short29}]);
+ await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),/UNSUPPORTED_FACT/);
+ assert.equal(h.calls.length,2);
+ const injected=provider([l29.attempts[0],{text:short29,authorship:{supportMode:'review'}}]);
+ await assert.rejects(injected.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),/INVALID_PROGRESSION/);
+ assert.equal(injected.calls.length,2);
+});
+test('L29 focal: contradição e referência sem base não dominam necessidade estabelecida',()=>{
+ const {readFunctionalNeed}=require('../artifacts/api-server/src/lib/functional-context.cjs');
+ const a=resume29.classification,messages=resume29.messages,previous=resume29.previous,snapshot=JSON.stringify(a);
+ const need=readFunctionalNeed(a,messages,previous);
+ assert.equal(need.job,'prepare_message');assert.equal(need.inherited,true);assert.equal(need.substantiveDecisionPending,false);assert.equal(need.pendingRejection,'decision_already_clear');
+ const route=decideRoute(a,{reportedMessages:messages,functionalNeed:previous});
+ assert.equal(route.agent,'FBK');assert.equal(route.reason,'message_preparation_context_preserved');assert.equal(JSON.stringify(a),snapshot);
+ for(const patch of [
+  {decisionSufficientlyClear:false,needEvidence:[]},
+  {decisionSufficientlyClear:false,needEvidence:[a.needEvidence[0]],decisionEvidence:[{message:2,quote:'Uma escolha que não foi relatada.'}]},
+  {decisionSufficientlyClear:undefined,needEvidence:[a.needEvidence[0]]}
+ ]){
+  const invalid={...a,...patch},v=readFunctionalNeed(invalid,messages,previous);
+  assert.equal(v.substantiveDecisionPending,false);assert(v.pendingRejection);
+ }
+});
+test('L29 focal: retomada sem expressão-senha usa fonte anterior compatível, sem copiar rota incondicionalmente',()=>{
+ for(const content of ['A falha interrompeu o que pedi. Vamos retomar?','Ainda preciso daquele apoio.']){
+  const messages=[...resume29.messages.slice(0,-1),{role:'user',content}];
+  const a={...resume29.classification,job:'unclear',needEvidence:[],decisionEvidence:[],substantiveDecisionPending:false};
+  const route=decideRoute(a,{reportedMessages:messages,functionalNeed:resume29.previous});
+  assert.equal(route.agent,'FBK');assert.equal(route.reason,'message_preparation_context_preserved');
+  const noPrior=decideRoute(a,{reportedMessages:messages});
+  assert.equal(noPrior.mode,'clarify');
+ }
+});
+test('L29 focal: decisão genuinamente pendente exige clareza false e referências válidas; correção atual prevalece',()=>{
+ const {readFunctionalNeed}=require('../artifacts/api-server/src/lib/functional-context.cjs');
+ const content='Quero preparar o registro, mas ainda não decidi se devo cobrar a entrega ou revisar o processo.';
+ const messages=[...resume29.messages.slice(0,-1),{role:'user',content}];
+ const evidence=[{message:2,quote:content}];
+ const a={...resume29.classification,decisionSufficientlyClear:false,substantiveDecisionPending:true,needEvidence:evidence,decisionEvidence:evidence};
+ const prior=readFunctionalNeed(a,messages,resume29.previous);
+ assert.equal(prior.substantiveDecisionPending,true);
+ assert.equal(decideRoute(a,{reportedMessages:messages,functionalNeed:resume29.previous}).reason,'substantive_decision_pending');
+ const carry={...a,job:'unclear',needEvidence:[],decisionEvidence:[],decisionSufficientlyClear:undefined};
+ const carried=readFunctionalNeed(carry,messages,prior);
+ assert.equal(carried.substantiveDecisionPending,true);assert.deepEqual(carried.decisionEvidence,evidence);
+ assert.equal(readFunctionalNeed(carry,messages,carried).substantiveDecisionPending,true);
+ const current='Já defini que quero combinar prazos e avisos; falta só elaborar a comunicação.';
+ const next=[...messages,{role:'user',content:current}];
+ const corrected={...a,needEvidence:[{message:3,quote:current}],decisionSufficientlyClear:true,substantiveDecisionPending:false,decisionEvidence:[]};
+ assert.equal(decideRoute(corrected,{reportedMessages:next,functionalNeed:prior}).agent,'FBK');
+});
+test('L29 focal: nova necessidade, retirada da escrita e risco concreto mantêm prioridade',()=>{
+ for(const [job,agent,content] of [
+  ['compare_paths','MNT','Quero decidir entre cobrar a entrega e revisar o processo.'],
+  ['understand_impact','IMP','Não quero escrever agora. Quero compreender o efeito da minha mudança no colega.']
+ ]){
+  const messages=[...resume29.messages,{role:'user',content}],evidence=[{message:3,quote:content}];
+  const a={...resume29.classification,job,confidence:'moderate',needEvidence:evidence,substantiveDecisionPending:false};
+  assert.equal(decideRoute(a,{reportedMessages:messages,functionalNeed:resume29.previous}).agent,agent);
+ }
+ const content='Há fogo agora e duas pessoas estão presas.',messages=[...resume29.messages,{role:'user',content}];
+ const risk={...resume29.classification,immediateExternalRisk:true,riskKind:'physical',riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:content,riskImpactEvidence:'duas pessoas estão presas'};
+ assert.equal(decideRoute(risk,{reportedMessages:messages,functionalNeed:resume29.previous}).agent,'CRS');
+});
+test('L29 focal: falha seguida de retomada conserva T02, não conta erro e repetição não gera',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId},state={budget:{charged:123,calls:[]}};
+ const store=createPilotStore(state),session=store.open(scope);
+ state.session.exchangeCount=1;state.session.context={messages:structuredClone(l29.messages.slice(0,-1)),functionalNeed:structuredClone(resume29.previous)};
+ let classifications=0,generations=0;const seen=[];
+ const svc=createConversationService({repository:store.repository,agentPrompts:{FBK:profile.prompt},
+  classify:async({messages})=>{seen.push(structuredClone(messages));classifications++;return classifications===1
+   ?{...resume29.classification,decisionSufficientlyClear:true,substantiveDecisionPending:false,needEvidence:[resume29.classification.needEvidence[0]],decisionEvidence:[]}
+   :structuredClone(resume29.classification);},
+  respond:async()=>{generations++;if(generations===1)throw Error('INVALID_MODEL_RESPONSE');return {text:'Você já definiu prazos e aviso antecipado; a dificuldade é elaborar a comunicação.'};}});
+ const t02={sessionId:session.id,requestId:'synthetic-T02',content:l29.messages.at(-1).content};
+ await assert.rejects(svc.turn(scope,t02));assert.equal(state.session.exchangeCount,1);
+ const t03={sessionId:session.id,requestId:'synthetic-T03',content:resume29.messages.at(-1).content};
+ const result=await svc.turn(scope,t03);
+ assert.equal(result.route.agent,'FBK');assert.equal(result.exchangeCount,2);
+ assert.equal(seen[1].filter(m=>m.role==='user'&&m.content===t02.content).length,1);
+ assert(seen[1].some(m=>m.content===l29.messages[0].content));assert.equal(seen[1].filter(m=>m.role==='assistant').length,1);
+ assert.equal((await svc.turn(scope,t03)).replayed,true);assert.equal(classifications,2);assert.equal(generations,2);
+ assert.equal(state.budget.charged,123);assert.equal(state.budget.calls.length,0);
 });

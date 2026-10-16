@@ -138,7 +138,7 @@
       },
       "substantiveDecisionPending": {
         "type": "boolean",
-        "description": "Há decisão substantiva sobre o que fazer realmente em aberto? Não confundir com abordagem de comunicação ainda não elaborada, que integra Feedback."
+        "description": "Há decisão substantiva sobre o que fazer realmente em aberto, com fonte literal pertinente? Só true com decisionSufficientlyClear false e needEvidence/decisionEvidence válidas. Objetivo já definido, dificuldade de escrever ou retomar após erro não comprovam pendência. Releia todo o contexto; não contradiga clareza já relatada nem copie a leitura anterior se a necessidade mudou."
       },
       "decisionEvidence": {
         "type": "array",
@@ -146,7 +146,7 @@
         "items": {
           "$ref": "#/$defs/userReference"
         },
-        "description": "Fonte literal da decisão substantiva ainda em aberto; vazio sem base. Não promover dificuldade de como falar a decisão substantiva indefinida."
+        "description": "Fonte literal da escolha substantiva ainda não resolvida, não do objetivo já definido ou da dificuldade de escrever. Vazio sem base pertinente. Índices contam somente falas user desde zero; não misture fontes. Não promover dificuldade de como falar a decisão substantiva indefinida."
       },
       "clarificationQuestion": {
         "type": "string",

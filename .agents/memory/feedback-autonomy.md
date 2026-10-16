@@ -31,9 +31,14 @@ Distinguir decisão substantiva indefinida de abordagem de comunicação ainda n
 elaborada: esta é parte do trabalho Feedback. Confiança moderada sozinha não
 justifica repetir menu já respondido; esclarecer apenas lacuna material ainda
 não respondida, aproveitando a necessidade explicitada no histórico da conversa.
+Confiança declarada, inclusive alta, não valida pendência substantiva sem fonte
+pertinente ou contraditória com objetivo já definido. Retomar após erro não
+transforma dificuldade de escrita em decisão substantiva aberta.
 
 **Why:** orientação explícita do proprietário após desistência por triagem
 repetida; a orientação de autoria não é “só fazer perguntas”.
+O proprietário reiterou essa distinção após uma retomada ignorar objetivo e
+pedido de escrita já esclarecidos, mesmo com contexto integral preservado.
 
 **How to apply:** não exigir que o líder saiba categorias internas nem elabore
 a abordagem sozinho antes de receber ajuda concreta para pensá-la. Preservar

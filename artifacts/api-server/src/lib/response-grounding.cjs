@@ -31,6 +31,13 @@ function validateGrounding(value, messages, visibleParts, normalizations = []) {
   // a statement of uncertainty is not acceptance/viability of that date.
   for (const part of visibleParts) {
     for (const sentence of part.split(/(?<=[.!?\n])\s*/)) {
+      const periods=sentence.match(/\brecentes?\b|\brecentemente\b|(?<![\p{L}\p{N}_])últim(?:os|as)\s+(?:(?:\d+|dois|duas|três|alguns|algumas)\s+)?(?:dias|semanas|meses|anos)\b/giu)??[];
+      const temporalHypothesis=sentence.includes('?')||/\b(?:talvez|hipótese|possibilidade)\b|não (?:sei|sabemos) se|sem presumir que/i.test(sentence);
+      for(const period of temporalHypothesis?[]:periods){
+        const supported=byRole.user.some(m=>m.content.split(/(?<=[.!?;\n])\s*/).some(s=>
+          normalize(s).includes(normalize(period))&&!/\b(?:não|talvez|hipótese|se)\b|\?/i.test(s)));
+        if(!supported)throw Error('UNSUPPORTED_FACT');
+      }
       // Two recent reports are not necessarily the last two reports.
       const recency = sentence.match(/(?:^|\s)últim(?:os|as)\s+(?:dois|duas|2)\s+(relatórios|entregas)\b/i);
       if (recency && !sentence.includes('?')) {
