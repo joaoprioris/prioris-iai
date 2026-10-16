@@ -2,7 +2,7 @@
 // Reference policy. Inputs are semantic observations, not keyword matches.
 // trustedContext must come from authenticated server-side state, never user/LLM output.
 const AGENTS = Object.freeze(['MNT', 'CTN', 'PRF', 'IMP', 'FBK', 'OTO', 'CRS']);
-const ROUTING_VERSION = '0.3.4-EX04-2';
+const ROUTING_VERSION = '0.3.4-EX05-1';
 const {references,readFunctionalNeed,focalQuestion}=require('./functional-context.cjs');
 const JOBS = Object.freeze(['compare_paths', 'conduct_live', 'prepare_message', 'understand_impact', 'explore_pattern', 'analyze_crisis', 'unclear']);
 const SITUATION_STATES = Object.freeze(['BEFORE', 'DURING', 'AFTER', 'PATTERN', 'EMPTY']);

@@ -23,7 +23,7 @@ test('Rodada17: processamento não permite excluir evasão; hipótese aberta é 
  const messages=[user('Ela ficou em silêncio por alguns segundos. Acho que vou esperar.')];
  assert.throws(()=>validateMethodologicalFidelity({},messages,['O silêncio pode ser processamento, não evasão.']),/UNSUPPORTED_FACT/);
  const v=envelope('OTO',{text:'O silêncio admite diferentes leituras; processamento ou evasão são hipóteses, não fatos confirmados. Sua escolha é esperar; falta observar a resposta.'});
- assert.equal(validateProgress(v,profiles.OTO,messages,{number:5}).progress.methodologyRevision,'methodological-1');
+ assert.equal(validateProgress(v,profiles.OTO,messages,{number:5}).progress.methodologyRevision,require('../artifacts/api-server/src/lib/methodological-fidelity.cjs').REVISION);
 });
 test('Rodada18: efeitos e incapacidade sem relato anterior são recusados em cada prefixo real',()=>{
  const r=original.archivedRounds.find(a=>a.round===18).original;

@@ -163,6 +163,6 @@ test('Proteção física pertinente não é subordinada à regra de autoria do F
  const service=createConversationService({repository:store.repository,classify:async()=>({...classify,immediateExternalRisk:true,riskKind:'physical',riskBasis:'concrete_immediate_threat_or_harm',riskEvidence:threat,riskImpactEvidence:threat}),respond:async()=>{throw Error('SHOULD_NOT_GENERATE');},agentPrompts:prompts});
  const r=await service.turn(scope,{sessionId:session.id,requestId:'fictitious-physical-1',content:threat});
  assert.equal(r.route.agent,'CRS');assert.match(r.text,/não entre em confronto nem tente conter ou separar fisicamente/);
- assert.equal(r.route.version,ROUTING_VERSION);assert.equal(r.exchangeCount,1);
+ assert.equal(state.audit[0].version,ROUTING_VERSION);assert.equal(r.exchangeCount,1);
  assert.equal(state.audit[0].outcome,'completed');assert.equal(state.audit[0].analysis.riskImpactEvidence,threat);
 });

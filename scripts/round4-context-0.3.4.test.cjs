@@ -119,7 +119,7 @@ test('Serviço persiste contexto/objetos em memória isolada; triagem não reini
 });
 test('Rodada5 preserva integralmente rodada4/custo, recusa escopo anterior e reserva insuficiente antes de chamar SDK',async()=>{
  const before=JSON.stringify(original),state=prepareFifthRound(original,1000);
- assert.equal(JSON.stringify(original),before);assert.equal(state.version,ROUTING_VERSION);assert.equal(state.round,5);
+ assert.equal(JSON.stringify(original),before);assert.equal(state.version,require('../artifacts/api-server/src/lib/pilot-rounds.cjs').PILOT_STATE_VERSION);assert.equal(state.round,5);
  assert.deepEqual(state.archivedRounds.at(-1).original,original);
  assert.equal(state.archivedRounds.at(-1).original.session.exchangeCount,3);
  assert.equal(state.budget.charged,412818);assert.equal(state.budget.calls.length,26);

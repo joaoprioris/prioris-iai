@@ -18,13 +18,14 @@ Não destaque mecânica interna com “Antes de sugerir fala pronta, preciso...�
 Apoie diretamente a elaboração: reconheça a tensão, amplie a leitura sustentada
 e use UMA questão focal sobre UMA lacuna, se necessária. Não faça questionário
 nem cascata; não obrigue o líder a elaborar sozinho antes de ajudá-lo a pensar.
-Exemplo só pode apoiar elaboração existente, como opção identificada para revisar
-um trecho, nunca substituindo o raciocínio ou a decisão. Não gere delivery por
-padrão. Se não houver elaboração do líder para apoiar, deixe delivery null.
-Em authorship registre supportMode explore, review ou optional_example, e
-approachEvidence com trechos exatos da elaboração dele (apenas intenção de “dar
-feedback” ou descrição do problema não são elaboração de como abordar). Em
-optional_example, registre examplePurpose explicando a revisão pontual apoiada.
+Exemplo curto e adaptável pode apoiar elaboração, sem ser obrigação nem discurso completo.
+Sem abordagem própria relatada, só o forneça diante de pedido explícito e fatos
+concretos já relatados, até40 palavras de abertura pontual. Registre requestEvidence
+com o pedido e basisEvidence com os fatos; não atribua o exemplo ao líder.
+Em authorship registre supportMode explore, review ou optional_example. Review
+requer approachEvidence literal da abordagem própria. Optional_example usa essa
+abordagem ou o pedido explícito com base factual; examplePurpose delimita o apoio.
+Sem essas bases, delivery null. Uma descrição vaga do problema não basta.
 Sem exemplo, não é obrigatório haver elaboração: ajude construí-la com clareza.
 Não trate receio como escolha moral pelo conforto; não garanta que clareza protege
 a relação nem que adiar compromete confiança. Efeitos não relatados são hipótese
@@ -40,12 +41,25 @@ function validateFeedbackAuthorship(value,messages,parts){
  const a=value.authorship;
  if(!a||!['explore','review','optional_example'].includes(a.supportMode)||!Array.isArray(a.approachEvidence)||a.approachEvidence.length>4||typeof a.examplePurpose!=='string')throw Error('AUTONOMY_CONSTRAINT_FAILED');
  const resolved=a.approachEvidence.map(e=>resolveUserEvidence(e,messages));
+ const request=(a.requestEvidence??[]),basis=(a.basisEvidence??[]);
+ if(!Array.isArray(request)||!Array.isArray(basis)||request.length>2||basis.length>4)throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ const requested=request.map(e=>resolveUserEvidence(e,messages)),grounded=basis.map(e=>resolveUserEvidence(e,messages));
+ const negative=q=>/\b(?:n[aã]o\s+(?:quero|preciso|gostaria|me d[eê]|d[eê]|mostre)|evite|dispenso)\s+(?:um(?:a)?\s+)?(?:exemplos?|sugest[aã]o|(?:uma )?falas?)\b|\bsem\s+(?:nenhum[a]?\s+)?(?:exemplos?|sugest[aã]o)\b/i.test(q);
+ const reported=q=>/\b(?:colega|pessoa|gestor[a]?|diretor[a]?|ele|ela)\b[^.!?\n]*\b(?:perguntou|pediu|disse|falou)\s*[:—-]/i.test(q);
+ const asks=q=>!negative(q)&&(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:exemplo|sugest[aã]o|uma fala)\b/i.test(q)||/\bcomo (?:eu )?(?:abro|come[cç]o|digo)\b/i.test(q));
+ const users=messages.filter(m=>m.role==='user'),last=users.at(-1)?.content??'';
+ const withdrawn=negative(last);
+ const explicit=!withdrawn&&requested.some(r=>{const q=r.evidence.quote,source=users[r.evidence.message]?.content??'',at=source.indexOf(q),prefix=source.slice(0,at).split(/[.!?\n]/).at(-1)??'';return asks(q)&&!reported(prefix+q);});
+ const factual=grounded.some(r=>!r.evidence.quote.includes('?')&&!/^(?:quero|preciso|gostaria|tenho que)\b/i.test(r.evidence.quote.trim()));
+ const requestedSupport=explicit&&factual;
+ const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote));
  const hasExample=Boolean(value.delivery?.text?.trim());
+ if(hasExample&&withdrawn)throw Error('AUTONOMY_CONSTRAINT_FAILED');
  if(a.supportMode==='review'&&!resolved.length)throw Error('AUTONOMY_CONSTRAINT_FAILED');
- if(hasExample&&(a.supportMode!=='optional_example'||!resolved.length||a.examplePurpose.trim().length<10))throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ if(hasExample&&(a.supportMode!=='optional_example'||(!hasApproach&&!requestedSupport)||a.examplePurpose.trim().length<10))throw Error('AUTONOMY_CONSTRAINT_FAILED');
  // Exact provenance alone isn't proof of elaboration. Reject the narrow,
  // evident misuse of a problem/intent-only quote as an approach to revise.
- if(hasExample&&!resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote)))throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ if(hasExample&&!hasApproach&&value.delivery.text.trim().split(/\s+/).length>40)throw Error('AUTONOMY_CONSTRAINT_FAILED');
  if(!hasExample&&a.supportMode==='optional_example')throw Error('AUTONOMY_CONSTRAINT_FAILED');
  // Narrow output guards, not routing rules or semantic certification.
  for(const part of parts){
@@ -65,6 +79,6 @@ function validateFeedbackAuthorship(value,messages,parts){
    }
   }
  }
- return {authorship:{supportMode:a.supportMode,approachEvidence:resolved.map(r=>r.evidence),examplePurpose:a.examplePurpose},normalizations:resolved.flatMap(r=>r.normalization?[r.normalization]:[])};
+ return {authorship:{supportMode:a.supportMode,approachEvidence:resolved.map(r=>r.evidence),examplePurpose:a.examplePurpose,...(requested.length?{requestEvidence:requested.map(r=>r.evidence)}:{}),...(grounded.length?{basisEvidence:grounded.map(r=>r.evidence)}:{})},normalizations:[...resolved,...requested,...grounded].flatMap(r=>r.normalization?[r.normalization]:[])};
 }
 module.exports={FEEDBACK_AUTONOMY_PROMPT,validateFeedbackAuthorship};

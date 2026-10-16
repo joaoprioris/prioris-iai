@@ -108,18 +108,18 @@ test('Teto conjunto não se renova na rodada 2; uso novo soma ao anterior',async
 test('Metodologia original de Crises e definições dos demais agentes preservadas',()=>{
  const fs=require('node:fs');
  const original=require('../prioris-routing-consolidation-20261012/agent_contract.json');
- const {resolveAgentProfile,revision}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
- assert.equal(contract.agents.length,8);assert.equal(contract.methodology_revision,revision);
+ const {resolveContract,REVISION}=require('../artifacts/api-server/src/lib/ex04-reference.cjs'); const {AGENTS}=require('../artifacts/api-server/src/lib/functional-policy.cjs'); const effective=resolveContract();
+ assert.equal(contract.agents.length,8);assert.equal(contract.methodology_revision,REVISION);assert.equal(effective.version,REVISION);
  for(const current of contract.agents){
   const source=original.agents.find(a=>a.id===current.id);assert(source);
   for(const key of ['source_definition','determinations','allowed_transversal_lenses'])assert.deepEqual(current[key],source[key]);
  }
  // The approved EX04 effective resolution is allowed to differ from the old
  // emergency-only interpretation, not from the preserved source definitions.
- const crises=resolveAgentProfile('CRS');
- assert.match(crises.prompt,/antes, durante e depois/i);
+ const crises=effective.agents.find(a=>a.id==='CRS');
+ assert.match(crises.prompt,/antes, durante (?:e|ou) depois/i);
  assert.match(crises.prompt,/dano em curso|ameaça concreta/i);
- assert.throws(()=>resolveAgentProfile('EVL'),/unavailable|disabled|INVALID|indispon|conversacional/i);
+ assert.equal(AGENTS.includes('EVL'),false);assert(effective.agents.some(a=>a.id==='EVL'));assert.deepEqual(effective.background_capabilities,[]);assert.throws(()=>decideRoute(observations({job:'EVL'})),/Invalid job/);
  assert.equal(decideRoute(observations()).background.length,0);
  assert.equal(fs.existsSync('generated-artifacts/pilot-0.3.0-round-1-preserved/state.original.json'),true);
 });

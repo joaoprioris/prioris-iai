@@ -1,5 +1,7 @@
 'use strict';
-const { ROUTING_VERSION } = require('./functional-policy.cjs');
+// Persisted ledger schema is independent of prompt/routing revisions.
+const PILOT_STATE_VERSION = '0.3.4';
+const COMPATIBLE_STATE_VERSIONS = Object.freeze([PILOT_STATE_VERSION,'0.3.4-EX04-1','0.3.4-EX04-2']);
 const SECOND_IDENTITY = Object.freeze({ id: '00000000-0000-4000-8000-000000000303', organizationId: '00000000-0000-4000-8000-000000000304', organizationName: 'Outra empresa fictícia — rodada 2', email: 'outro-piloto@example.invalid', role: 'leader' });
 function prepareSecondRound(original, now = Date.now()) {
   if (original.version === '0.3.1') {
@@ -43,13 +45,13 @@ function prepareFourthRound(original, now = Date.now()) {
 }
 const FIFTH_IDENTITY = Object.freeze({ id: '00000000-0000-4000-8000-000000000309', organizationId: '00000000-0000-4000-8000-000000000310', organizationName: 'Empresa fictícia independente — rodada 5', email: 'rodada5@example.invalid', role: 'leader' });
 function prepareFifthRound(original, now = Date.now()) {
-  if (original.version === ROUTING_VERSION) {
+  if (COMPATIBLE_STATE_VERSIONS.includes(original.version)) {
     if (!Number.isSafeInteger(original.round) || original.round < 5 || !original.budget || !Array.isArray(original.archivedRounds)) throw Error('PILOT_STATE_MISMATCH');
     return original;
   }
   if (original.version !== '0.3.3' || original.round !== 4 || original.session?.userId !== FOURTH_IDENTITY.id || original.session?.organizationId !== FOURTH_IDENTITY.organizationId || !Number.isSafeInteger(original.budget?.charged) || original.budget.charged < 0 || !Array.isArray(original.budget.calls) || !Array.isArray(original.archivedRounds) || original.budget.calls.some(c => c.status === 'reserved')) throw Error('PILOT_STATE_MISMATCH');
   return {
-    version: ROUTING_VERSION, round: 5, provider: original.provider, createdAt: now, expiresAt: now + 2 * 60 * 60 * 1000,
+    version: PILOT_STATE_VERSION, round: 5, provider: original.provider, createdAt: now, expiresAt: now + 2 * 60 * 60 * 1000,
     archivedRounds: [...structuredClone(original.archivedRounds), { round: 4, version: '0.3.3', endedBy: 'abandonment-reported-by-user', original: structuredClone(original) }],
     budget: { ...structuredClone(original.budget), currentRound: 5 }, requests: {}, audit: [],
   };
@@ -57,11 +59,13 @@ function prepareFifthRound(original, now = Date.now()) {
 module.exports = { prepareSecondRound, SECOND_IDENTITY, prepareThirdRound, THIRD_IDENTITY, prepareFourthRound, FOURTH_IDENTITY, prepareFifthRound, FIFTH_IDENTITY };
 
 function prepareIndependentRound(original, now = Date.now(), endedBy = 'coordinator-ended-test') {
-  if (original.version !== ROUTING_VERSION || !Number.isSafeInteger(original.round) || original.round < 5 || !Number.isSafeInteger(original.budget?.charged) || original.budget.charged < 0 || !Array.isArray(original.budget.calls) || !Array.isArray(original.archivedRounds) || original.budget.calls.some(c => c.status === 'reserved')) throw Error('PILOT_STATE_MISMATCH');
+  if (!COMPATIBLE_STATE_VERSIONS.includes(original.version) || !Number.isSafeInteger(original.round) || original.round < 5 || !Number.isSafeInteger(original.budget?.charged) || original.budget.charged < 0 || !Array.isArray(original.budget.calls) || !Array.isArray(original.archivedRounds) || original.budget.calls.some(c => c.status === 'reserved')) throw Error('PILOT_STATE_MISMATCH');
   const round = original.round + 1;
   const prior = structuredClone(original);
   // Existing archives remain in the parent array, without recursive copies.
   prior.archivedRounds = [];
-  return { version: ROUTING_VERSION, round, provider: original.provider, createdAt: now, expiresAt: now + 2 * 60 * 60 * 1000, archivedRounds: [...structuredClone(original.archivedRounds), { round: original.round, version: original.version, endedBy, original: prior }], budget: { ...structuredClone(original.budget), currentRound: round }, requests: {}, audit: [] };
+  return { version: PILOT_STATE_VERSION, round, provider: original.provider, createdAt: now, expiresAt: now + 2 * 60 * 60 * 1000, archivedRounds: [...structuredClone(original.archivedRounds), { round: original.round, version: original.version, endedBy, original: prior }], budget: { ...structuredClone(original.budget), currentRound: round }, requests: {}, audit: [] };
 }
 module.exports.prepareIndependentRound = prepareIndependentRound;
+
+module.exports.PILOT_STATE_VERSION = PILOT_STATE_VERSION;
