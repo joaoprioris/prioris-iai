@@ -38,11 +38,12 @@ com elaboração, escolha ou execução do usuário. Proteção pertinente a per
 físico não é enfraquecida; as funções e transições dos agentes permanecem.
 `;
 function validateFeedbackAuthorship(value,messages,parts){
+ const reject=reason=>{throw Object.assign(Error('AUTONOMY_CONSTRAINT_FAILED'),{validationReason:reason});};
  const a=value.authorship;
- if(!a||!['explore','review','optional_example'].includes(a.supportMode)||!Array.isArray(a.approachEvidence)||a.approachEvidence.length>4||typeof a.examplePurpose!=='string')throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ if(!a||!['explore','review','optional_example'].includes(a.supportMode)||!Array.isArray(a.approachEvidence)||a.approachEvidence.length>4||typeof a.examplePurpose!=='string')reject('INVALID_AUTHORSHIP_SHAPE');
  const resolved=a.approachEvidence.map(e=>resolveUserEvidence(e,messages));
  const request=(a.requestEvidence??[]),basis=(a.basisEvidence??[]);
- if(!Array.isArray(request)||!Array.isArray(basis)||request.length>2||basis.length>4)throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ if(!Array.isArray(request)||!Array.isArray(basis)||request.length>2||basis.length>4)reject('INVALID_REQUEST_BASIS_SHAPE');
  const requested=request.map(e=>resolveUserEvidence(e,messages)),grounded=basis.map(e=>resolveUserEvidence(e,messages));
  const negative=q=>/\b(?:n[aã]o\s+(?:quero|preciso|gostaria|me d[eê]|d[eê]|mostre)|evite|dispenso)\s+(?:um(?:a)?\s+)?(?:exemplos?|sugest[aã]o|(?:uma )?falas?)\b|\bsem\s+(?:nenhum[a]?\s+)?(?:exemplos?|sugest[aã]o)\b/i.test(q);
  const reported=q=>/\b(?:colega|pessoa|gestor[a]?|diretor[a]?|ele|ela)\b[^.!?\n]*\b(?:perguntou|pediu|disse|falou)\s*[:—-]/i.test(q);
@@ -54,16 +55,18 @@ function validateFeedbackAuthorship(value,messages,parts){
  const requestedSupport=explicit&&factual;
  const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote));
  const hasExample=Boolean(value.delivery?.text?.trim());
- if(hasExample&&withdrawn)throw Error('AUTONOMY_CONSTRAINT_FAILED');
- if(a.supportMode==='review'&&!resolved.length)throw Error('AUTONOMY_CONSTRAINT_FAILED');
- if(hasExample&&(a.supportMode!=='optional_example'||(!hasApproach&&!requestedSupport)||a.examplePurpose.trim().length<10))throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ if(hasExample&&withdrawn)reject('EXAMPLE_WITHDRAWN');
+ if(a.supportMode==='review'&&!resolved.length)reject('REVIEW_WITHOUT_APPROACH');
+ if(hasExample&&a.supportMode!=='optional_example')reject('EXAMPLE_MODE_MISMATCH');
+ if(hasExample&&!hasApproach&&!requestedSupport)reject(!explicit?'EXPLICIT_REQUEST_MISSING':'FACTUAL_BASIS_MISSING');
+ if(hasExample&&a.examplePurpose.trim().length<10)reject('EXAMPLE_PURPOSE_MISSING');
  // Exact provenance alone isn't proof of elaboration. Reject the narrow,
  // evident misuse of a problem/intent-only quote as an approach to revise.
- if(hasExample&&!hasApproach&&value.delivery.text.trim().split(/\s+/).length>40)throw Error('AUTONOMY_CONSTRAINT_FAILED');
- if(!hasExample&&a.supportMode==='optional_example')throw Error('AUTONOMY_CONSTRAINT_FAILED');
+ if(hasExample&&!hasApproach&&value.delivery.text.trim().split(/\s+/).length>40)reject('EXAMPLE_TOO_LONG');
+ if(!hasExample&&a.supportMode==='optional_example')reject('OPTIONAL_EXAMPLE_WITHOUT_DELIVERY');
  // Narrow output guards, not routing rules or semantic certification.
  for(const part of parts){
-  if(/(?:^|[.!?\n]\s*)(?:diga|fale|comece|use a frase|você deve|você pode (?:dizer|abrir|começar))\b/i.test(part))throw Error('AUTONOMY_CONSTRAINT_FAILED');
+  if(/(?:^|[.!?\n]\s*)(?:diga|fale|comece|use a frase|você deve|você pode (?:dizer|abrir|começar))\b/i.test(part))reject('IMPERATIVE_PRESENTATION');
   for(const sentence of part.split(/(?<=[.!?\n])\s*/)){
    if(/(?:escolh\w*|protege\w*)[^.!?]*conforto|adiar[^.!?]*(?:compromete|destrói)[^.!?]*confiança|clareza[^.!?]*(?:protege|garante)[^.!?]*relação/i.test(sentence)&&!/\bnão (?:garante|protege|compromete|comprova|escolhe)\b/i.test(sentence))throw Error('UNSUPPORTED_FACT');
    if(/\b(?:afeta|afetou|compromete|comprometeu|prejudica|prejudicou)\b[^.!?]*(?:planejamento|andamento|confiança do cliente)/i.test(sentence)&&!sentence.includes('?')&&!/\bnão (?:podemos|consigo|é possível) afirmar|\bnão sei (?:dizer|afirmar)|\bhipótese\b/i.test(sentence)){

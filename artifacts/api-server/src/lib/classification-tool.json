@@ -99,7 +99,7 @@
       },
       "conversationInProgress": {
         "type": "boolean",
-        "description": "Conversa relevante acontecendo agora, bilateral ou em grupo; nome de reunião e estado Durante não bastam."
+        "description": "A interação que o líder precisa conduzir JÁ está acontecendo, com base literal em needEvidence. Não confundir fato/crise anterior com conversa futura sobre esse fato. Preparar abertura não comprova conversa em curso. Estados, nome de reunião e palavras isoladas não decidem função."
       },
       "situationState": {
         "type": [

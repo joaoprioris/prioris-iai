@@ -12,6 +12,7 @@ const {createPilotStore}=require('../artifacts/api-server/src/lib/pilot-store.cj
 const {pilotIdentity}=require('../artifacts/api-server/src/lib/pilot-next-round.cjs');
 const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
 const {resolveContract}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
+const {inspectOperation,operationMessages}=require('../artifacts/api-server/src/lib/ex05-operation-recovery.cjs');
 const file=path.join(dir,'campaign.json');
 if(!fs.existsSync(file)){
  const initial={schema:'ex05-isolated-real-v1',authorization:{date:'2026-10-15',quote:'sim, pode usar os $10 conforme necessidade... pode seguir',additionalCeilingUSD:10,initialProductAllocationUSD:5,agentRequestsAfterRefill:0},priorCampaign:{path:prior,sha256:priorHash,conservativelyDeductedUSD:5,untouched:true},budget:{cap:5000000,charged:0,calls:[],blocked:false},cases:{},operations:{}};
@@ -24,7 +25,7 @@ const api=Module.createRequire(path.resolve('artifacts/api-server/package.json')
 const command=process.argv[2];
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function view(caseId,result){
- const item=campaign.cases[caseId],messages=Object.values(campaign.operations).filter(o=>o.caseId===caseId).flatMap(o=>[{role:'user',content:o.input},...(o.result?.text?[{role:'assistant',content:o.result.text}]:[])]);
+ const item=campaign.cases[caseId],messages=operationMessages(campaign,caseId,result);
  const rows=messages.map(m=>`<article class="${m.role}"><b>${m.role==='user'?'Líder':'IAí'}</b><p>${escape(m.content)}</p></article>`).join('');
  const error=result.error?`<article><b>Interação interrompida</b><p>${escape(result.error)}</p></article>`:'';
  const html=`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>IAí · avaliação conversacional</title><style>body{font:17px/1.5 system-ui;background:#141414;color:#eee;max-width:900px;margin:28px auto;padding:0 20px}h1{color:#d8b969;font-size:24px}small{color:#aaa}article{padding:15px 22px;background:#242424;border-radius:12px;margin:15px 0}.user{margin-right:80px}.assistant{margin-left:60px;border-left:3px solid #d8b969}p{white-space:pre-wrap;margin:8px 0}b{color:#d8b969}</style><h1>IAí · avaliação conversacional</h1><small>Dados fictícios · motor real · sem SED · sessão ${escape(caseId)}</small>${rows}${error}<small>Conversa ${escape(result.status??'em avaliação')} · ${item?.session?.exchangeCount??0} trocas</small></html>`;
@@ -37,13 +38,22 @@ async function main(){
  if(command==='status')return {budget:createPilotBudget(campaign.budget,save).snapshot(),cases:Object.fromEntries(Object.entries(campaign.cases).map(([id,c])=>[id,{count:c.session?.exchangeCount,status:c.session?.status}]))};
  const input=JSON.parse(fs.readFileSync(process.argv[3],'utf8')),id=input.caseId;
  if(!/^L2[1-9]$/.test(id))throw Error('INVALID_CASE');
+ // acquireRequest above proves exclusive ownership on this shared local store.
+ // Recover only stored output, or explicitly retain uncertainty. No SDK is built.
+ if(command==='recover'){
+  const result=inspectOperation(campaign,id,input.requestId,{activeRequest:false});
+  view(id,result);return result;
+ }
  if(command==='finish'){
   const current=campaign.cases[id];if(!current)throw Error('CASE_NOT_STARTED');current.actorOutcome=input.outcome;current.actorFeedback=input.feedback??null;save();const result={caseId:id,status:input.outcome};view(id,result);return result;
  }
  if(command!=='turn'||typeof input.content!=='string'||input.content.length>6000)throw Error('INVALID_COMMAND');
  const requestId=input.requestId;
  if(!/^L\d\d-T\d\d-[a-z0-9-]+$/.test(requestId))throw Error('INVALID_REQUEST_ID');
- if(campaign.operations[requestId])return {replayPrevented:true,...campaign.operations[requestId]};
+ if(campaign.operations[requestId])return inspectOperation(campaign,id,requestId,{activeRequest:false});
+ if(Object.entries(campaign.operations).some(([key,o])=>o.status==='processing'&&!o.result&&
+   !inspectOperation(campaign,o.caseId,key,{activeRequest:false}).text))
+  throw Error('CAMPAIGN_PENDING_DELIVERY');
  if(campaign.budget.blocked)throw Error('CAMPAIGN_BLOCKED');
  campaign.budget.currentRound=Number(id.slice(1));
  const state={...(campaign.cases[id]??{}),budget:campaign.budget};

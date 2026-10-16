@@ -92,6 +92,8 @@ export function createModelProviders(
       const riskQualification = `\nQUALIFICAÇÃO DA BASE, NÃO NOVA METODOLOGIA: immediateExternalRisk não decorre apenas de incerteza, divergência de informação, urgência de fala ou possibilidade abstrata de dano. Só marque risco imediato com ameaça concreta/imediata ou dano em curso explicitamente relatado. Retorne riskBasis: concrete_immediate_threat_or_harm, uncertainty_only ou insufficient; riskEvidence deve ser citação EXATA de fala do usuário, nunca do assistente. riskKind é physical apenas com base física pertinente; organizational não autoriza orientação física. Incorpore a correção mais recente e abandone uma leitura não sustentada; respostas anteriores do IAí não provam risco. Necessidade ao vivo exige interpretar a função dominante, não escolher pelo cenário ou palavra. Falar na interação para lidar com informação incompleta pode ser conduct_live, sem exigir decisão estratégica resolvida ou inventar fato; comparar alternativas continua compare_paths. Não use dívida-agente, nome de caso nem palavras-chave como seletor.`;
       const currentBasis =
         "\nBASE ATUAL: riskEvidence deve citar a última fala do líder, sustentando que a ameaça/dano concreto continua presente; riskImpactEvidence cita nessa fala a própria ameaça/dano, não apenas o cenário, divergência ou urgência. Sem ameaça/dano relatado, deixe vazio e não ative risco imediato. Uma divergência anterior não comprova dano imediato. Se a última fala corrige a hipótese, abandone-a. ownClarityImpaired exige ownClarityBasis reaction_or_overload_impeding_judgment e ownClarityEvidence com citação exata da última fala sobre emoção/sobrecarga impedindo julgamento. Falta de viabilidade conhecida, urgência comercial ou impossibilidade de validar em segundos são uncertainty_only ou insufficient, não incapacidade emocional. Preserve ameaças realmente relatadas, inclusive a confirmação atual de que persistem, sem transformar hipótese em fato.";
+      const interactionTiming =
+        "\nMOMENTO DA INTERAÇÃO: distinga o fato relatado da conversa que o líder pretende ter. conversationInProgress=true exige que essa interação já esteja acontecendo e que a necessidade dominante seja conduzi-la agora; indique essa base em needEvidence. Pedir ajuda para abrir uma conversa futura não comprova interação em andamento, mesmo quando o fato ocorreu antes ou a crise acabou. Nesse caso, elaborar comunicação é prepare_message; decidir alternativas é compare_paths; analisar riscos/consequências pode continuar analyze_crisis. Não force Feedback por estar no futuro nem 1:1 por mencionar equipe, reunião ou como abrir. AFTER pode descrever o fato ocorrido sem definir o momento da conversa pretendida. Atualize o sentido com a correção atual, sem usar palavras-chave nem estados como seletor.";
       const reply = await getClient().messages.create({
         model: "claude-haiku-4-5",
         max_tokens: 1200,
@@ -100,7 +102,7 @@ export function createModelProviders(
           "\n" + classifierAuthority() +
           "\nEX04: analyze_crisis representa organizar riscos e consequências contextualizados antes/durante/depois, sem exigir dano atual. Registre crisisPhase e crisisEvidence literal atual. Isso não marca immediateExternalRisk: só dano em curso/ameaça concreta sustentam contenção imediata. Revise necessidade com a fala atual. Escolha momentReferences apenas entre IDs dos dados candidatos pertinentes; [] se nenhum servir. Nenhum candidato determina função. Não cite exemplos como evidência do líder." +
           riskQualification +
-          currentBasis +
+          currentBasis + interactionTiming +
           contextQualification +
           "\nUse referências mínimas e curtas, sem repetir a mesma fonte nos campos desnecessariamente.",
         tools: [classificationTool as Anthropic.Tool],
@@ -185,6 +187,7 @@ export function createModelProviders(
         JSON.stringify(userReferences) +
         ". Em evidence.message use userMessage. Cite só trechos exatos das falas user; nunca os marcadores, a resposta do assistente ou campos internos. Preserve aspas e espaços da fonte. Não invente evidência quando faltar base.";
       let lastFailure = "";
+      let lastValidationReason = "";
       let presentationRepairHint = "";
       let lastCandidate: any = null;
       const instructions =
@@ -209,6 +212,8 @@ export function createModelProviders(
             (repair
               ? "\nA resposta anterior falhou na validação: " +
                 lastFailure + presentationRepairHint +
+                (lastValidationReason ? "\nRazão específica: " + lastValidationReason +
+                  ". Preserve o código geral. Não repita a apresentação recusada. Um pedido explícito com fatos já relatados permite exemplo opcional e adaptável de até40 palavras em delivery, com requestEvidence e basisEvidence literais, mesmo sem approachEvidence. Isso não autoriza discurso completo, imperativos, efeitos não relatados ou fatos novos. Text deve apenas contextualizar a opção, sem copiar a entrega nem dizer você pode abrir/diga/comece. Sem essas bases, ajude a elaboração sem exemplo." : "") +
                 ". Refaça em até 80 palavras. Se RESPONSE_CONSTRAINT_FAILED, reduza para no máximo UMA pergunta total ao líder sobre UMA lacuna; não transforme o reparo de apresentação em fechamento. Se AUTONOMY_CONSTRAINT_FAILED, retire imperativos como use a frase, diga, comece; preserve exemplo apenas se opcional e apoiado em abordagem própria ou em pedido explícito e base factual com as referências correspondentes. Sem abordagem própria, delivery tem até 40 palavras; coloque a abertura somente em delivery, nunca a duplique em text. Não preencha approachEvidence com mero objetivo de comportamento. Não acrescente efeitos na colaboração ou ambiente nem transforme em última reunião um episódio ocorrido em uma das reuniões. Quando já há pedido explícito e fatos, ofereça o exemplo pontual adaptável em vez de repetir pergunta ou esconder o apoio por trás da falha. Nunca cite a geração atual ou uma tentativa rejeitada como resposta anterior do assistente. Se UNSUPPORTED_FACT, reconstrua operationalClaims somente com trechos literais realmente expostos na resposta e evidência exata da fala do usuário. nunca títulos ou resumos de contexto. Prazo relatado não é promessa assumida: não marque time_commitment sem compromisso explícito afirmativo. Use [] quando não expõe as categorias de alegação; isso não autoriza texto sem base. Não repita compromisso sem base, alegação de histórico não exibido ou entrega duplicada. No Feedback, ajude o líder a elaborar/revisar a abordagem sem substituí-lo por frase pronta. Pode reconhecer lacunas e oferecer apenas um próximo movimento sem data. Se fizer pergunta, faça UMA questão focal sobre UMA lacuna; não acumule subperguntas. Em fechamento, nenhuma. Use poucos critérios completed; deixe pending tudo que não tiver citação exata suficiente."
               : "") +
             "\nCRITÉRIOS: " +
@@ -257,12 +262,15 @@ export function createModelProviders(
           return validated;
         } catch (e) {
           lastFailure = (e as Error).message;
+          lastValidationReason = typeof (e as any).validationReason === "string"
+            ? (e as any).validationReason : "";
           await options.onValidationObservation?.({
             turn: turn.number,
             agent,
             attempt: repair ? 2 : 1,
             phase: "validation",
             code: lastFailure,
+            ...(lastValidationReason ? { reason: lastValidationReason } : {}),
           });
           options.onValidationFailure?.(lastFailure, candidateInput);
           throw e;
