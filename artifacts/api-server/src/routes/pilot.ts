@@ -12,7 +12,7 @@ import { resolve, dirname } from "node:path";
 import { createPilotBudget } from "../lib/pilot-budget.cjs";
 import { createPilotStore } from "../lib/pilot-store.cjs";
 import { createPilotDelivery } from "../lib/pilot-delivery.cjs";
-import { OPERATIONAL_CAPACITY_MESSAGE } from "../lib/conversation-service.cjs";
+import { OPERATIONAL_CAPACITY_MESSAGE, RECOVERY_REQUIRED_MESSAGE } from "../lib/conversation-service.cjs";
 import { createPilotPersistence } from "../lib/pilot-persistence.cjs";
 import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
 import { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation } from "../lib/pilot-next-round.cjs";
@@ -406,7 +406,7 @@ export function createPilotRouter(
   router.post("/session/message", sameOrigin, authorize, (req, res, next) => {
     // A replay retrieves state and never enters the model path, even when the
     // original call failed or the budget no longer allows another call.
-    if ((state.delivery?.[req.body?.requestId] || state.requests?.[req.body?.requestId] || state.audit?.some((a:any)=>a.requestId===req.body?.requestId)) && req.body?.sessionId === state.session?.id) {
+    if ((Object.hasOwn(state.delivery??{},req.body?.requestId) || Object.hasOwn(state.requests??{},req.body?.requestId) || state.audit?.some((a:any)=>a.requestId===req.body?.requestId)) && req.body?.sessionId === state.session?.id) {
       try { delivery.begin(req.body,inFlight);res.json({recovered:true,...delivery.view()}); }
       catch (err) {res.status(409).json({code:(err as Error).message,error:"Identificador já usado com outro conteúdo."});}
       return;
@@ -436,7 +436,7 @@ export function createPilotRouter(
     }
     let releaseRequest:(()=>void)|undefined;
     try { releaseRequest=persistence.acquireRequest();delivery.begin(req.body,inFlight); }
-    catch(err) {releaseRequest?.();const code=(err as any).code??(err as Error).message;res.status(code==="STORAGE_UNAVAILABLE"?503:409).json({code,error:code==="OPERATIONAL_CAPACITY_REACHED"?OPERATIONAL_CAPACITY_MESSAGE:"O envio não foi iniciado. Consulte o estado registrado."});return;}
+    catch(err) {releaseRequest?.();const code=(err as any).code??(err as Error).message;res.status(code==="STORAGE_UNAVAILABLE"?503:409).json({code,error:code==="OPERATIONAL_CAPACITY_REACHED"?OPERATIONAL_CAPACITY_MESSAGE:code==="RECOVERY_REQUIRED"?RECOVERY_REQUIRED_MESSAGE:"O envio não foi iniciado. Consulte o estado registrado."});return;}
     inFlight += 1;
     // A disconnected browser must not unlock a still-running provider call.
     let released = false;

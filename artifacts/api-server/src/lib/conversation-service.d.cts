@@ -1,5 +1,6 @@
 export const NOTICE_VERSION: string;
 export const OPERATIONAL_CAPACITY_MESSAGE: string;
+export const RECOVERY_REQUIRED_MESSAGE: string;
 export class ConversationError extends Error { code: string; status: number; }
 export function readAnalysis(value: unknown): any;
 export function createConversationService(dependencies: {

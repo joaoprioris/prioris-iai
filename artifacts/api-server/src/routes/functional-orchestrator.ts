@@ -7,6 +7,7 @@ import {
   ConversationError,
   NOTICE_VERSION,
   OPERATIONAL_CAPACITY_MESSAGE,
+  RECOVERY_REQUIRED_MESSAGE,
 } from "../lib/conversation-service.cjs";
 import { createPostgresRepository } from "../lib/private-history-repository.cjs";
 import baseContract from "../lib/agent-contract.json";
@@ -240,6 +241,7 @@ export function createModelProviders(
           const candidateInput = compact ? {...lastCandidate,text:edited!.text} : block.input;
         if(!repair)lastCandidate=candidateInput;
         await options.onGenerationObservation?.({
+          requestId: turn.requestId, executionToken: turn.executionToken,
           turn: turn.number,
           agent,
           attempt: repair ? 2 : 1,
@@ -253,6 +255,7 @@ export function createModelProviders(
             turn,
           );
           await options.onValidationObservation?.({
+            requestId: turn.requestId, executionToken: turn.executionToken,
             turn: turn.number,
             agent,
             attempt: repair ? 2 : 1,
@@ -276,6 +279,7 @@ export function createModelProviders(
                 " palavras; máximo permitido: 40; meta de reparo: até 30 palavras, com margem. Reescreva um exemplo ainda mais curto, preservando sentido, fatos, caráter opcional e adaptável e autoria do líder. Não trunque mecanicamente, não invente fatos nem substitua a decisão do líder. A meta não altera o limite nem os demais controles."
               : "";
           await options.onValidationObservation?.({
+            requestId: turn.requestId, executionToken: turn.executionToken,
             turn: turn.number,
             agent,
             attempt: repair ? 2 : 1,
@@ -325,6 +329,7 @@ export function createModelProviders(
         lastFailure = "RESPONSE_CONSTRAINT_FAILED";
         presentationRepairHint = " A tentativa continha " + questionCounts(first).leader + " perguntas ao líder, " + questionCounts(first).interlocutor + " ao interlocutor do exemplo e " + first.text.trim().split(/\s+/).length + " palavras. Mantenha no máximo uma questão focal por destinatário, sem cascata; nenhuma pergunta em fechamento proibido. Se houver reparo de apresentação, mantenha a elaboração em vez de encerrar.";
         await options.onValidationObservation?.({
+          requestId: turn.requestId, executionToken: turn.executionToken,
           turn: turn.number,
           agent,
           attempt: 1,
@@ -357,6 +362,7 @@ export function createModelProviders(
       }
       if (usable(revised)) return revised;
       await options.onValidationObservation?.({
+        requestId: turn.requestId, executionToken: turn.executionToken,
         turn: turn.number,
         agent,
         attempt: 2,
@@ -482,6 +488,8 @@ export function createFunctionalRouter(
       SESSION_CLOSED: "Conversa encerrada. Inicie uma nova.",
       INVALID_INPUT: "Mensagem ou identificador da requisição inválido.",
       OPERATIONAL_CAPACITY_REACHED: OPERATIONAL_CAPACITY_MESSAGE,
+      RECOVERY_REQUIRED: RECOVERY_REQUIRED_MESSAGE,
+      REQUEST_ALREADY_SUBMITTED: "Este envio já está preservado. Consulte a entrega e seu estado; não haverá reenvio automático.",
       IDEMPOTENCY_CONFLICT:
         "O identificador desta requisição já foi usado com outro conteúdo.",
     };

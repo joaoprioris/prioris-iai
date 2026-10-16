@@ -9,6 +9,17 @@ function processIdentity(pid){
   return fs.readFileSync('/proc/sys/kernel/random/boot_id','utf8').trim()+':'+stat.slice(stat.lastIndexOf(')')+2).split(' ')[19];
  }catch{return null;}
 }
+function localExecutionOwner(){
+ try{return {pid:process.pid,processIdentity:processIdentity(process.pid),host:require('node:os').hostname(),namespace:fs.readlinkSync('/proc/self/ns/pid')};}catch{return null;}
+}
+function executionOwnerState(owner){
+ const here=localExecutionOwner();
+ if(!here||!owner||!Number.isInteger(owner.pid)||owner.pid<1||typeof owner.processIdentity!=='string'||!/^[-0-9a-f]{36}:\d+$/.test(owner.processIdentity)||owner.host!==here.host||owner.namespace!==here.namespace||owner.processIdentity.split(':')[0]!==here.processIdentity?.split(':')[0])return 'unknown';
+ const live=processIdentity(owner.pid);
+ if(live===owner.processIdentity)return 'active';
+ if(live===null&&fs.existsSync('/proc/'+owner.pid))return 'unknown';
+ return 'terminated';
+}
 function createPilotPersistence(file,state){
  file=path.resolve(file);
  function io(action,input={}){
@@ -49,4 +60,4 @@ function createPilotPersistence(file,state){
  }
  return {save,refresh,acquireRequest,requestActive,sha};
 }
-module.exports={createPilotPersistence};
+module.exports={createPilotPersistence,localExecutionOwner,executionOwnerState};

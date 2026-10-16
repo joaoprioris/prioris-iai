@@ -2,12 +2,14 @@
 const { decideRoute, AGENTS, readSituation, readRisk, ROUTING_VERSION } = require('./functional-policy.cjs');
 const {readFunctionalNeed}=require('./functional-context.cjs');
 const {selectReferences}=require('./ex04-reference.cjs');
-const {createHash}=require('node:crypto');
+const {createHash,randomUUID}=require('node:crypto');
+const {localExecutionOwner,executionOwnerState}=require('./pilot-persistence.cjs');
 const {turnDirective,closingFallback}=require('./conversation-guidance.cjs');
 const MAX_EXCHANGES = 10;
 const MAX_OPERATIONAL_INPUTS = 20;
 const MAX_OPERATIONAL_INPUT_BYTES = 64 * 1024;
 const OPERATIONAL_CAPACITY_MESSAGE = 'Esta conversa atingiu o limite operacional de 20 envios ou 64 KiB de texto do líder, incluindo tentativas falhas. Nenhum fato foi cortado e este envio não iniciou uma nova chamada de IA. Encerre a conversa ou apague os dados pelos controles disponíveis antes de iniciar outra.';
+const RECOVERY_REQUIRED_MESSAGE = 'Seu envio está preservado, mas não foi possível confirmar o término da execução anterior. Não o reenvie. Nenhuma nova chamada foi iniciada e as reservas permanecem retidas. Consulte a entrega preservada; para sair, use os controles autorizados de encerramento/apagamento. Se esses controles estiverem bloqueados por uso incerto, é necessária revisão técnica do registro, sem repetir a chamada.';
 const NOTICE_VERSION = 'history-v1-20261012';
 const CLOSE_SIGNAL = '[ENCERRAR]';
 class ConversationError extends Error {
@@ -24,15 +26,27 @@ function assertOperationalCapacity(context, content, externalCount=0) {
   if(count>=MAX_OPERATIONAL_INPUTS||bytes+Buffer.byteLength(content,'utf8')>MAX_OPERATIONAL_INPUT_BYTES)
     throw new ConversationError('OPERATIONAL_CAPACITY_REACHED',409);
 }
+function recoverInputReceipts(context) {
+  const next=structuredClone(context||{});
+  for(const receipt of Object.values(next.inputReceipts||{})){
+    if(receipt.status!=='processing')continue;
+    const state=executionOwnerState(receipt.owner);
+    if(state==='active')throw new ConversationError('TURN_IN_PROGRESS',409);
+    if(state!=='terminated')throw new ConversationError('RECOVERY_REQUIRED',409);
+    receipt.status='interrupted_unconfirmed';
+    receipt.recovery={reason:'LOCAL_OWNER_TERMINATED',at:new Date().toISOString(),remoteResult:'unconfirmed',automaticRetry:false};
+  }
+  return next;
+}
 function retainUserInput(session, entry) {
   if (!session || session.status !== 'active' || session.exchangeCount !== entry.expectedCount) throw new ConversationError('CONVERSATION_CHANGED',409);
-  const context=structuredClone(session.context||{});
+  let context=structuredClone(session.context||{});
+  if(Object.hasOwn(context.inputReceipts||{},entry.requestId))throw new ConversationError(context.inputReceipts[entry.requestId].contentHash===entry.contentHash?'REQUEST_ALREADY_SUBMITTED':'IDEMPOTENCY_CONFLICT',409);
+  context=recoverInputReceipts(context);
   const receipts=context.inputReceipts||{};
-  if(receipts[entry.requestId])throw new ConversationError(receipts[entry.requestId].contentHash===entry.contentHash?'REQUEST_ALREADY_SUBMITTED':'IDEMPOTENCY_CONFLICT',409);
-  if(Object.values(receipts).some(r=>r.status==='processing'))throw new ConversationError('TURN_IN_PROGRESS',409);
   assertOperationalCapacity(context,entry.content);
   context.messages=[...(Array.isArray(context.messages)?context.messages:[]),{role:'user',content:entry.content}];
-  context.inputReceipts={...receipts,[entry.requestId]:{contentHash:entry.contentHash,status:'processing'}};
+  context.inputReceipts={...receipts,[entry.requestId]:{contentHash:entry.contentHash,status:'processing',owner:localExecutionOwner(),executionToken:randomUUID()}};
   return context;
 }
 function readAnalysis(value) {
@@ -56,6 +70,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
     if (busy.has(key)) throw new ConversationError('TURN_IN_PROGRESS', 409);
     busy.add(key);
     let inputRecorded=false;
+    let executionToken;
     let sessionAuthorized=false;
     try {
       const session = await repository.getSession(scope, input.sessionId);
@@ -77,6 +92,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       if(repository.recordInput){
         ctx=await repository.recordInput(scope,{sessionId:input.sessionId,requestId:input.requestId,contentHash,content:input.content.trim(),expectedCount:session.exchangeCount,settingsRevision:settings.revision});
         inputRecorded=true;
+        executionToken=ctx.inputReceipts[input.requestId].executionToken;
       }
       const history = settings.enabled && settings.noticeVersion === NOTICE_VERSION ? await repository.readPrivateHistory(scope, 4, input.sessionId) : [];
       const currentMessages = Array.isArray(ctx.messages) ? ctx.messages : [];
@@ -84,7 +100,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       if(!inputRecorded)assertOperationalCapacity(ctx,input.content.trim());
       const verifyInput=async()=>{
         if(inputRecorded&&repository.assertInputCurrent)
-          await repository.assertInputCurrent(scope,{sessionId:input.sessionId,requestId:input.requestId,expectedCount:session.exchangeCount,settingsRevision:settings.revision});
+          await repository.assertInputCurrent(scope,{sessionId:input.sessionId,requestId:input.requestId,expectedCount:session.exchangeCount,settingsRevision:settings.revision,executionToken});
       };
       await verifyInput();
       let analysis,classificationRaw;
@@ -100,7 +116,7 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const situationReading = readSituation(analysis, allMessages);
       const count=session.exchangeCount+1;
       const riskReading=readRisk(analysis,allMessages);
-      const turnControl={number:count,max:MAX_EXCHANGES,previousProgress:ctx.progress??null,situationReading,riskReading,
+      const turnControl={number:count,max:MAX_EXCHANGES,requestId:input.requestId,executionToken,previousProgress:ctx.progress??null,situationReading,riskReading,
         momentReferences:selectReferences(analysis.momentReferences,allMessages),crisisPhase:analysis.crisisPhase??null};
       if(repository.recordObservation)await repository.recordObservation(scope,{sessionId:input.sessionId,requestId:input.requestId,turn:count,inputHash:contentHash,version:ROUTING_VERSION,classificationRaw,analysis,functionalNeed,riskReading,situationReading,route,messages:allMessages});
       let text;
@@ -125,20 +141,20 @@ function createConversationService({ repository, classify, respond, agentPrompts
       const result = { text, exchangeCount: count, maxExchanges: MAX_EXCHANGES, status: closing ? 'closed' : 'active', lowConfidence: route.mode === 'clarify', route: { mode: route.mode, agent: route.agent, transition: route.transition, reason: route.reason }, historyUsed: history.length > 0 };
       const messages = [...allMessages, { role: 'assistant', content: text }];
       const progressTrail=[...(Array.isArray(ctx.progressTrail)?ctx.progressTrail:[]),{turn:count,agent:route.agent,stage:progress?.stage??route.mode,completed:progress?.completed?.map(c=>c.criterion)??[],pending:progress?.pending??[]}].slice(-MAX_EXCHANGES);
-      const inputReceipts=inputRecorded&&!closing?{...ctx.inputReceipts,[input.requestId]:{contentHash,status:'completed'}}:undefined;
+      const inputReceipts=inputRecorded&&!closing?{...ctx.inputReceipts,[input.requestId]:{...ctx.inputReceipts[input.requestId],status:'completed'}}:undefined;
       const context = { messages: closing && !settings.enabled ? [] : messages, ...(inputReceipts?{inputReceipts}:{}), agentType: route.agent || previous,progress,progressTrail,situationReading,functionalNeed,routingVersion: ROUTING_VERSION, lastRequest: { id: input.requestId, content: input.content.trim(), result } };
       // Disabling history still permits operational context while a conversation is active.
       // Once it closes, retain no conversation text or replay payload in that context.
       const persistedContext = closing && !settings.enabled ? { agentType:context.agentType, routingVersion:context.routingVersion } : context;
-      const committed = await repository.commitTurn(scope, { sessionId: input.sessionId, requestId:input.requestId, contentHash, expectedCount: session.exchangeCount, settingsRevision: settings.revision, context:persistedContext, agent: route.agent || previous || 'MNT', status: result.status, nextCount: count,result, privateRecord: settings.enabled ? { sessionId: input.sessionId, input: input.content.trim(), response: text, time: clock().toISOString() } : null });
+      const committed = await repository.commitTurn(scope, { sessionId: input.sessionId, requestId:input.requestId, contentHash, executionToken, expectedCount: session.exchangeCount, settingsRevision: settings.revision, context:persistedContext, agent: route.agent || previous || 'MNT', status: result.status, nextCount: count,result, privateRecord: settings.enabled ? { sessionId: input.sessionId, input: input.content.trim(), response: text, time: clock().toISOString() } : null });
       if (!committed) throw new ConversationError('CONVERSATION_CHANGED', 409);
       return result;
     } catch(err) {
-      if(inputRecorded&&repository.recordInputFailure)await repository.recordInputFailure(scope,{sessionId:input.sessionId,requestId:input.requestId});
+      if(inputRecorded&&repository.recordInputFailure)await repository.recordInputFailure(scope,{sessionId:input.sessionId,requestId:input.requestId,executionToken});
       if(sessionAuthorized&&repository.recordFailure)await repository.recordFailure(scope,{sessionId:input.sessionId,requestId:input.requestId,code:err.code??'MODEL_UNAVAILABLE'});
       throw err;
     } finally { busy.delete(key); }
   }
   return { turn };
 }
-module.exports = { createConversationService, ConversationError, readAnalysis, NOTICE_VERSION, MAX_EXCHANGES, retainUserInput, assertOperationalCapacity, MAX_OPERATIONAL_INPUTS, MAX_OPERATIONAL_INPUT_BYTES, OPERATIONAL_CAPACITY_MESSAGE };
+module.exports = { createConversationService, ConversationError, readAnalysis, NOTICE_VERSION, MAX_EXCHANGES, retainUserInput, recoverInputReceipts, assertOperationalCapacity, MAX_OPERATIONAL_INPUTS, MAX_OPERATIONAL_INPUT_BYTES, OPERATIONAL_CAPACITY_MESSAGE, RECOVERY_REQUIRED_MESSAGE };

@@ -94,7 +94,7 @@ function operationalPgFixture(){
   if(sql.startsWith('SELECT id,context,status,exchange_count')||sql.startsWith('SELECT context,status,exchange_count'))return result([structuredClone(row)]);
   if(sql.startsWith('SELECT s.id')){
    assert(sql.includes("s.status='active'")&&sql.includes('p.revision::text=$5')&&sql.includes("->>'status'='processing'"));
-   return result(row.status==='active'&&row.exchange_count===v[3]&&String(prefs.revision)===v[4]&&row.context?.inputReceipts?.[v[5]]?.status==='processing'?[{id:row.id}]:[]);
+   return result(row.status==='active'&&row.exchange_count===v[3]&&String(prefs.revision)===v[4]&&row.context?.inputReceipts?.[v[5]]?.status==='processing'&&row.context.inputReceipts[v[5]].executionToken===v[6]?[{id:row.id}]:[]);
   }
   if(sql.startsWith('UPDATE prioris_history_preferences')){
    prefs.revision++;prefs.enabled=sql.includes('SET enabled=false')?false:v[2];prefs.notice_version=prefs.enabled?v[3]:null;return result([]);
@@ -102,11 +102,12 @@ function operationalPgFixture(){
   if(sql.startsWith('UPDATE sessions SET context=NULL')){row.context=null;row.status='closed';return result([]);}
   if(sql.startsWith('DELETE FROM prioris_')){records.length=0;return result([]);}
   if(sql.startsWith('UPDATE sessions SET context=jsonb_set')){
-   if(row.status==='active'&&row.context?.inputReceipts?.[v[3]]?.status==='processing')row.context.inputReceipts[v[3]].status='failed';
+   if(row.status==='active'&&row.context?.inputReceipts?.[v[3]]?.status==='processing'&&row.context.inputReceipts[v[3]].executionToken===v[4])row.context.inputReceipts[v[3]].status='failed';
    return result([]);
   }
   if(sql.startsWith('UPDATE sessions SET context=$4::jsonb')){
    if(sql.includes('exchange_count=$8')&&(row.status!=='active'||row.exchange_count!==v[7]))return result([]);
+   if(sql.includes("->>'executionToken'=$9")&&(row.context?.inputReceipts?.[v[9]]?.status!=='processing'||row.context.inputReceipts[v[9]].executionToken!==v[8]))return result([]);
    row.context=JSON.parse(v[3]);if(sql.includes('agent_type=$5')){row.status=v[5];row.exchange_count=v[6];}
    return result([{id:row.id}]);
   }
@@ -129,6 +130,91 @@ test('Capacidade operacional: apagamento durante classificação impede geraçã
  await assert.rejects(()=>operation,e=>e.code==='CONVERSATION_CHANGED');
  assert.equal(generation,0);assert.equal(f.row.context,null);assert.equal(f.row.status,'closed');
  assert.equal(f.row.exchange_count,0);assert.deepEqual(f.records,[]);
+});
+const interruptedClassification={scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,decisionSufficientlyClear:true,ownRecurrenceReported:false};
+test('Interrupção focal: SIGKILL depois da admissão, novo processo retoma sem repetir chamada nem reduzir reserva',async()=>{
+ const {spawnSync}=require('node:child_process');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'iai-receipt-kill-')),file=path.join(dir,'state.json');
+ const base=path.resolve('artifacts/api-server/src/lib');
+ const budget={charged:900000,calls:[{status:'uncertain-held',reservedMicroUSD:900000}]};
+ fs.writeFileSync(file,JSON.stringify({budget}));
+ const common=`const {createPilotPersistence}=require(${JSON.stringify(base+'/pilot-persistence.cjs')});const {createPilotStore,IDENTITY}=require(${JSON.stringify(base+'/pilot-store.cjs')});const {createPilotDelivery}=require(${JSON.stringify(base+'/pilot-delivery.cjs')});const {createConversationService}=require(${JSON.stringify(base+'/conversation-service.cjs')});const state={};const p=createPilotPersistence(process.argv[1],state);const release=p.acquireRequest();const store=createPilotStore(state,p.save);const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId};const session=store.open(scope);const delivery=createPilotDelivery(state,p.save);`;
+ const first=spawn(process.execPath,['-e',common+`(async()=>{delivery.begin({sessionId:session.id,requestId:'killed-request',content:'Correção literal antes da interrupção.'},0);await store.repository.recordInput(scope,{sessionId:session.id,requestId:'killed-request',content:'Correção literal antes da interrupção.',contentHash:'original-fictional-hash',expectedCount:0,settingsRevision:'pilot-history-off'});console.log('READY');setInterval(()=>{},1000);})().catch(()=>process.exit(9));`,file],{stdio:['ignore','pipe','pipe']});
+ try{
+  await new Promise((resolve,reject)=>{first.stdout.once('data',resolve);first.once('error',reject);first.once('exit',()=>reject(Error('worker exited before admission')));});
+  const {createPilotPersistence}=require('../artifacts/api-server/src/lib/pilot-persistence.cjs');
+  const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+  const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+  const loaded={},p=createPilotPersistence(file,loaded),store=createPilotStore(loaded,p.save);
+  const scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId};let calls=0;
+  assert.equal(p.requestActive(),true);
+  const service=createConversationService({repository:store.repository,agentPrompts:{FBK:'Simulado'},classify:async()=>{calls++;return interruptedClassification;},respond:async()=>{calls++;return 'Simulado.';}});
+  await assert.rejects(()=>service.turn(scope,{sessionId:loaded.session.id,requestId:'active-denied',content:'Novo envio.'}),e=>e.code==='TURN_IN_PROGRESS');
+  assert.equal(calls,0);
+  const exit=new Promise(r=>first.once('exit',r));first.kill('SIGKILL');await exit;
+  const run=spawnSync(process.execPath,['-e',common+`(async()=>{delivery.recoverRestart();state.fakeCalls={classify:0,generation:0};const service=createConversationService({repository:store.repository,agentPrompts:{FBK:'Simulado'},classify:async()=>{state.fakeCalls.classify++;return ${JSON.stringify(interruptedClassification)};},respond:async()=>{state.fakeCalls.generation++;return 'Qual parte da sua abordagem você quer esclarecer?';}});const input={sessionId:session.id,requestId:'resumed-request',content:'Minha correção adicional, sem apagar a anterior.'};delivery.begin(input,0);await service.turn(scope,input);const replay=await service.turn(scope,input);if(!replay.replayed)throw Error('missing replay');release();console.log('DONE');})().catch(e=>{console.error(e.code||e.message);process.exitCode=9});`,file],{encoding:'utf8',timeout:20000});
+  assert.equal(run.status,0,run.stderr);assert.match(run.stdout,/DONE/);
+  const after=JSON.parse(fs.readFileSync(file));
+  assert.deepEqual(after.budget,budget);assert.deepEqual(after.fakeCalls,{classify:1,generation:1});
+  assert.equal(after.session.exchangeCount,1);
+  assert.equal(after.session.context.inputReceipts['killed-request'].status,'interrupted_unconfirmed');
+  assert.equal(after.session.context.inputReceipts['killed-request'].recovery.automaticRetry,false);
+  assert.equal(after.session.context.messages[0].content,'Correção literal antes da interrupção.');
+  assert.equal(after.session.context.messages.filter(m=>m.role==='assistant').length,1);
+  const foreign=createPilotStore(after);
+  await assert.rejects(()=>createConversationService({repository:foreign.repository,agentPrompts:{},classify:async()=>assert.fail('cross-tenant generation'),respond:async()=>assert.fail('cross-tenant generation')}).turn({userId:'another-user',organizationId:'another-org'},{sessionId:after.session.id,requestId:'foreign-denied',content:'Acesso indevido.'}),e=>e.code==='SESSION_NOT_FOUND');
+ }finally{if(first.exitCode===null&&first.signalCode===null)first.kill('SIGKILL');fs.rmSync(dir,{recursive:true,force:true});}
+});
+test('Interrupção focal: recibo sem origem verificável informa saída preservável; apagamento impede resultado antigo',async()=>{
+ const {createConversationService,RECOVERY_REQUIRED_MESSAGE}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const f=operationalPgFixture();let calls=0;
+ f.row.context={messages:[{role:'user',content:'Fala legada intacta.'}],inputReceipts:{'legacy-request':{status:'processing',contentHash:'legacy'}}};
+ const service=createConversationService({repository:f.repo,agentPrompts:{},classify:async()=>{calls++;},respond:async()=>{calls++;}});
+ const before=JSON.stringify(f.row);
+ await assert.rejects(()=>service.turn(f.scope,{sessionId:f.row.id,requestId:'unknown-denied',content:'Não repetir.'}),e=>e.code==='RECOVERY_REQUIRED');
+ assert.equal(JSON.stringify(f.row),before);assert.equal(calls,0);
+ assert.match(RECOVERY_REQUIRED_MESSAGE,/preservado/);assert.match(RECOVERY_REQUIRED_MESSAGE,/encerramento\/apagamento/);
+ await f.repo.eraseHistory(f.scope);
+ const stale=await f.repo.commitTurn(f.scope,{sessionId:f.row.id,requestId:'legacy-request',settingsRevision:'0',executionToken:'old',context:{messages:[{role:'assistant',content:'Não ressuscitar.'}]}});
+ assert.equal(stale,false);assert.equal(f.row.context,null);assert.equal(f.row.status,'closed');
+});
+test('Interrupção focal: resposta atrasada não sobrescreve continuação mesmo antes de incrementar troca',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const state={},store=createPilotStore(state),scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId},session=store.open(scope);
+ let release,entered;const wait=new Promise(r=>release=r),started=new Promise(r=>entered=r);
+ const service=createConversationService({repository:store.repository,agentPrompts:{FBK:'Simulado'},classify:async()=>interruptedClassification,respond:async()=>{entered();await wait;return 'Resposta atrasada.';}});
+ const old=service.turn(scope,{sessionId:session.id,requestId:'old-response',content:'Fala antiga.'});await started;
+ // Simulates a fenced continuation, not permission to declare a live owner dead.
+ const oldToken=state.session.context.inputReceipts['old-response'].executionToken;
+ state.session.context.inputReceipts['old-response'].status='interrupted_unconfirmed';
+ await store.repository.recordInput(scope,{sessionId:session.id,requestId:'new-response',content:'Correção mais recente.',contentHash:'new',expectedCount:0,settingsRevision:'pilot-history-off'});
+ const before=structuredClone(state.session.context);
+ const stale=await store.repository.commitTurn(scope,{sessionId:session.id,requestId:'old-response',executionToken:oldToken,expectedCount:0,settingsRevision:'pilot-history-off',context:{messages:[{role:'assistant',content:'Sobrescrever.'}]},status:'active',nextCount:1});
+ assert.equal(stale,false);
+ await assert.rejects(()=>store.repository.recordGenerationObservation(scope,{sessionId:session.id,requestId:'old-response',executionToken:oldToken,turn:1,attempt:1}),e=>e.code==='CONVERSATION_CHANGED');
+ release();await assert.rejects(()=>old,e=>e.code==='CONVERSATION_CHANGED');
+ assert.deepEqual(state.session.context,before);assert.equal(state.session.exchangeCount,0);
+ assert.equal(state.session.context.messages.at(-1).content,'Correção mais recente.');
+});
+test('Interrupção focal: constructor e toString são envios próprios com replay e conflitos sem geração duplicada',async()=>{
+ const {createPilotStore,IDENTITY}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
+ const {createPilotDelivery}=require('../artifacts/api-server/src/lib/pilot-delivery.cjs');
+ const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+ const state={},store=createPilotStore(state),scope={userId:IDENTITY.id,organizationId:IDENTITY.organizationId},session=store.open(scope),delivery=createPilotDelivery(state,()=>{});
+ let calls=0;
+ const service=createConversationService({repository:store.repository,agentPrompts:{FBK:'Simulado'},classify:async()=>{calls++;return interruptedClassification;},respond:async()=>{calls++;return 'Como você pretende abordar essa conversa?';}});
+ for(const id of ['constructor','toString']){
+  const input={sessionId:session.id,requestId:id,content:'Envio fictício '+id+'.'};
+  assert.equal(delivery.begin(input,0).replay,false);
+  await service.turn(scope,input);
+  assert.equal((await service.turn(scope,input)).replayed,true);
+  assert.equal(delivery.begin(input,0).replay,true);
+  await assert.rejects(()=>service.turn(scope,{...input,content:'Conteúdo conflitante.'}),e=>e.code==='IDEMPOTENCY_CONFLICT');
+  assert.throws(()=>delivery.begin({...input,content:'Conteúdo conflitante.'},0),/IDEMPOTENCY_CONFLICT/);
+  assert(Object.hasOwn(state.requests,id));assert(Object.hasOwn(state.session.context.inputReceipts,id));
+ }
+ assert.equal(calls,4);assert.equal(state.session.exchangeCount,2);
 });
 test('Capacidade operacional: apagamento e novo consentimento durante resposta não restauram envio antigo',async()=>{
  const {createConversationService,NOTICE_VERSION}=require('../artifacts/api-server/src/lib/conversation-service.cjs');

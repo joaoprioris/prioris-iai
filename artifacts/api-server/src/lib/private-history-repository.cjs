@@ -16,7 +16,7 @@ function createPostgresRepository(pool) {
   }
   return {
     async assertInputCurrent(scope,entry){
-      const {rows}=await pool.query("SELECT s.id FROM sessions s JOIN prioris_history_preferences p USING(user_id,organization_id) WHERE s.user_id=$1 AND s.organization_id=$2 AND s.id=$3 AND s.status='active' AND s.exchange_count=$4 AND p.revision::text=$5 AND s.context->'inputReceipts'->$6::text->>'status'='processing'",[...scoped(scope),entry.sessionId,entry.expectedCount,String(entry.settingsRevision),entry.requestId]);
+      const {rows}=await pool.query("SELECT s.id FROM sessions s JOIN prioris_history_preferences p USING(user_id,organization_id) WHERE s.user_id=$1 AND s.organization_id=$2 AND s.id=$3 AND s.status='active' AND s.exchange_count=$4 AND p.revision::text=$5 AND s.context->'inputReceipts'->$6::text->>'status'='processing' AND s.context->'inputReceipts'->$6::text->>'executionToken'=$7",[...scoped(scope),entry.sessionId,entry.expectedCount,String(entry.settingsRevision),entry.requestId,entry.executionToken]);
       if(rows.length!==1)throw new ConversationError('CONVERSATION_CHANGED',409);
     },
     async recordInput(scope,entry){
@@ -31,7 +31,7 @@ function createPostgresRepository(pool) {
     },
     async recordInputFailure(scope,entry){
       return transaction(scope,async client=>{
-        await client.query("UPDATE sessions SET context=jsonb_set(context,ARRAY['inputReceipts',$4::text,'status'],to_jsonb('failed'::text)) WHERE user_id=$1 AND organization_id=$2 AND id=$3 AND status='active' AND context->'inputReceipts'->$4::text->>'status'='processing'",[...scoped(scope),entry.sessionId,entry.requestId]);
+        await client.query("UPDATE sessions SET context=jsonb_set(context,ARRAY['inputReceipts',$4::text,'status'],to_jsonb('failed'::text)) WHERE user_id=$1 AND organization_id=$2 AND id=$3 AND status='active' AND context->'inputReceipts'->$4::text->>'status'='processing' AND context->'inputReceipts'->$4::text->>'executionToken'=$5",[...scoped(scope),entry.sessionId,entry.requestId,entry.executionToken]);
       });
     },
     async getCompletedRequest(scope,sessionId,requestId){
@@ -70,9 +70,10 @@ function createPostgresRepository(pool) {
     async commitTurn(scope, turn) {
       return transaction(scope, async (client, settings) => {
         if (String(settings.revision) !== String(turn.settingsRevision)) return false;
+        if(!turn.executionToken)return false;
         const duplicate=await client.query('SELECT 1 FROM prioris_completed_requests WHERE user_id=$1 AND organization_id=$2 AND session_id=$3 AND request_id=$4',[...scoped(scope),turn.sessionId,turn.requestId]);
         if(duplicate.rowCount)return false;
-        const q=await client.query("UPDATE sessions SET context=$4::jsonb,agent_type=$5,status=$6,exchange_count=$7 WHERE user_id=$1 AND organization_id=$2 AND id=$3 AND exchange_count=$8 AND status='active' RETURNING id", [...scoped(scope),turn.sessionId,JSON.stringify(turn.context),turn.agent,turn.status,turn.nextCount,turn.expectedCount]);
+        const q=await client.query("UPDATE sessions SET context=$4::jsonb,agent_type=$5,status=$6,exchange_count=$7 WHERE user_id=$1 AND organization_id=$2 AND id=$3 AND exchange_count=$8 AND status='active' AND context->'inputReceipts'->$10::text->>'status'='processing' AND context->'inputReceipts'->$10::text->>'executionToken'=$9 RETURNING id", [...scoped(scope),turn.sessionId,JSON.stringify(turn.context),turn.agent,turn.status,turn.nextCount,turn.expectedCount,turn.executionToken,turn.requestId]);
         if (q.rowCount !== 1) return false;
         await client.query('INSERT INTO prioris_completed_requests(user_id,organization_id,session_id,request_id,content_hash) VALUES($1,$2,$3,$4,$5)',[...scoped(scope),turn.sessionId,turn.requestId,turn.contentHash]);
         if (turn.privateRecord && settings.enabled && settings.notice_version===NOTICE_VERSION) {
