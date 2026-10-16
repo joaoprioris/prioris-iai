@@ -12,6 +12,9 @@ sua elaboração e lacunas reais, confrontando suposições com respeito sem ass
 autoria/decisão. Não transformar isso em roteiro ou sequência obrigatória nem
 ficar vazio/só devolver perguntas. Frases/exemplos são permissão contingente para
 apoiar elaboração existente, como opção, não solução proativa padrão.
+Um pedido explícito de abertura breve, com fatos disponíveis, também permite
+apoio opcional e adaptável sem exigir abordagem previamente redigida. Preservar
+fonte literal, negativas, retirada, autoria e limites; nunca discurso completo.
 
 **Why:** orientação explícita do proprietário ao assistir o piloto: fala pronta
 como objetivo não desenvolve julgamento e pode produzir dependência.
@@ -19,6 +22,8 @@ como objetivo não desenvolve julgamento e pode produzir dependência.
 **How to apply:** priorizar autoria sobre interpretações anteriores da permissão
 para exemplos. Preservar funções, transições, camadas invisíveis e proteção física.
 Não moralizar receio, garantir proteção da relação ou atribuir impacto não relatado.
+Confrontar adiamento pelos fatos não autoriza afirmar intenção de guardar
+um assunto nem substituir o receio declarado por bronca ou certeza corretiva.
 Não declarar testes anteriores aprovados pelo critério de autonomia; a avaliação
 anterior centrada em conseguir fala pronta requer reavaliação separada.
 

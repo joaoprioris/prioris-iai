@@ -22,6 +22,9 @@ Exemplo curto e adaptável pode apoiar elaboração, sem ser obrigação nem dis
 Sem abordagem própria relatada, só o forneça diante de pedido explícito e fatos
 concretos já relatados, até40 palavras de abertura pontual. Registre requestEvidence
 com o pedido e basisEvidence com os fatos; não atribua o exemplo ao líder.
+Pedidos de sugerir, propor ou elaborar uma abertura breve também são pedidos
+explícitos; cite a formulação real completa, não apenas um fragmento sem o pedido.
+Negação, retirada e pergunta relatada de outra pessoa não autorizam exemplo.
 Em authorship registre supportMode explore, review ou optional_example. Review
 requer approachEvidence literal da abordagem própria. Optional_example usa essa
 abordagem ou o pedido explícito com base factual; examplePurpose delimita o apoio.
@@ -45,12 +48,18 @@ function validateFeedbackAuthorship(value,messages,parts){
  const request=(a.requestEvidence??[]),basis=(a.basisEvidence??[]);
  if(!Array.isArray(request)||!Array.isArray(basis)||request.length>2||basis.length>4)reject('INVALID_REQUEST_BASIS_SHAPE');
  const requested=request.map(e=>resolveUserEvidence(e,messages)),grounded=basis.map(e=>resolveUserEvidence(e,messages));
- const negative=q=>/\b(?:n[aã]o\s+(?:quero|preciso|gostaria|me d[eê]|d[eê]|mostre)|evite|dispenso)\s+(?:um(?:a)?\s+)?(?:exemplos?|sugest[aã]o|(?:uma )?falas?)\b|\bsem\s+(?:nenhum[a]?\s+)?(?:exemplos?|sugest[aã]o)\b/i.test(q);
- const reported=q=>/\b(?:colega|pessoa|gestor[a]?|diretor[a]?|ele|ela)\b[^.!?\n]*\b(?:perguntou|pediu|disse|falou)\s*[:—-]/i.test(q);
- const asks=q=>!negative(q)&&(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:exemplo|sugest[aã]o|uma fala)\b/i.test(q)||/\bcomo (?:eu )?(?:abro|come[cç]o|digo)\b/i.test(q));
+ const negative=q=>/\b(?:n[aã]o\s+(?:quero|preciso|gostaria|me d[eê]|d[eê]|mostre)|evite|dispenso)\s+(?:um(?:a)?\s+)?(?:exemplos?|sugest[aã]o|(?:uma )?falas?|abertura)\b|\bsem\s+(?:nenhum[a]?\s+)?(?:exemplos?|sugest[aã]o|abertura)\b/i.test(q)||
+  /\b(?:n[aã]o|nunca)\s+(?:(?:quero|preciso|precisa|gostaria)\s+(?:que\s+)?)?(?:(?:voc[eê]|me)\s+)?(?:(?:pode|poderia|deve)\s+)?(?:sugerir|sugira|propor|redigir|escrever|dar|d[eê]|mostrar|mostre|preparar|elaborar)\b[^.!?\n]{0,60}\b(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q);
+ const reported=q=>/\b(?:perguntou|pediu|disse|falou|solicitou)\b[^.!?\n]{0,80}(?:[:—-]|\b(?:se|que|para)\b)/i.test(q)||
+  /\b(?:pedido|fala|pergunta)\s+(?:de|do|da)\b[^.!?\n]{0,60}\b(?:foi|é)\s*[:“"']/i.test(q)||
+  /^\s*[“"‘']*(?:ele|ela|[oa] colega|minh[oa] chefe)\s+(?:pode|poderia|consegue|quer|gostaria|vai)\b/i.test(q);
+ const asks=q=>!negative(q)&&(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:exemplo|sugest[aã]o|uma fala)\b/i.test(q)||
+  /\b(?:pode(?:ria)?|consegue)\b[^.!?\n]{0,40}\b(?:sugerir|propor|mostrar|redigir|escrever|rascunhar|preparar|elaborar)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
+  /\b(?:quero|gostaria(?: de)?|me (?:sugira|proponha|mostre|d[eê]|d[aá])|sugira|proponha|redija|escreva|prepare)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
+  /\bcomo (?:eu )?(?:abro|come[cç]o|digo)\b/i.test(q));
  const users=messages.filter(m=>m.role==='user'),last=users.at(-1)?.content??'';
  const withdrawn=negative(last);
- const explicit=!withdrawn&&requested.some(r=>{const q=r.evidence.quote,source=users[r.evidence.message]?.content??'',at=source.indexOf(q),prefix=source.slice(0,at).split(/[.!?\n]/).at(-1)??'';return asks(q)&&!reported(prefix+q);});
+ const explicit=!withdrawn&&requested.some(r=>{const q=r.evidence.quote,source=users[r.evidence.message]?.content??'',at=source.indexOf(q),prefix=source.slice(0,at).split(/[.!?\n]/).at(-1)??'';return asks(q)&&!negative(prefix+q)&&!reported(prefix+q);});
  const factual=grounded.some(r=>!r.evidence.quote.includes('?')&&!/^(?:quero|preciso|gostaria|tenho que)\b/i.test(r.evidence.quote.trim()));
  const requestedSupport=explicit&&factual;
  const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote));

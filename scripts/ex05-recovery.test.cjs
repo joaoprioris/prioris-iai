@@ -11,6 +11,7 @@ const {readAnalysis}=require('../artifacts/api-server/src/lib/conversation-servi
 const {inspectOperation,operationMessages}=require('../artifacts/api-server/src/lib/ex05-operation-recovery.cjs');
 const {createPilotPersistence}=require('../artifacts/api-server/src/lib/pilot-persistence.cjs');
 const {admitIndependentCase}=require('../artifacts/api-server/src/lib/ex05-operation-recovery.cjs');
+const {validateMethodologicalFidelity}=require('../artifacts/api-server/src/lib/methodological-fidelity.cjs');
 const contract=resolveContract(),profile=contract.agents.find(a=>a.id==='FBK'),l26=replay['L26-T03-b'];
 const api=Module.createRequire(path.resolve('artifacts/api-server/package.json'));
 const built=api('esbuild').buildSync({entryPoints:['artifacts/api-server/src/routes/functional-orchestrator.ts'],bundle:true,platform:'node',format:'cjs',packages:'external',write:false,alias:{'@workspace/db':path.resolve('scripts/db-denied-fixture.ts')}});
@@ -229,4 +230,85 @@ test('Caso independente: Linux real mantém exclusão entre processos antes e de
   assert.equal(await new Promise(resolve=>contender.once('exit',resolve)),0);
   assert.equal(JSON.stringify(f.c),before);assert.equal(f.c.budget.calls.length,1);
  }finally{if(release)release();if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');f.close();}
+});
+const l27=replay['L27-T02-a'];
+const t03='Deu erro aqui. Pode tentar de novo e me dar uma sugestão concreta de abertura, incluindo como assumir que eu deveria ter falado antes?';
+const request27='Você pode sugerir uma abertura concreta, reconhecendo a entrega dela e assumindo que eu demorei a trazer isso?';
+const messages27=content=>[...l27.messages.slice(0,2),{role:'user',content}];
+function opening27(messages,request){
+ return {...structuredClone(l27.attempts[1]),
+  text:'Uma opção breve para você adaptar ao reconhecimento e ao atraso que relatou.',
+  stage:'explore',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],
+  closingSummary:'',nextStep:'',operationalClaims:[],
+  delivery:{kind:'message',text:'Camila, reconheço sua entrega nos dois últimos projetos. Demorei a trazer os episódios das reuniões e gostaria de conversar sobre o que observei.'},
+  authorship:{supportMode:'optional_example',approachEvidence:[],examplePurpose:'Apoio breve e adaptável à abertura solicitada, sem substituir a decisão do líder.',
+   requestEvidence:[{message:1,quote:request}],basisEvidence:[
+    {message:0,quote:'Ela entrega muito bem tecnicamente e cumpriu os dois últimos projetos'},
+    {message:0,quote:'Nunca conversei com ela sobre isso e já adiei a avaliação duas vezes'}]}};
+}
+test('Pedido explícito: gerações T02 arquivadas avançam do falso negativo para recusa real por tamanho, sem aprová-las',()=>{
+ for(const raw of l27.attempts){
+  const before=JSON.stringify(raw);
+  assert.throws(()=>validateProgress(raw,profile,l27.messages,{number:2}),
+   e=>e.message==='AUTONOMY_CONSTRAINT_FAILED'&&e.validationReason==='EXAMPLE_TOO_LONG');
+  assert.equal(JSON.stringify(raw),before);
+ }
+});
+test('Pedido explícito: literal T02, variante T03 e equivalentes aceitam somente abertura opcional curta com fatos',()=>{
+ for(const request of [request27,t03,'Poderia propor uma abertura breve?','Você consegue elaborar uma abertura curta?','Quero uma abertura breve.','Me sugira uma abertura curta.']){
+  const messages=messages27(request),v=opening27(messages,request);
+  const r=validateProgress(v,profile,messages,{number:2});
+  assert.equal(r.progress.authorship.supportMode,'optional_example');
+  assert.equal(r.progress.authorship.approachEvidence.length,0);
+  assert.equal(r.progress.authorship.requestEvidence[0].quote,request);
+  assert.equal(r.text.split(v.delivery.text).length-1,1);
+  assert(v.delivery.text.split(/\s+/).length<=40);
+ }
+});
+test('Pedido explícito: negações, retirada e negação omitida da citação não autorizam exemplo',()=>{
+ for(const negative of ['Não pode sugerir uma abertura concreta.','Você pode não sugerir uma abertura?','Não quero que você sugira uma abertura.','Dispenso uma abertura.','Sem exemplos.']){
+  const messages=messages27(negative),v=opening27(messages,negative);
+  assert.throws(()=>validateProgress(v,profile,messages,{number:2}),e=>e.validationReason==='EXAMPLE_WITHDRAWN');
+ }
+ const messages=[l27.messages[0],{role:'user',content:'Não pode sugerir uma abertura concreta.'},{role:'user',content:'Quero refletir sobre os episódios.'}];
+ const v=opening27(messages,'pode sugerir uma abertura concreta');
+ assert.throws(()=>validateProgress(v,profile,messages,{number:2}),e=>e.validationReason==='EXPLICIT_REQUEST_MISSING');
+});
+test('Pedido explícito: fala de terceiros, assistente, citação inventada e ambiguidade continuam recusadas',()=>{
+ for(const content of ['Minha colega perguntou: “'+request27+'”','Ela pediu que eu pergunte: “'+request27+'”','A pergunta da colega foi: “'+request27+'”','Ela pode sugerir uma abertura concreta.']){
+  const q=content.startsWith('Ela pode')?'pode sugerir uma abertura concreta':request27;
+  const messages=messages27(content),v=opening27(messages,q);
+  assert.throws(()=>validateProgress(v,profile,messages,{number:2}),e=>e.validationReason==='EXPLICIT_REQUEST_MISSING');
+ }
+ const other=[{role:'user',content:'Quero refletir.'},{role:'assistant',content:request27},{role:'user',content:'Ainda estou pensando.'}];
+ assert.throws(()=>validateProgress(opening27(other,request27),profile,other,{number:2}),/INVALID_PROGRESS_EVIDENCE/);
+ const messages=messages27(request27),v=opening27(messages,'Pode inventar uma abertura que não pedi?');
+ assert.throws(()=>validateProgress(v,profile,messages,{number:2}),/INVALID_PROGRESS_EVIDENCE/);
+ const repeated=[l27.messages[0],{role:'user',content:request27},{role:'user',content:request27}],ambiguous=opening27(repeated,request27);
+ ambiguous.authorship.requestEvidence[0].message=9;
+ assert.throws(()=>validateProgress(ambiguous,profile,repeated,{number:2}),/INVALID_PROGRESS_EVIDENCE/);
+});
+test('Pedido explícito: ausência de fatos, discurso longo e apresentação imperativa continuam recusados',()=>{
+ const messages=messages27(request27);
+ let v=opening27(messages,request27);v.authorship.basisEvidence=[];
+ assert.throws(()=>validateProgress(v,profile,messages,{number:2}),e=>e.validationReason==='FACTUAL_BASIS_MISSING');
+ v=opening27(messages,request27);v.delivery.text='palavra '.repeat(41);
+ assert.throws(()=>validateProgress(v,profile,messages,{number:2}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
+ v=opening27(messages,request27);v.text='Diga essa frase e cobre uma decisão.';
+ assert.throws(()=>validateProgress(v,profile,messages,{number:2}),e=>e.validationReason==='IMPERATIVE_PRESENTATION');
+});
+test('Pedido explícito: adaptador real aceita variante T03 após reparo de tamanho com SDK simulado',async()=>{
+ const messages=messages27(t03),tooLong=opening27(messages,t03);tooLong.delivery.text='palavra '.repeat(41);
+ const h=provider([tooLong,opening27(messages,t03)]);
+ const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}});
+ assert.equal(h.calls.length,2);assert.equal(h.events[0].reason,'EXAMPLE_TOO_LONG');
+ assert.equal(h.events[1].code,'ACCEPTED');assert.equal(r.progress.authorship.requestEvidence[0].quote,t03);
+ assert.equal(r.text.split(r.progress.delivery.text).length-1,1);
+});
+test('Pedido explícito: tom recusa certeza corretiva sobre intenção, preserva fatos e hipótese identificada',()=>{
+ const bad='A dificuldade não é parecer que guardou — é que você guardou.';
+ assert.throws(()=>validateMethodologicalFidelity({operationalClaims:[]},l27.messages,[bad]),/UNSUPPORTED_FACT/);
+ const fact='Você relatou que adiou a avaliação duas vezes e ainda não conversou sobre os episódios.';
+ assert.equal(validateMethodologicalFidelity({operationalClaims:[]},l27.messages,[fact]),'methodological-2');
+ assert.equal(validateMethodologicalFidelity({operationalClaims:[]},l27.messages,['Como hipótese, '+bad.toLowerCase()]),'methodological-2');
 });

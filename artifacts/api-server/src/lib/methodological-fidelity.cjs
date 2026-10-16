@@ -19,6 +19,11 @@ disponíveis ANTES desta resposta. Reconheça efeitos ou capacidade explicitamen
 relatados, sem ampliar seu alcance. Hipóteses identificadas continuam possíveis;
 não converta receio, proposta ou condição em efeito observado.
 Não afirme a dificuldade real ou a motivação do líder sem relato; transforme a leitura em hipótese aberta. Não converta dois relatos em nexo causal, mesmo dentro de fala proposta condicional.
+Confronte adiamentos pelos fatos e suas lacunas, sem censura ou bronca.
+Ter adiado não comprova intenção de reter um assunto. Não substitua o receio
+declarado por uma certeza corretiva sobre a intenção ou a dificuldade do líder.
+Se ele apontar efeito negativo do tom, reconheça a correção e ajuste a ajuda,
+sem defender a leitura anterior nem exigir nova justificativa para ajudá-lo.
 Consulte o contexto já informado antes de perguntar; uma pergunta só é útil
 quando trata uma lacuna material ainda aberta. Não reduza ajuda a perguntas:
 uma distinção sustentada ou exame concreto de suposição pode fazer avançar.
@@ -27,6 +32,7 @@ funções e a proteção pertinente diante de perigo físico realmente relatado.
 `;
 const patterns=[
  {name:'inner_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+(?:dificuldade|quest[aã]o|tens[aã]o|problema)\s+real\s+(?:n[aã]o\s+)?(?:é|est[aá])(?=\s|[,.!?;:]|$)/i},
+ {name:'corrective_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+dificuldade\s+n[aã]o\s+é(?=\s)[^.!?\n]*[—–:-]\s*é\s+(?:que\s+)?voc[eê](?=\s|[,.!?;:]|$)/i},
  {name:'embedded_causal_assertion',kind:'impact',embeddedCausal:true,match:/\b(?:dizendo|dizer|afirmar|falar|explicar|pontuar)\b[^.!?]*\b(?:isso|epis[oó]dios|comportamentos)\b[^.!?]*\b(?:criou|causou|gerou|provocou)\b/i,sourceMatch:/\b(?:isso|epis[oó]dios|comportamentos)\b[^.!?]*\b(?:criou|causou|gerou|provocou)\b/i},
  {name:'silence_processing',kind:'impact',match:/\bsil[eê]ncio\b[^.!?]*(?:\b(?:é|foi)\b[^.!?]*processamento|processamento[^.!?]*,\s*n[aã]o\s+evas[aã]o)/i},
  {name:'moment_protection',kind:'impact',match:/\b(?:rea[cç][aã]o|ceder|isso|movimento)\b[^.!?]*\bprote(?:ge|geu)\b[^.!?]*\bmomento\b/i},
@@ -43,7 +49,7 @@ function validateMethodologicalFidelity(value,messages,parts){
    // "pode ser X, não Y" still rules out Y. A possibility for X doesn't
    // establish exclusion of Y, even if another clause is conditional.
    const excludesAlternative=rule.name==='silence_processing'&&/,\s*n[aã]o\s+evas[aã]o/i.test(sentence);
-   if(rule.name==='inner_difficulty_certainty'){
+   if(['inner_difficulty_certainty','corrective_difficulty_certainty'].includes(rule.name)){
     const at=sentence.search(rule.match),prefix=sentence.slice(0,at);
     if(/\b(?:talvez|hip[oó]tese|possibilidade|n[aã]o sabemos se|n[aã]o sei se|sem afirmar que|ser[aá] que|voc[eê] diria que)\b/i.test(prefix))continue;
    }else if(!excludesAlternative&&!rule.embeddedCausal&&(sentence.includes('?')||uncertain(sentence)))continue;
