@@ -10,6 +10,7 @@ const {decideRoute}=require('../artifacts/api-server/src/lib/functional-policy.c
 const {readAnalysis}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
 const {inspectOperation,operationMessages}=require('../artifacts/api-server/src/lib/ex05-operation-recovery.cjs');
 const {createPilotPersistence}=require('../artifacts/api-server/src/lib/pilot-persistence.cjs');
+const {admitIndependentCase}=require('../artifacts/api-server/src/lib/ex05-operation-recovery.cjs');
 const contract=resolveContract(),profile=contract.agents.find(a=>a.id==='FBK'),l26=replay['L26-T03-b'];
 const api=Module.createRequire(path.resolve('artifacts/api-server/package.json'));
 const built=api('esbuild').buildSync({entryPoints:['artifacts/api-server/src/routes/functional-orchestrator.ts'],bundle:true,platform:'node',format:'cjs',packages:'external',write:false,alias:{'@workspace/db':path.resolve('scripts/db-denied-fixture.ts')}});
@@ -116,4 +117,116 @@ test('Linux: lock de processo real ativo bloqueia; após SIGKILL recupera lock s
    assert(fs.readdirSync(path.join(dir,'lock-recovery')).length>0);
   }finally{release();}
  }finally{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');fs.rmSync(dir,{recursive:true,force:true});}
+});
+function independentFixture(){
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'ex05-independent-')),file=path.join(dir,'campaign.json');
+ const c=campaign();c.budget={cap:5000000,charged:590064,blocked:false,calls:[
+  {round:24,model:'claude-sonnet-4-5',inputBound:92844,maxOutput:2200,reservedMicroUSD:590064,status:'reserved'}]};
+ fs.writeFileSync(file,JSON.stringify(c));
+ fs.writeFileSync(path.join(dir,'latest-result.json'),JSON.stringify({caseId:'L24',requestId:'one',error:'RESULT_UNCONFIRMED',noAutomaticRetry:true}));
+ const p=createPilotPersistence(file,c),release=p.acquireRequest();
+ const archive=path.join(dir,'lock-recovery','campaign.json.request-lock.fictional');
+ fs.mkdirSync(archive,{recursive:true});
+ const boot=fs.readFileSync('/proc/sys/kernel/random/boot_id','utf8').trim();
+ const oldOwner={pid:2147483647,processIdentity:boot+':1',writer:'fictional-old-owner'};
+ fs.writeFileSync(path.join(archive,'owner.json'),JSON.stringify(oldOwner));
+ return {dir,file,c,p,archive,oldOwner,release,close(){release();fs.rmSync(dir,{recursive:true,force:true});}};
+}
+test('Caso independente: término verificável e reserva integral permitem novo caso sem liberar valor nem repetir envio',()=>{
+ const f=independentFixture();
+ try{
+  const before=JSON.stringify(f.c),result=admitIndependentCase(f.c,'L27',f.file);
+  assert.equal(result.pending.length,1);assert.equal(result.pending[0].requestId,'one');
+  assert.equal(result.pending[0].proof.localTerminationVerified,true);
+  assert.equal(result.pending[0].proof.remoteResult,'unconfirmed');
+  assert.equal(JSON.stringify(f.c),before);
+  assert.equal(result.pending[0].proof.reservations[0].index,0);
+  assert.equal(f.c.cases.L27,undefined);assert.equal(f.c.budget.charged,590064);
+ }finally{f.close();}
+});
+test('Caso independente: reenvio não gera e continuação do contexto incerto permanece bloqueada',()=>{
+ const f=independentFixture();
+ try{
+  assert.equal(inspectOperation(f.c,'L24','one',{activeRequest:false}).error,'RESULT_UNCONFIRMED');
+  assert.throws(()=>admitIndependentCase(f.c,'L24',f.file),/PENDING_CASE_UNCERTAIN/);
+  f.c.cases.L26={session:{id:'already-existing'}};
+  assert.throws(()=>admitIndependentCase(f.c,'L26',f.file),/NEW_INDEPENDENT_CASE_REQUIRED/);
+  assert.equal(f.c.budget.calls.length,1);
+ }finally{f.close();}
+});
+test('Caso independente: proprietário original ativo continua bloqueando',()=>{
+ const f=independentFixture();
+ try{
+  const owner=JSON.parse(fs.readFileSync(f.file+'.request-lock/owner.json','utf8'));
+  fs.writeFileSync(path.join(f.archive,'owner.json'),JSON.stringify(owner));
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/PENDING_OWNER_ACTIVE/);
+ }finally{f.close();}
+});
+test('Caso independente: origem ausente, processo não verificável e evidência ambígua não autorizam chamadas',(t)=>{
+ const f=independentFixture();
+ try{
+  fs.writeFileSync(path.join(f.archive,'owner.json'),JSON.stringify({...f.oldOwner,processIdentity:null}));
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/RECOVERY_EVIDENCE_INSUFFICIENT/);
+  fs.writeFileSync(path.join(f.archive,'owner.json'),JSON.stringify({...f.oldOwner,pid:1}));
+  const read=fs.readFileSync;
+  t.mock.method(fs,'readFileSync',(p,...args)=>{
+   if(String(p)==='/proc/1/stat')throw Object.assign(Error('simulated permission denied'),{code:'EACCES'});
+   return read(p,...args);
+  });
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/PENDING_OWNER_UNVERIFIABLE/);
+  t.mock.restoreAll();
+  fs.writeFileSync(path.join(f.archive,'owner.json'),JSON.stringify(f.oldOwner));
+  fs.writeFileSync(path.join(f.dir,'latest-result.json'),JSON.stringify({caseId:'L26',requestId:'other'}));
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/RECOVERY_EVIDENCE_INSUFFICIENT/);
+  fs.writeFileSync(path.join(f.dir,'latest-result.json'),JSON.stringify({caseId:'L24',requestId:'one',error:'RESULT_UNCONFIRMED',noAutomaticRetry:true}));
+  const extra=path.join(f.dir,'lock-recovery','campaign.json.request-lock.ambiguous');
+  fs.mkdirSync(extra);fs.writeFileSync(path.join(extra,'owner.json'),JSON.stringify(f.oldOwner));
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/RECOVERY_EVIDENCE_INSUFFICIENT/);
+ }finally{f.close();}
+});
+test('Caso independente: reserva abaixo do máximo ou não integralmente deduzida permanece bloqueada',()=>{
+ const f=independentFixture();
+ try{
+  f.c.budget.calls[0].reservedMicroUSD--;
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/RESERVATION_COVERAGE_UNVERIFIED/);
+  f.c.budget.calls[0].reservedMicroUSD++;f.c.budget.charged--;
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/RESERVATION_NOT_FULLY_DEDUCTED/);
+  f.c.budget.charged++;f.c.budget.calls[0].maxOutput=2201;
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/RESERVATION_COVERAGE_UNVERIFIED/);
+ }finally{f.close();}
+});
+test('Caso independente: prova persistida é reutilizável sem latest-result antigo; reserva alterada invalida a prova',()=>{
+ const f=independentFixture();
+ try{
+  const r=admitIndependentCase(f.c,'L27',f.file);
+  f.c.operations.one.independentRecovery=r.pending[0].proof;
+  f.c.cases.L27={independentAdmission:{revision:r.revision,pending:['one']}};
+  fs.writeFileSync(path.join(f.dir,'latest-result.json'),JSON.stringify({caseId:'L27',status:'active'}));
+  assert.equal(admitIndependentCase(f.c,'L27',f.file).pending.length,1);
+  assert.equal(admitIndependentCase(f.c,'L28',f.file).pending.length,1);
+  assert.throws(()=>admitIndependentCase(f.c,'L24',f.file),/PENDING_CASE_UNCERTAIN/);
+  f.c.budget.calls[0].reservedMicroUSD++;f.c.budget.charged++;
+  assert.throws(()=>admitIndependentCase(f.c,'L28',f.file),/RESERVATION_COVERAGE_UNVERIFIED/);
+ }finally{f.close();}
+});
+test('Caso independente: Linux real mantém exclusão entre processos antes e depois de recuperar órfão',async()=>{
+ const f=independentFixture();
+ // Release normally; keep only the real child owner archive in this test.
+ f.release();
+ f.close=function(){fs.rmSync(f.dir,{recursive:true,force:true});};
+ fs.rmSync(f.archive,{recursive:true,force:true});
+ const child=spawn(process.execPath,['-e',`const {createPilotPersistence}=require(${JSON.stringify(path.resolve('artifacts/api-server/src/lib/pilot-persistence.cjs'))});const p=createPilotPersistence(process.argv[1],{});p.acquireRequest();process.stdout.write('READY\\n');setInterval(()=>{},1000);`,f.file],{stdio:['ignore','pipe','pipe']});
+ let release;
+ try{
+  await new Promise((resolve,reject)=>{child.stdout.once('data',resolve);child.once('error',reject);child.once('exit',()=>reject(Error('Child exited before readiness')));});
+  assert.throws(()=>f.p.acquireRequest(),/TURN_IN_PROGRESS/);
+  assert.throws(()=>admitIndependentCase(f.c,'L27',f.file),/REQUEST_LOCK_NOT_OWNED/);
+  const exited=new Promise(resolve=>child.once('exit',resolve));child.kill('SIGKILL');await exited;
+  release=f.p.acquireRequest();f.p.refresh();
+  const before=JSON.stringify(f.c);
+  assert.equal(admitIndependentCase(f.c,'L27',f.file).pending.length,1);
+  const contender=spawn(process.execPath,['-e',`const {createPilotPersistence}=require(${JSON.stringify(path.resolve('artifacts/api-server/src/lib/pilot-persistence.cjs'))});try{createPilotPersistence(process.argv[1],{}).acquireRequest();process.exit(7);}catch(e){process.exit(e.code==='TURN_IN_PROGRESS'?0:8);}`,f.file],{stdio:'ignore'});
+  assert.equal(await new Promise(resolve=>contender.once('exit',resolve)),0);
+  assert.equal(JSON.stringify(f.c),before);assert.equal(f.c.budget.calls.length,1);
+ }finally{if(release)release();if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');f.close();}
 });

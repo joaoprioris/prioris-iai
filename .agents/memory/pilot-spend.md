@@ -34,3 +34,6 @@ bloquear testes por uma chamada terminada, sem reduzir margem nem aumentar teto.
 
 **How to apply:** verificar cobertura e dedução integral, preservar a reserva
 original e impedir continuidade quando houver envio ativo ou evidência insuficiente.
+Essa continuidade é somente para caso independente: reenvio ou continuação
+do contexto cujo resultado permanece incerto continuam bloqueados, sem liberar
+a reserva nem transformar término local em resultado remoto confirmado.

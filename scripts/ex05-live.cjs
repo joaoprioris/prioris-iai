@@ -12,7 +12,7 @@ const {createPilotStore}=require('../artifacts/api-server/src/lib/pilot-store.cj
 const {pilotIdentity}=require('../artifacts/api-server/src/lib/pilot-next-round.cjs');
 const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
 const {resolveContract}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
-const {inspectOperation,operationMessages}=require('../artifacts/api-server/src/lib/ex05-operation-recovery.cjs');
+const {inspectOperation,operationMessages,admitIndependentCase,ADMISSION_REVISION}=require('../artifacts/api-server/src/lib/ex05-operation-recovery.cjs');
 const file=path.join(dir,'campaign.json');
 if(!fs.existsSync(file)){
  const initial={schema:'ex05-isolated-real-v1',authorization:{date:'2026-10-15',quote:'sim, pode usar os $10 conforme necessidade... pode seguir',additionalCeilingUSD:10,initialProductAllocationUSD:5,agentRequestsAfterRefill:0},priorCampaign:{path:prior,sha256:priorHash,conservativelyDeductedUSD:5,untouched:true},budget:{cap:5000000,charged:0,calls:[],blocked:false},cases:{},operations:{}};
@@ -20,6 +20,8 @@ if(!fs.existsSync(file)){
 }
 const campaign=JSON.parse(fs.readFileSync(file,'utf8')),persistence=createPilotPersistence(file,campaign);
 const release=persistence.acquireRequest();
+// Re-read under exclusivity; another writer could have finished after initial read.
+persistence.refresh();
 const save=()=>persistence.save();
 const api=Module.createRequire(path.resolve('artifacts/api-server/package.json'));
 const command=process.argv[2];
@@ -51,16 +53,19 @@ async function main(){
  const requestId=input.requestId;
  if(!/^L\d\d-T\d\d-[a-z0-9-]+$/.test(requestId))throw Error('INVALID_REQUEST_ID');
  if(campaign.operations[requestId])return inspectOperation(campaign,id,requestId,{activeRequest:false});
- if(Object.entries(campaign.operations).some(([key,o])=>o.status==='processing'&&!o.result&&
-   !inspectOperation(campaign,o.caseId,key,{activeRequest:false}).text))
-  throw Error('CAMPAIGN_PENDING_DELIVERY');
+ const admission=admitIndependentCase(campaign,id,file);
+ for(const {requestId:pendingId,proof} of admission.pending)
+  campaign.operations[pendingId].independentRecovery=proof;
+ if(admission.pending.length)save();
  if(campaign.budget.blocked)throw Error('CAMPAIGN_BLOCKED');
  campaign.budget.currentRound=Number(id.slice(1));
- const state={...(campaign.cases[id]??{}),budget:campaign.budget};
+ const state={...(campaign.cases[id]??{}),budget:campaign.budget,
+  ...(admission.pending.length?{independentAdmission:{revision:admission.revision,pending:admission.pending.map(p=>p.requestId)}}:{})};
  const saveCase=()=>{const {budget,...current}=state;campaign.cases[id]=current;save();};
  const identity=pilotIdentity(Number(id.slice(1))),scope={userId:identity.id,organizationId:identity.organizationId};
  const store=createPilotStore(state,saveCase,identity),session=store.open(scope);
- campaign.operations[requestId]={caseId:id,status:'processing',input:input.content,startedAt:Date.now()};saveCase();
+ campaign.operations[requestId]={caseId:id,status:'processing',input:input.content,startedAt:Date.now(),
+  execution:{revision:ADMISSION_REVISION,owner:JSON.parse(fs.readFileSync(file+'.request-lock/owner.json','utf8')),callStartIndex:campaign.budget.calls.length}};saveCase();
  const budget=createPilotBudget(campaign.budget,saveCase);
  const Anthropic=api('@anthropic-ai/sdk').default;
  const sdk=new Anthropic({apiKey:process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,baseURL:process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,maxRetries:0,timeout:30000});
