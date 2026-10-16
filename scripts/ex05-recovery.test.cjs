@@ -312,3 +312,63 @@ test('Pedido explícito: tom recusa certeza corretiva sobre intenção, preserva
  assert.equal(validateMethodologicalFidelity({operationalClaims:[]},l27.messages,[fact]),'methodological-2');
  assert.equal(validateMethodologicalFidelity({operationalClaims:[]},l27.messages,['Como hipótese, '+bad.toLowerCase()]),'methodological-2');
 });
+test('Reparo EXAMPLE_TOO_LONG: pedido recebe contagem real arquivada de 53 ou 42, máximo 40 e meta 30',async()=>{
+ const archived=replay['L27-T03-a'],messages=archived.messages;
+ for(const [index,words] of [53,42].entries()){
+  const original=archived.attempts[index],snapshot=JSON.stringify(original);
+  assert.equal(original.delivery.text.trim().split(/\s+/).length,words);
+  const h=provider([original,opening27(messages,t03)]);
+  const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}});
+  assert.equal(h.calls.length,2);
+  assert(!h.calls[0].system.includes('DIAGNÓSTICO EXAMPLE_TOO_LONG:'));
+  assert(h.calls[1].system.includes(`DIAGNÓSTICO EXAMPLE_TOO_LONG: delivery.text contém ${words} palavras; máximo permitido: 40; meta de reparo: até 30 palavras, com margem.`));
+  assert(h.calls[1].system.includes('preservando sentido, fatos, caráter opcional e adaptável e autoria do líder'));
+  assert.equal(h.events[0].reason,'EXAMPLE_TOO_LONG');
+  assert.equal(h.events[1].code,'ACCEPTED');
+  assert.equal(r.progress.delivery.text,opening27(messages,t03).delivery.text);
+  assert.equal(JSON.stringify(original),snapshot);
+ }
+});
+test('Reparo EXAMPLE_TOO_LONG: diagnóstico numérico ausente em falhas não relacionadas',async()=>{
+ const messages=messages27(t03);
+ for(const [reason,change] of [
+  ['EXPLICIT_REQUEST_MISSING',v=>{v.authorship.requestEvidence=[];}],
+  ['FACTUAL_BASIS_MISSING',v=>{v.authorship.basisEvidence=[];}],
+  ['IMPERATIVE_PRESENTATION',v=>{v.text='Diga essa frase.';}],
+  [undefined,v=>{v.authorship.requestEvidence[0].quote='Fonte inexistente para esse pedido.';}],
+ ]){
+  const bad=opening27(messages,t03);change(bad);
+  if(reason==='EXPLICIT_REQUEST_MISSING')bad.delivery.text='palavra '.repeat(53);
+  const h=provider([bad,opening27(messages,t03)]);
+  await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}});
+  assert.equal(h.calls.length,2);
+  assert.equal(h.events[0].reason,reason);
+  assert(h.calls.every(c=>!c.system.includes('DIAGNÓSTICO EXAMPLE_TOO_LONG:')));
+ }
+});
+test('Reparo EXAMPLE_TOO_LONG: reparo ainda longo é recusado sem terceira chamada nem truncamento',async()=>{
+ const archived=replay['L27-T03-a'],h=provider(structuredClone(archived.attempts));
+ await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages:archived.messages,history:[],turn:{number:2,max:10}}),
+  e=>e.message==='AUTONOMY_CONSTRAINT_FAILED'&&e.validationReason==='EXAMPLE_TOO_LONG');
+ assert.equal(h.calls.length,2);
+ assert.deepEqual(h.events.map(e=>e.reason),['EXAMPLE_TOO_LONG','EXAMPLE_TOO_LONG']);
+ assert(h.calls[1].system.includes('delivery.text contém 53 palavras; máximo permitido: 40'));
+});
+test('Reparo EXAMPLE_TOO_LONG: ser curto não contorna fonte, pedido, fatos, modo, imperativos ou efeitos',async()=>{
+ const archived=replay['L27-T03-a'],messages=archived.messages;
+ for(const [code,reason,change] of [
+  ['INVALID_PROGRESS_EVIDENCE',undefined,v=>{v.authorship.requestEvidence[0].quote='Pedido inventado sem origem.';}],
+  ['AUTONOMY_CONSTRAINT_FAILED','EXPLICIT_REQUEST_MISSING',v=>{v.authorship.requestEvidence=[];}],
+  ['AUTONOMY_CONSTRAINT_FAILED','FACTUAL_BASIS_MISSING',v=>{v.authorship.basisEvidence=[];}],
+  ['AUTONOMY_CONSTRAINT_FAILED','EXAMPLE_MODE_MISMATCH',v=>{v.authorship.supportMode='explore';}],
+  ['AUTONOMY_CONSTRAINT_FAILED','IMPERATIVE_PRESENTATION',v=>{v.text='Diga essa frase.';}],
+  ['UNSUPPORTED_FACT',undefined,v=>{v.text='Clareza garante a relação.';}],
+ ]){
+  const short=opening27(messages,t03);change(short);
+  const h=provider([archived.attempts[0],short]);
+  await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:2,max:10}}),
+   e=>e.message===code&&e.validationReason===reason);
+  assert.equal(h.calls.length,2);assert.equal(h.events[0].reason,'EXAMPLE_TOO_LONG');
+  assert.equal(h.events[1].code,code);assert.equal(h.events[1].reason,reason);
+ }
+});
