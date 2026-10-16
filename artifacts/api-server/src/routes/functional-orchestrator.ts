@@ -217,7 +217,7 @@ export function createModelProviders(
           messages: [
             ...(referenceMessage(turn.momentReferences) ? [referenceMessage(turn.momentReferences)!] : []),
             ...memory, ...messages,
-            ...(repair ? [{role:"user" as const,content:REPAIR_BOUNDARY+"\n"+JSON.stringify(repairData(lastCandidate,lastFailure,lastValidationReason,lastPresentationMeasurement))}] : []),
+            ...(repair ? [{role:"user" as const,content:REPAIR_BOUNDARY+"\n"+JSON.stringify(repairData(lastCandidate,lastFailure,lastValidationReason,lastPresentationMeasurement,messages))}] : []),
           ],
         });
         options.onUsage?.("sonnet", reply.usage);

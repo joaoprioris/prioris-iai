@@ -5,39 +5,50 @@ const { affirmativeHistory } = require('./history-assertions.cjs');
 const TIMES = /\b(?:segunda|terça|quarta|quinta|sexta|sábado|domingo)(?:-feira)?\b|\b(?:hoje|amanhã|agora|imediatamente)\b|\b\d{1,2}(?::\d{2}|h(?:\d{2})?)\b|\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/gi;
 const COMMIT = /\b(?:assum\w*|retorn\w*|volt\w*|confirm\w*|valid\w*|chec\w*|entreg\w*|alinhe|alinhar|alinha)\b/i;
 const NAMED_DAYS = /\b(?:segunda|terça|quarta|quinta|sexta|sábado|domingo)(?:-feira)?\b/gi;
+function unsupportedTemporalFacts(messages, parts) {
+  const users=messages.filter(m=>m.role==='user');
+  const missing=[];
+  for(const [partIndex,part] of parts.entries())for(const sentence of part.split(/(?<=[.!?\n])\s*/)){
+    const periods=sentence.match(/\brecentes?\b|\brecentemente\b|(?<![\p{L}\p{N}_])últim(?:os|as)\s+(?:(?:\d+|dois|duas|três|alguns|algumas)\s+)?(?:dias|semanas|meses|anos)\b/giu)??[];
+    if(sentence.includes('?')||/\b(?:talvez|hipótese|possibilidade)\b|não (?:sei|sabemos) se|sem presumir que/i.test(sentence))continue;
+    for(const period of periods){
+      // The latest pertinent source can withdraw an earlier temporal assertion.
+      const source=users.flatMap(m=>m.content.split(/(?<=[.!?;\n])\s*/))
+        .filter(s=>normalize(s).includes(normalize(period))).at(-1);
+      if(!source||/\b(?:não|talvez|hipótese|se)\b|\?/i.test(source))
+        missing.push({part:partIndex,text:period,reason:'NO_CURRENT_AFFIRMATIVE_TEMPORAL_SOURCE'});
+    }
+  }
+  return missing;
+}
 function validateGrounding(value, messages, visibleParts, normalizations = []) {
   const rawClaims = value.operationalClaims ?? [];
   if (!Array.isArray(rawClaims) || rawClaims.length > 12) throw Error('UNSUPPORTED_FACT');
   const claims = [];
   const byRole = { user: messages.filter(m => m.role === 'user'), assistant: messages.filter(m => m.role === 'assistant') };
   for (const claim of rawClaims) {
+    // Keep raw audit data; unused metadata is not a displayed factual assertion.
+    // Visible assertions below still require their own valid source.
+    if(claim&&typeof claim.text==='string'&&claim.text.trim()&&!visibleParts.some(p=>p.includes(claim.text))){
+      normalizations.push({type:'unused_operational_claim_omitted',claim:structuredClone(claim)});
+      continue;
+    }
     if (!claim || !['time_commitment', 'viability', 'impact', 'execution', 'prior_assistant_content'].includes(claim.kind) || !['user', 'assistant'].includes(claim.role) || !Number.isInteger(claim.message) || typeof claim.quote !== 'string' || !claim.quote.trim() || typeof claim.text !== 'string' || !claim.text.trim()) throw Error('UNSUPPORTED_FACT');
     const source = byRole[claim.role][claim.message]?.content;
     if (typeof source !== 'string' || !source.includes(claim.quote)) throw Error('UNSUPPORTED_FACT');
     if (claim.kind === 'prior_assistant_content' && claim.role !== 'assistant') throw Error('UNSUPPORTED_FACT');
     if (claim.kind !== 'prior_assistant_content' && claim.role !== 'user') throw Error('UNSUPPORTED_FACT');
-    // A source-verified control field that is not exposed is unused metadata.
-    // Omit it, never paraphrase or rewrite its source. Visible assertions below
-    // still need their own valid support; this does not certify their meaning.
-    if (!visibleParts.some(p => p.includes(claim.text))) {
-      normalizations.push({ type: 'unused_operational_claim_omitted', claim: structuredClone(claim) });
-      continue;
-    }
     claims.push(claim);
   }
   const users = byRole.user.map(m => m.content).join('\n');
   const assistants = byRole.assistant.map(m => m.content).join('\n');
+  const temporal=unsupportedTemporalFacts(messages,visibleParts);
+  if(temporal.length)throw Object.assign(Error('UNSUPPORTED_FACT'),{
+    validationReason:'UNSUPPORTED_TEMPORAL_FACT',factualDiagnostics:temporal});
   // Proposed dates are commitments too. Mentioning a date in a question or in
   // a statement of uncertainty is not acceptance/viability of that date.
   for (const part of visibleParts) {
     for (const sentence of part.split(/(?<=[.!?\n])\s*/)) {
-      const periods=sentence.match(/\brecentes?\b|\brecentemente\b|(?<![\p{L}\p{N}_])últim(?:os|as)\s+(?:(?:\d+|dois|duas|três|alguns|algumas)\s+)?(?:dias|semanas|meses|anos)\b/giu)??[];
-      const temporalHypothesis=sentence.includes('?')||/\b(?:talvez|hipótese|possibilidade)\b|não (?:sei|sabemos) se|sem presumir que/i.test(sentence);
-      for(const period of temporalHypothesis?[]:periods){
-        const supported=byRole.user.some(m=>m.content.split(/(?<=[.!?;\n])\s*/).some(s=>
-          normalize(s).includes(normalize(period))&&!/\b(?:não|talvez|hipótese|se)\b|\?/i.test(s)));
-        if(!supported)throw Error('UNSUPPORTED_FACT');
-      }
       // Two recent reports are not necessarily the last two reports.
       const recency = sentence.match(/(?:^|\s)últim(?:os|as)\s+(?:dois|duas|2)\s+(relatórios|entregas)\b/i);
       if (recency && !sentence.includes('?')) {
@@ -76,4 +87,4 @@ function rejectDuplicateDelivery(parts, delivery) {
   const target = normalize(delivery);
   if (parts.some(p => normalize(p).includes(target))) throw Error('DUPLICATE_DELIVERY');
 }
-module.exports = { validateGrounding, rejectDuplicateDelivery };
+module.exports = { validateGrounding, rejectDuplicateDelivery, unsupportedTemporalFacts };

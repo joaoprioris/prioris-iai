@@ -953,7 +953,9 @@ test('L29 focal: tempo inventado é recusado; relato afirmativo e hipótese iden
 });
 test('L29 focal: reparo não salva fatos inválidos fora do exemplo nem permite mudar contrato',async()=>{
  const raw=provider([l29.attempts[0],{text:short29}]);
- await assert.rejects(raw.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),/UNSUPPORTED_FACT/);
+ // Unused raw metadata no longer vetoes a valid displayed response; the
+ // visible false fact and attempted contract mutation below still fail.
+ await raw.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}});
  assert.deepEqual(raw.observations[1].input.operationalClaims,l29.attempts[0].operationalClaims);
  assert.equal(raw.calls.length,2);
  const bad=scopeSeed29();bad.text+=' Foram entregas recentes.';
@@ -963,6 +965,88 @@ test('L29 focal: reparo não salva fatos inválidos fora do exemplo nem permite 
  const injected=provider([l29.attempts[0],{text:short29,authorship:{supportMode:'review'}}]);
  await assert.rejects(injected.p.respond({agent:'FBK',system:profile.prompt,messages:l29.messages,history:[],turn:{number:2,max:10}}),/INVALID_PROGRESSION/);
  assert.equal(injected.calls.length,2);
+});
+
+const ab29=replay['EX05-C3-COMPARE-L29-T02-preflight'].execution;
+const ab29Audit=ab29.conditions.B.checkpoint.audit.at(-1);
+const validAb29=()=>({...structuredClone(ab29Audit.generationAttempts[0].input),
+ text:'Uma opção curta, para você adaptar ou discordar:',
+ delivery:{kind:'message',text:'Em duas entregas, os dados chegaram após o prazo e refiz a consolidação. Em uma, mudei o formato perto do prazo. Gostaria de combinar prazos e aviso antecipado quando houver impedimentos.'}});
+test('Condução focal 4: replay real preserva 61 palavras e recusa temporal do reparo de 38',()=>{
+ const [first,second]=ab29Audit.generationAttempts;
+ assert.throws(()=>validateProgress(first.input,profile,ab29.messages,{number:2}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
+ assert.equal(second.input.delivery.text.split(/\s+/).length,38);
+ assert.throws(()=>validateProgress(second.input,profile,ab29.messages,{number:2}),e=>e.message==='UNSUPPORTED_FACT'&&e.validationReason==='UNSUPPORTED_TEMPORAL_FACT');
+ assert.deepEqual(second.input.operationalClaims,[]);
+});
+test('Condução focal 4: reparo recebe o termo temporal real e só entrega uma versão sustentada',async()=>{
+ const first=structuredClone(ab29Audit.generationAttempts[0].input),good=validAb29();
+ // Positive fixture has valid presentation; original archive stays unchanged
+ // and its unsupported categorical reading is covered separately below.
+ first.text=good.text+'\n\n'+first.delivery.text;
+ const h=provider([first,{text:good.delivery.text}]);
+ const result=await h.p.respond({agent:'FBK',system:profile.prompt,messages:ab29.messages,history:[],turn:{number:2,max:10}});
+ assert.equal(h.calls.length,2);
+ const internal=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
+ assert.equal(internal.measurement.found,61);assert.equal(internal.measurement.maximum,40);
+ assert(internal.factualDiagnostics.some(x=>x.text==='recentes'));
+ assert.equal(result.text.split(good.delivery.text).length-1,1);
+ assert(!result.text.includes(first.delivery.text));
+});
+test('Condução focal 4: encurtar exemplo não legitima interpretação categórica sem fonte',async()=>{
+ const h=provider([ab29Audit.generationAttempts[0].input,{text:validAb29().delivery.text}]);
+ await assert.rejects(()=>h.p.respond({agent:'FBK',system:profile.prompt,messages:ab29.messages,history:[],turn:{number:2,max:10}}),/UNSUPPORTED_FACT/);
+ assert.equal(h.calls.length,2);
+ assert(h.observations[1].input.text.includes('A dificuldade real está'));
+});
+test('Condução focal 4: ajuda curta fundamentada sem triagem adicional passa pelo fluxo validado',async()=>{
+ const good=validAb29(),h=provider([good]);
+ const result=await h.p.respond({agent:'FBK',system:profile.prompt,messages:ab29.messages,history:[],turn:{number:2,max:10}});
+ assert.equal(h.calls.length,1);assert.equal(result.text.split(good.delivery.text).length-1,1);
+ assert(result.text.includes(good.text));assert(!result.text.includes('?'));
+ assert.equal(result.progress.authorship.supportMode,'optional_example');
+});
+test('Condução focal 4: registro interno irrelevante é omitido sem reatribuir fonte',()=>{
+ const good=validAb29(),claim=structuredClone(l29.attempts[0].operationalClaims[0]);
+ good.operationalClaims=[claim];
+ assert.doesNotThrow(()=>validateProgress(good,profile,ab29.messages,{number:2}));
+ const normalizations=[];
+ const {validateGrounding}=require('../artifacts/api-server/src/lib/response-grounding.cjs');
+ assert.deepEqual(validateGrounding(good,ab29.messages,[good.text,good.delivery.text],normalizations),[]);
+ assert.equal(normalizations[0].type,'unused_operational_claim_omitted');
+ assert.deepEqual(normalizations[0].claim,claim);
+});
+test('Condução focal 4: informação exposta exige fonte mesmo com registro interno descartável',()=>{
+ const good=validAb29();good.operationalClaims=[structuredClone(l29.attempts[0].operationalClaims[0])];
+ for(const text of ['As entregas recentes causaram impacto no cliente.','Isso prejudicou o planejamento e a confiança do cliente.']){
+  const bad={...good,text};assert.throws(()=>validateProgress(bad,profile,ab29.messages,{number:2}),/UNSUPPORTED_FACT/);
+ }
+ const bad={...good,operationalClaims:[{kind:'prior_assistant_content',role:'assistant',message:1,quote:ab29.messages[0].content,text:good.text}]};
+ assert.throws(()=>validateProgress(bad,profile,ab29.messages,{number:2}),/UNSUPPORTED_FACT/);
+});
+test('Condução focal 4: correção temporal atual invalida afirmação anterior, hipótese continua hipótese',()=>{
+ const {validateGrounding}=require('../artifacts/api-server/src/lib/response-grounding.cjs');
+ const earlier=[{role:'user',content:'Foram entregas recentes.'}];
+ assert.doesNotThrow(()=>validateGrounding({},earlier,['Foram entregas recentes.']));
+ const corrected=[...earlier,{role:'user',content:'Corrigindo: não disse que foram recentes.'}];
+ assert.throws(()=>validateGrounding({},corrected,['Foram entregas recentes.']),e=>e.validationReason==='UNSUPPORTED_TEMPORAL_FACT');
+ assert.doesNotThrow(()=>validateGrounding({},corrected,['Não sabemos se foram recentes.']));
+});
+test('Condução focal 4: retirada atual de exemplo vence pedido anterior preservado',()=>{
+ const good=validAb29(),messages=[...ab29.messages,{role:'user',content:'Não quero exemplo. Prefiro refletir sobre a abordagem.'}];
+ assert.throws(()=>validateProgress(good,profile,messages,{number:2}),e=>e.validationReason==='EXAMPLE_WITHDRAWN');
+ const noExample={...good,delivery:null,authorship:{...good.authorship,supportMode:'explore',approachEvidence:[]},text:'Podemos examinar o que é responsabilidade sua e o que precisa ser combinado, sem transformar dois episódios em padrão.'};
+ assert.doesNotThrow(()=>validateProgress(noExample,profile,messages,{number:2}));
+});
+test('Condução focal 4: composição usa um exemplo canônico limitado por função sem ativar Evolução',()=>{
+ const {canonicalExample}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
+ const {responseInstructions,CONVERSATION_REVISION}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+ assert.equal(CONVERSATION_REVISION,'EX05-2-conversation-4');
+ for(const id of ['MNT','CTN','PRF','IMP','FBK','OTO','CRS']){
+  const example=canonicalExample(id);assert(example.length>0&&example.length<2300);
+  assert.equal(responseInstructions(id).split(example).length-1,1);
+ }
+ assert.equal(canonicalExample('EVL'),'');assert.throws(()=>responseInstructions('EVL'),/INVALID_PROGRESSION/);
 });
 test('L29 focal: contradição e referência sem base não dominam necessidade estabelecida',()=>{
  const {readFunctionalNeed}=require('../artifacts/api-server/src/lib/functional-context.cjs');

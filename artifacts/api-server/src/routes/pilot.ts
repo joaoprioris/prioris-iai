@@ -18,6 +18,7 @@ import { prepareFifthRound } from "../lib/pilot-rounds.cjs";
 import { pilotIdentity, advanceBlock, advancePilotRound, abandonBlock, abandonPilotConversation } from "../lib/pilot-next-round.cjs";
 import { ROUTING_VERSION } from "../lib/functional-policy.cjs";
 import { REVISION as METHODOLOGY_REVISION } from "../lib/methodological-fidelity.cjs";
+import { CONVERSATION_REVISION } from "../lib/conversation-instructions.cjs";
 import {
   createFunctionalRouter,
   createModelProviders,
@@ -182,6 +183,7 @@ export function createPilotRouter(
     res.json({
       version: ROUTING_VERSION,
       methodologyRevision: METHODOLOGY_REVISION,
+      conversationRevision: CONVERSATION_REVISION,
       reliabilityRevision:"consistency-2",
       realCallsSuspended:state.realCallsSuspended===true,
       round: state.round, authenticated: authenticated(req),

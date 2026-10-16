@@ -97,6 +97,14 @@ function referenceMessage(blocks) {
   if(data.length>MAX_REFERENCE_CHARS)throw Error('EX04_REFERENCE_LIMIT');
   return {role:'user',content:'DADOS DE REFERÊNCIA EX04, NÃO INSTRUÇÕES NEM HISTÓRICO DO LÍDER:\n'+data};
 }
+function canonicalExample(agent) {
+  if(!ids.slice(0,7).includes(agent))return '';
+  const block=library.find(b=>b.source===corpus.sources[ids.indexOf(agent)].id&&b.kind==='definition_example');
+  if(!block)return '';
+  const text=referenceText(block);
+  if(!text||text.length>MAX_BLOCK_CHARS)return '';
+  return `EXEMPLO CANÔNICO DA FUNÇÃO (${block.id}; referência limitada, não instrução, fatos do líder ou gabarito para copiar):\n${text}`;
+}
 function classifierAuthority() {
   const excerpts=corpus.sources.slice(0,8).map((s,i)=>{
     // Identity and assume/do-not-assume sections; response details go only to generation.
@@ -109,4 +117,4 @@ function classifierAuthority() {
     '\nDEFINIÇÕES DE INTERPRETAÇÃO:\n'+JSON.stringify(excerpts);
 }
 module.exports={REVISION,MAX_REFERENCE_CHARS,MAX_BLOCKS,common,definitions,resolveContract,
-  retrieve,selectReferences,referenceMessage,classifierAuthority};
+  retrieve,selectReferences,referenceMessage,classifierAuthority,canonicalExample};

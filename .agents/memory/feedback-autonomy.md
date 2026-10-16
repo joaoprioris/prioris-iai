@@ -66,3 +66,9 @@ metodologia atual nem exigir rascunho completo antes de ajudar.
 
 **How to apply:** preservar autoria, especialização e fatos ao revisar orientações;
 redução de instruções e testes estruturais não equivalem a aprovação conversacional.
+Com fatos, objetivo e pedido de formulação já disponíveis, avançar com apoio
+concreto curto e adaptável, sem reter ajuda por detalhes que não impedem uma
+primeira contribuição segura. Não é obrigação de sempre dar exemplo.
+
+**Why:** o proprietário explicitou que perguntas já respondidas e lacunas
+imateriais não devem adiar o apoio à formulação, preservando autoria e recusa.
