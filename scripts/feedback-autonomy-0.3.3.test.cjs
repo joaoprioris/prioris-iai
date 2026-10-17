@@ -107,12 +107,12 @@ test('Fechamento admite lacunas e movimento do líder sem afirmar execução, pr
 });
 test('Feedback completo aceita abertura pedida, incorpora correção causal e respeita encerramento',()=>{
  const initial='Preciso dar feedback formal sobre um par. Em duas entregas, os dados chegaram depois do prazo e refiz a consolidação. Em uma delas, mudei o formato perto do prazo. Quero reconhecer minha parte e ouvir a leitura dele.';
- const request='Pode me dar uma abertura curta e adaptável?';
+ const request='Pode me dar uma abertura?';
  const correction='Correção: eu não disse que minha mudança causou o atraso; ela só aconteceu perto do prazo.';
  const opening='Quero conversar sobre duas entregas em que os dados chegaram depois do prazo. Em uma delas, também mudei o formato perto do prazo. Quero reconhecer minha parte e ouvir como você lê o que aconteceu.';
  const turns=[{role:'user',content:initial},{role:'assistant',content:'Vamos trabalhar a abertura.'},{role:'user',content:request}];
  const base={stage:'explore',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],closingSummary:'',nextStep:'',operationalClaims:[]};
- const opened=validateProgress({...base,text:'Uma opção curta e adaptável para você ajustar ao seu tom:',delivery:{kind:'message',text:opening},authorship:{supportMode:'optional_example',requestIntent:'brief_adaptable_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:'Em duas entregas, os dados chegaram depois do prazo e refiz a consolidação.'},{message:0,quote:'Em uma delas, mudei o formato perto do prazo.'}],examplePurpose:'Oferecer uma abertura curta para adaptação pelo líder.'}},profile,turns,{number:2});
+ const opened=validateProgress({...base,text:'Uma opção curta e adaptável para você ajustar ao seu tom:',delivery:{kind:'message',text:opening},authorship:{supportMode:'optional_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:'Em duas entregas, os dados chegaram depois do prazo e refiz a consolidação.'},{message:0,quote:'Em uma delas, mudei o formato perto do prazo.'}],examplePurpose:'Oferecer uma abertura curta para adaptação pelo líder.'}},profile,turns,{number:2});
  assert.equal(opened.text.split(opening).length-1,1);assert.equal(opened.progress.authorship.supportMode,'optional_example');
  turns.push({role:'assistant',content:opened.text},{role:'user',content:correction});
  const contradicted={...base,text:'Sua mudança de formato causou parte do atraso. Vale reconhecer isso antes de ouvir a leitura dele.',delivery:null,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}};
@@ -122,6 +122,13 @@ test('Feedback completo aceita abertura pedida, incorpora correção causal e re
  turns.push({role:'assistant',content:corrected.text},{role:'user',content:'Pode encerrar por aqui.'});
  const closed=validateProgress({...base,text:'Encerramento.',stage:'close',closingSummary:'Você tem uma abertura curta que nomeia as duas entregas, reconhece a mudança de formato perto do prazo sem tratá-la como causa e convida a leitura do seu par.',nextStep:'O próximo passo fica com você: adaptar essa abertura ao seu tom, mantendo separadas a coincidência temporal e a atribuição de causa.',delivery:null,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}},profile,turns,{number:4});
  assert.equal(closed.progress.stage,'close');assert.doesNotMatch(closed.text,/\?/);assert.match(closed.text,/Podemos retomar o próximo passo em uma nova conversa/);
+});
+test('Abertura direta não transforma negativa, pedido citado ou roteiro completo em autorização',()=>{
+ const fact='Em duas entregas, os dados chegaram depois do prazo.';
+ const opening='Quero conversar sobre as duas entregas e ouvir como você lê o que aconteceu.';
+ const attempt=request=>validateProgress({text:'Uma opção curta para adaptar:',stage:'explore',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],closingSummary:'',nextStep:'',operationalClaims:[],delivery:{kind:'message',text:opening},authorship:{supportMode:'optional_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:fact}],examplePurpose:'Oferecer uma abertura breve para adaptação pelo líder.'}},profile,[{role:'user',content:fact},{role:'user',content:request}],{number:2});
+ for(const request of ['Não quero uma abertura.','Ele perguntou se pode me dar uma abertura.','Pode me dar um roteiro completo?'])
+  assert.throws(()=>attempt(request),/AUTONOMY_CONSTRAINT_FAILED/);
 });
 test('Adaptador envia orientação autoritativa e mapa de referências; correção inequívoca não gasta recuperação',async()=>{
  const received=[],validations=[],payloads=[];
