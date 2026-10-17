@@ -2,6 +2,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {validateProgress}=require('../artifacts/api-server/src/lib/conversation-guidance.cjs');
 const {validateMethodologicalFidelity}=require('../artifacts/api-server/src/lib/methodological-fidelity.cjs');
+const {createConversationService,ConversationError}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
 const contract=require('../artifacts/api-server/src/lib/agent-contract.json');
 const profile=contract.agents.find(a=>a.id==='FBK');
 const criteria=profile.diagnostic_criteria.map(c=>c.id);
@@ -73,3 +74,23 @@ test('Ambiguidade recebe ajuda concreta sem liberar exemplo por inferência',()=
  assert.throws(()=>validateProgress(attempted,profile,[{role:'user',content:message}],{number:1}),/AUTONOMY_CONSTRAINT_FAILED/);
 });
 
+test('Falha do provider encerra a tentativa sem commit nem fallback',async()=>{
+ const content='Preciso preparar um feedback formal sobre um par.';
+ let committed=false,recordedFailure=null;
+ const repository={
+  getSession:async()=>({status:'active',exchangeCount:0,context:{}}),
+  getHistorySettings:async()=>({enabled:false,noticeVersion:null,revision:1}),
+  readPrivateHistory:async()=>[],
+  commitTurn:async()=>{committed=true;return true;},
+  recordFailure:async(_scope,event)=>{recordedFailure=event.code;},
+ };
+ const classify=async()=>({scope:'leadership',job:'prepare_message',confidence:'high',personalEmergency:false,immediateExternalRisk:false,ownClarityImpaired:false,conversationInProgress:false,decisionSufficientlyClear:true,substantiveDecisionPending:false,ownRecurrenceReported:false,situationState:'BEFORE',stateEvidence:content,needEvidence:[{message:0,quote:content}]});
+ const respond=async()=>{throw Error('provider unavailable');};
+ const service=createConversationService({repository,classify,respond,agentPrompts:{FBK:'Feedback canônico.'}});
+ await assert.rejects(
+  service.turn({userId:'fictional-user',organizationId:'fictional-org'},{sessionId:'fictional-session',requestId:'fictional-request-1',content}),
+  error=>error instanceof ConversationError&&error.code==='MODEL_UNAVAILABLE'&&error.status===503,
+ );
+ assert.equal(committed,false);
+ assert.equal(recordedFailure,'MODEL_UNAVAILABLE');
+});

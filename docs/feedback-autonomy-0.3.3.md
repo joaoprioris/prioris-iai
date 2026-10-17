@@ -70,9 +70,10 @@ rodada 1 e dos objetos de geração da rodada 2 também permanecem explícitas.
 ## Verificações executadas nesta alteração
 
 Validação local posterior, em branch separada da rodada 4: `node --test
-scripts/local-feedback-eval.test.cjs`, seis casos sintéticos aprovados. Cobertura:
+scripts/local-feedback-eval.test.cjs`, sete casos sintéticos aprovados. Cobertura:
 sucesso, ambiguidade, abertura solicitada, negativas/pedido citado/roteiro,
-correção causal, hipótese e encerramento sem pergunta. Esses candidatos
+correção causal, hipótese, encerramento sem pergunta e falha injetada do provider
+sem commit nem fallback. Esses candidatos
 determinísticos não são conversa real com modelo e não aprovam qualidade
 semântica.
 
