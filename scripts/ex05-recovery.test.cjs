@@ -379,12 +379,15 @@ test('Replay L26 mantém as duas recusas e identifica o motivo específico, sem 
   e=>e.message==='AUTONOMY_CONSTRAINT_FAILED'&&e.validationReason===expected[i]));
 });
 test('Recuperação usa motivo específico e aceita só a abertura opcional solicitada, sem abordagem prévia obrigatória',async()=>{
- const h=provider([l26.attempts[0],corrected()]);
+ const original=structuredClone(l26.attempts[0]);original.authorship.approachEvidence=[];
+ const h=provider([original,corrected()]);
  const r=await h.p.respond({agent:'FBK',system:profile.prompt,messages:l26.messages,history:[],turn:{number:3,max:10}});
  assert.equal(h.calls.length,2);assert.equal(h.events[0].code,'AUTONOMY_CONSTRAINT_FAILED');
  assert.equal(h.events[0].reason,'EXAMPLE_TOO_LONG');assert.equal(h.events[1].code,'ACCEPTED');
- assert(h.calls[1].system.includes('Razão específica: EXAMPLE_TOO_LONG'));
- assert(h.calls[1].system.includes('requestEvidence e basisEvidence literais'));
+ const repair=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
+ assert.equal(repair.reason,'EXAMPLE_TOO_LONG');
+ assert.equal(h.observations[1].repairScope,'display_and_delivery');
+ assert.deepEqual(h.observations[1].input.authorship,original.authorship);
  assert.equal(r.progress.authorship.approachEvidence.length,0);assert.equal(r.progress.authorship.supportMode,'optional_example');
  assert.equal(r.text.split(corrected().delivery.text).length-1,1);
  assert(r.progress.delivery.text.trim().split(/\s+/).length<=40);
@@ -602,8 +605,12 @@ test('L28 focal: reparo explica modo, apresentação ou evidência e aceita some
  for(const id of ['L28-T02-a','L28-T04-a'])for(const original of replay[id].attempts){
   const h=provider([original,revised28(id)]),messages=replay[id].messages;
   if(id==='L28-T02-a'&&original===replay[id].attempts[0]){
-   // Restricted example repair cannot fix the original imperative presentation.
-   await assert.rejects(h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:3,max:10}}),e=>e.validationReason==='IMPERATIVE_PRESENTATION');
+   // Atomic repair replaces the rejected imperative presentation as well as the example.
+   const repaired=await h.p.respond({agent:'FBK',system:profile.prompt,messages,history:[],turn:{number:3,max:10}});
+   assert.equal(h.events.at(-1).code,'ACCEPTED');
+   assert.equal(h.observations[1].repairScope,'display_and_delivery');
+   assert.equal(repaired.text.split(repaired.progress.delivery.text).length-1,1);
+   assert.deepEqual(h.observations[1].input.authorship,original.authorship);
    assert.equal(h.calls.length,2);assert.equal(h.calls[1].tool_choice.name,'revisar_exemplo');
    const data=JSON.parse(h.calls[1].messages.at(-1).content.split('\n').slice(1).join('\n'));
    assert.equal(data.measurement.found,54);assert.equal(data.measurement.maximum,40);
@@ -617,15 +624,16 @@ test('L28 focal: reparo explica modo, apresentação ou evidência e aceita some
   if(data.reason==='EXAMPLE_MODE_MISMATCH'){
    assert.equal(data.correction.foundSupportMode,'review');
    assert.equal(data.correction.requiredSupportMode,'optional_example');
-   assert(data.correction.instruction.includes('abordagem própria literal'));
+   assert.equal(r.progress.authorship.supportMode,'optional_example');
   }
   if(data.reason==='EXAMPLE_TOO_LONG'){
    assert.equal(data.measurement.found,54);assert.equal(data.measurement.maximum,40);
-   assert(data.correction.instruction.includes('não a lacuna ou o pedido'));
+   assert.equal(h.calls[1].tool_choice.name,'revisar_exemplo');
   }
-  if(data.reason==='IMPERATIVE_PRESENTATION')assert(data.correction.instruction.includes('somente delivery'));
+  if(data.reason==='IMPERATIVE_PRESENTATION')assert.equal(h.observations[1].repairScope,'display_and_delivery');
   assert.equal(r.progress.authorship.supportMode,'optional_example');
-  assert(r.progress.authorship.approachEvidence[0].quote.includes('Pensei em dizer'));
+  const source=r.progress.authorship.approachEvidence[0];
+  assert(messages.filter(m=>m.role==='user')[source.message].content.includes(source.quote));
   assert.equal(r.text.split(r.progress.delivery.text).length-1,1);
   assert(!r.text.includes('isso prejudicou')&&!r.text.includes('isso criou'));
  }
@@ -638,7 +646,8 @@ test('L28 focal: falha repetida não é relabelada, truncada nem produz terceira
 });
 test('L28 focal: corrigir modo não aprova causalidade inventada e comentário sem exemplo continua revisão',()=>{
  const a=replay['L28-T04-a'],bad=revised28();
- bad.delivery=structuredClone(a.attempts[0].delivery);
+ bad.delivery={kind:'message',text:'Reconheço que não deixei claro o impacto das mudanças de prioridade nos prazos, e isso prejudicou a leitura do que aconteceu.'};
+ assert(bad.delivery.text.trim().split(/\s+/).length<=40,'Isolate invented impact from the independent length guard');
  assert.throws(()=>validateProgress(bad,profile,a.messages,{number:3}),/UNSUPPORTED_FACT/);
  const review=revised28();review.delivery=null;review.authorship.supportMode='review';
  assert.equal(validateProgress(review,profile,a.messages,{number:3}).progress.authorship.supportMode,'review');
