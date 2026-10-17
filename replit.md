@@ -36,9 +36,10 @@ desenvolvimento nem usuário embutido.
    locais. `ANTHROPIC_API_KEY` é necessária somente para conversa real.
 3. Crie um PostgreSQL vazio e descartável e aplique uma vez
    `psql -X -v ON_ERROR_STOP=1 -d iai_local -f lib/db/migrations/0001-baseline.sql`.
-   A baseline nunca deve ser aplicada a banco existente. Cadastre nesse banco
-   uma organização e um e-mail de teste autorizado; não use dados de conversa
-   reais na avaliação local.
+   A baseline nunca deve ser aplicada a banco existente. Cadastre a identidade
+   fictícia local com `psql -X -v ON_ERROR_STOP=1 -d iai_local -v
+   local_email=seu-alias-de-teste -f scripts/bootstrap-local.sql`. O script
+   recusa outro nome de banco; não use dados de conversa reais na avaliação.
 4. Para login pela interface, configure `AUTH_EMAIL_ENABLED=true` e as variáveis
    SMTP. O servidor não retorna tokens por API ou log.
 5. Ative o orquestrador com `PRIORIS_FUNCTIONAL_ROUTING_V1=true` e execute
