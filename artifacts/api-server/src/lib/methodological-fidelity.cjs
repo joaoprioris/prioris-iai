@@ -31,6 +31,7 @@ Não escolha função por nome de arquivo, reunião ou caso. Preserve todas as
 funções e a proteção pertinente diante de perigo físico realmente relatado.
 `;
 const patterns=[
+ {name:'causal_assertion',kind:'impact',match:/\b(?:causou|gerou|provocou|resultou\s+em)\b/i},
  {name:'inner_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+(?:dificuldade|quest[aã]o|tens[aã]o|problema)\s+real\s+(?:n[aã]o\s+)?(?:é|est[aá])(?=\s|[,.!?;:]|$)/i},
  {name:'corrective_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+dificuldade\s+n[aã]o\s+é(?=\s)[^.!?\n]*[—–:-]\s*é\s+(?:que\s+)?voc[eê](?=\s|[,.!?;:]|$)/i},
  {name:'communication_effect_assertion',kind:'impact',match:/\b(?:isso|falha de comunica[cç][aã]o|falta de comunica[cç][aã]o)\b[^.!?]*\b(?:prejudicou|prejudica|criou|gerou|causou)\b[^.!?]*\b(?:leitura|avalia[cç][aã]o|conclus[aã]o|interpreta[cç][aã]o|entendimento)\b/i},
