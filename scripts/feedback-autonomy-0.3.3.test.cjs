@@ -105,6 +105,24 @@ test('Fechamento admite lacunas e movimento do líder sem afirmar execução, pr
  const r=validateProgress(close,profile,messages,{number:3});assert.equal(r.progress.pending.length,4);assert.equal(r.progress.stage,'close');assert.doesNotMatch(r.text,/amanhã|hoje|executou|assumiu/);
  assert.throws(()=>validateProgress({...close,closingSummary:'Você executou a conversa e confirmou a solução.'},profile,messages,{number:3}),/UNSUPPORTED_FACT/);
 });
+test('Feedback completo aceita abertura pedida, incorpora correção causal e respeita encerramento',()=>{
+ const initial='Preciso dar feedback formal sobre um par. Em duas entregas, os dados chegaram depois do prazo e refiz a consolidação. Em uma delas, mudei o formato perto do prazo. Quero reconhecer minha parte e ouvir a leitura dele.';
+ const request='Pode me dar uma abertura curta e adaptável?';
+ const correction='Correção: eu não disse que minha mudança causou o atraso; ela só aconteceu perto do prazo.';
+ const opening='Quero conversar sobre duas entregas em que os dados chegaram depois do prazo. Em uma delas, também mudei o formato perto do prazo. Quero reconhecer minha parte e ouvir como você lê o que aconteceu.';
+ const turns=[{role:'user',content:initial},{role:'assistant',content:'Vamos trabalhar a abertura.'},{role:'user',content:request}];
+ const base={stage:'explore',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],closingSummary:'',nextStep:'',operationalClaims:[]};
+ const opened=validateProgress({...base,text:'Uma opção curta e adaptável para você ajustar ao seu tom:',delivery:{kind:'message',text:opening},authorship:{supportMode:'optional_example',requestIntent:'brief_adaptable_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:'Em duas entregas, os dados chegaram depois do prazo e refiz a consolidação.'},{message:0,quote:'Em uma delas, mudei o formato perto do prazo.'}],examplePurpose:'Oferecer uma abertura curta para adaptação pelo líder.'}},profile,turns,{number:2});
+ assert.equal(opened.text.split(opening).length-1,1);assert.equal(opened.progress.authorship.supportMode,'optional_example');
+ turns.push({role:'assistant',content:opened.text},{role:'user',content:correction});
+ const contradicted={...base,text:'Sua mudança de formato causou parte do atraso. Vale reconhecer isso antes de ouvir a leitura dele.',delivery:null,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}};
+ assert.throws(()=>validateProgress(contradicted,profile,turns,{number:3}),/UNSUPPORTED_FACT/);
+ const corrected=validateProgress({...contradicted,text:'Sua correção separa coincidência temporal de atribuição: a mudança de formato ocorreu perto do prazo; causa e contribuição continuam abertas.'},profile,turns,{number:3});
+ assert.match(corrected.text,/causa e contribuição continuam abertas/);
+ turns.push({role:'assistant',content:corrected.text},{role:'user',content:'Pode encerrar por aqui.'});
+ const closed=validateProgress({...base,text:'Encerramento.',stage:'close',closingSummary:'Você tem uma abertura curta que nomeia as duas entregas, reconhece a mudança de formato perto do prazo sem tratá-la como causa e convida a leitura do seu par.',nextStep:'O próximo passo fica com você: adaptar essa abertura ao seu tom, mantendo separadas a coincidência temporal e a atribuição de causa.',delivery:null,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}},profile,turns,{number:4});
+ assert.equal(closed.progress.stage,'close');assert.doesNotMatch(closed.text,/\?/);assert.match(closed.text,/Podemos retomar o próximo passo em uma nova conversa/);
+});
 test('Adaptador envia orientação autoritativa e mapa de referências; correção inequívoca não gasta recuperação',async()=>{
  const received=[],validations=[],payloads=[];
  const input=envelope({completed:[{criterion:'FBK.facts',evidence:[{message:4,quote:leader}]}],pending:profile.diagnostic_criteria.map(c=>c.id).filter(x=>x!=='FBK.facts')});
