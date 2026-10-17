@@ -57,7 +57,7 @@ function validateProgress(value, profile, messages, turn = {}) {
   }
   const operationalClaimNormalizations = [];
   const operationalClaims = validateGrounding(value, messages, [...visibleParts, ...(deliveryText ? [deliveryText] : [])], operationalClaimNormalizations);
-  const methodologyRevision=validateMethodologicalFidelity(value,messages,[...visibleParts,...(deliveryText?[deliveryText]:[])]);
+  const methodologyRevision=validateMethodologicalFidelity(value,messages,[...visibleParts,...(deliveryText?[deliveryText]:[])],profile.id);
   const displayedDelivery = deduplicated.append ? delivery : '';
   const text = terminal ? visibleParts.filter(Boolean).join('\n\n') + displayedDelivery + '\n\nPodemos retomar o próximo passo em uma nova conversa.' : visibleParts.join('\n\n').replace(/\s*\[ENCERRAR\]\s*$/, '') + displayedDelivery;
   if(terminal&&text.includes('?'))throw new Error('INVALID_CLOSURE');

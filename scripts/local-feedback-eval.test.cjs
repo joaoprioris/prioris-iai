@@ -39,10 +39,10 @@ test('Negação causal fiel passa e fonte negada não sustenta causa afirmativa'
  const faithful='Você não disse que sua mudança de formato causou o atraso.';
  const denied='Minha mudança de formato não causou o atraso.';
  const asserted='Sua mudança de formato causou o atraso.';
- assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(faithful),[{role:'user',content:correction}],[faithful]));
+ assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(faithful),[{role:'user',content:correction}],[faithful],'FBK'));
  assert.doesNotThrow(()=>validateProgress(shape(faithful),profile,[{role:'user',content:correction}],{number:1}));
  const claim={kind:'impact',role:'user',message:0,text:asserted,quote:denied};
- assert.throws(()=>validateMethodologicalFidelity(shape(asserted,[claim]),[{role:'user',content:denied}],[asserted]),/UNSUPPORTED_FACT/);
+ assert.throws(()=>validateMethodologicalFidelity(shape(asserted,[claim]),[{role:'user',content:denied}],[asserted],'FBK'),/UNSUPPORTED_FACT/);
  assert.throws(()=>validateProgress(shape(asserted,[claim]),profile,[{role:'user',content:denied}],{number:1}),/UNSUPPORTED_FACT/);
 });
 
@@ -52,7 +52,7 @@ test('Negação de outro sujeito não muda a polaridade da causa afirmada',()=>{
   const quote='minha mudança de formato causou o atraso.';
   const exact=source.includes(quote)?quote:'Minha mudança de formato causou o atraso.';
   const claim={kind:'impact',role:'user',message:0,text:asserted,quote:exact};
-  assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(asserted,[claim]),[{role:'user',content:source}],[asserted]));
+  assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(asserted,[claim]),[{role:'user',content:source}],[asserted],'FBK'));
   assert.doesNotThrow(()=>validateProgress(shape(asserted,[claim]),profile,[{role:'user',content:source}],{number:1}));
  }
  assert.throws(()=>validateProgress(shape('Não só causou o atraso, como gerou retrabalho.'),profile,[{role:'user',content:'A causa não foi confirmada.'}],{number:1}),/UNSUPPORTED_FACT/);
@@ -60,8 +60,13 @@ test('Negação de outro sujeito não muda a polaridade da causa afirmada',()=>{
 
 test('Hipótese causal identificada permanece permitida',()=>{
  const text='Uma hipótese é que a mudança causou o atraso.';
- assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(text),[{role:'user',content:'Não sei o que causou o atraso.'}],[text]));
+ assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(text),[{role:'user',content:'Não sei o que causou o atraso.'}],[text],'FBK'));
  assert.doesNotThrow(()=>validateProgress(shape(text),profile,[{role:'user',content:'Não sei o que causou o atraso.'}],{number:1}));
+});
+
+test('Guard causal focal não altera as outras funções',()=>{
+ const asserted='Sua mudança de formato causou o atraso.';
+ assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(asserted),[{role:'user',content:'A causa não foi confirmada.'}],[asserted]));
 });
 
 

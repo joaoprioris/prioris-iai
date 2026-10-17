@@ -31,7 +31,7 @@ Não escolha função por nome de arquivo, reunião ou caso. Preserve todas as
 funções e a proteção pertinente diante de perigo físico realmente relatado.
 `;
 const patterns=[
- {name:'causal_assertion',kind:'impact',match:/\b(?:causou|gerou|provocou|resultou\s+em)\b/i},
+ {name:'causal_assertion',kind:'impact',feedbackOnly:true,match:/\b(?:causou|gerou|provocou|resultou\s+em)\b/i},
  {name:'inner_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+(?:dificuldade|quest[aã]o|tens[aã]o|problema)\s+real\s+(?:n[aã]o\s+)?(?:é|est[aá])(?=\s|[,.!?;:]|$)/i},
  {name:'corrective_difficulty_certainty',kind:'impact',match:/\b(?:a|sua|minha)\s+dificuldade\s+n[aã]o\s+é(?=\s)[^.!?\n]*[—–:-]\s*é\s+(?:que\s+)?voc[eê](?=\s|[,.!?;:]|$)/i},
  {name:'communication_effect_assertion',kind:'impact',match:/\b(?:isso|falha de comunica[cç][aã]o|falta de comunica[cç][aã]o)\b[^.!?]*\b(?:prejudicou|prejudica|criou|gerou|causou)\b[^.!?]*\b(?:leitura|avalia[cç][aã]o|conclus[aã]o|interpreta[cç][aã]o|entendimento)\b/i},
@@ -48,10 +48,11 @@ const negatesCausality=s=>{
  const prefix=s.slice(0,causal).split(/[.!?;:\n]|[—–]|\b(?:mas|por[eé]m|contudo)\b/i).at(-1)??'';
  return /\bn[aã]o\b/i.test(prefix)&&!/\bn[aã]o\s+(?:s[oó]|apenas|somente)(?=\s|[,.!?;:]|$)/i.test(prefix);
 };
-function validateMethodologicalFidelity(value,messages,parts){
+function validateMethodologicalFidelity(value,messages,parts,agent=null){
  const users=messages.filter(m=>m.role==='user');
  for(const part of parts)for(const sentence of part.split(/(?<=[.!?;\n])\s*|,\s*(?:mas|por[eé]m|contudo)\s+/i)){
   for(const rule of patterns){
+   if(rule.feedbackOnly&&agent!=='FBK')continue;
    const match=rule.embeddedCausal&&part===value.delivery?.text?(rule.sourceMatch??rule.match):rule.match;
    if(!match.test(sentence))continue;
    if(rule.name==='causal_assertion'&&negatesCausality(sentence))continue;
