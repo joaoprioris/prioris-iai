@@ -1,6 +1,6 @@
 'use strict';
 // Complements, never replaces, the canonical definition selected by EX04.
-const CONVERSATION_REVISION='EX05-2-conversation-5';
+const CONVERSATION_REVISION='EX05-2-conversation-6';
 const COMMON_RESPONSE = `
 CONDUÇÃO COMUM (uma entrada e uma voz; orientação interna flexível, não roteiro):
 Não apresente sua interpretação do que o líder realmente sente ou precisa como fato confirmado. Leitura útil pode ser hipótese respeitosa; não diagnóstico categórico do problema interno do líder.

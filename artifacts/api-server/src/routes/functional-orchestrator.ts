@@ -192,9 +192,11 @@ export function createModelProviders(
       let lastPresentationMeasurement: any;
       async function generate(repair = false) {
         const exampleOnly = repair && lastFailure === "AUTONOMY_CONSTRAINT_FAILED" && lastValidationReason === "EXAMPLE_TOO_LONG" && typeof lastCandidate?.delivery?.text === "string";
-        const recomposeExample = repair && agent === "FBK" && typeof lastCandidate?.delivery?.text === "string" &&
-          (exampleOnly || lastFailure === "DUPLICATE_DELIVERY" || lastFailure === "UNSUPPORTED_FACT" ||
-           (lastFailure === "AUTONOMY_CONSTRAINT_FAILED" && ["EXAMPLE_NOT_INTERLOCUTOR_SPEECH","IMPERATIVE_PRESENTATION"].includes(lastValidationReason)));
+        // Both communication functions can repeat a rejected example in the
+        // presentation. Repair all visible fields together, preserving identity.
+        const recomposeExample = repair && ["FBK", "OTO"].includes(agent) && typeof lastCandidate?.delivery?.text === "string" &&
+          (exampleOnly || (agent === "FBK" && (lastFailure === "DUPLICATE_DELIVERY" || lastFailure === "UNSUPPORTED_FACT" ||
+           (lastFailure === "AUTONOMY_CONSTRAINT_FAILED" && ["EXAMPLE_NOT_INTERLOCUTOR_SPEECH","IMPERATIVE_PRESENTATION"].includes(lastValidationReason)))));
         const compact = repair && lastFailure === "RESPONSE_CONSTRAINT_FAILED" && lastCandidate !== null && lastCandidate.stage !== "close" && !lastCandidate.delivery;
         const activeTool: any = recomposeExample ? {name:"revisar_exemplo",description:"Recompor apresentação e exemplo juntos, sem reaproveitar partes exibíveis recusadas.",input_schema:{type:"object",additionalProperties:false,required:["text","presentation","closingSummary","nextStep"],properties:{text:{type:"string",minLength:1,maxLength:600,description:"Somente fala adaptável do líder ao interlocutor, até 40 palavras; meta 30. Não inclua apresentação ou instruções."},presentation:{type:"string",minLength:1,maxLength:1200,description:"Comentário breve opcional e coerente, sem copiar frases do exemplo."},closingSummary:{type:"string",maxLength:1200,description:"Vazio fora de close."},nextStep:{type:"string",maxLength:800,description:"Vazio fora de close."}}}} : exampleOnly ? {name:"revisar_exemplo",description:"Reescrever somente o exemplo recusado, sem alterar os demais campos.",input_schema:{type:"object",additionalProperties:false,required:["text"],properties:{text:{type:"string",minLength:1,maxLength:600}}}} : compact ? { name: "revisar_apresentacao", description: "Revisar somente a apresentação do texto já validado.", input_schema: {type:"object",additionalProperties:false,required:["text"],properties:{text:{type:"string",minLength:1,maxLength:1800}}} } : tool;
         const reply = await getClient().messages.create({

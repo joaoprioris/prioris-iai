@@ -1021,6 +1021,55 @@ test('Composição 5: orientações dos outros agentes e caminho legado de ediç
  const legacy=structuredClone(b4Candidates[0]);
  assert.deepEqual(current.applyExampleRepair(legacy,{text:edit5().text}),old.exports.applyExampleRepair(legacy,{text:edit5().text}));
 });
+// Synthetic live-conversation case: verifies repair mechanics, not model quality.
+function liveRepairFixture(){
+ const p=contract.agents.find(a=>a.id==='OTO');
+ const fact='A equipe está falando ao mesmo tempo nesta reunião. Estou tentando retomar o foco agora.';
+ const request='Pode sugerir uma frase curta para eu retomar a conversa?';
+ const messages=[{role:'user',content:fact},{role:'user',content:request}];
+ const first='Quero ouvir o que cada pessoa está tentando trazer para esta conversa, porque temos pontos diferentes aparecendo ao mesmo tempo e ainda precisamos entender cada um deles.';
+ const second='Podemos voltar ao assunto que estávamos discutindo e ouvir uma contribuição de cada vez para que todos consigam acompanhar a conversa com mais clareza?';
+ const candidate={text:'Em reuniões recentes isso se repetiu. Uma possibilidade: "'+first+'" Outra parte: "'+second+'"',stage:'explore',completed:[],pending:p.diagnostic_criteria.map(c=>c.id),lenses:[],closingSummary:'',nextStep:'',operationalClaims:[],
+  delivery:{kind:'micro_move',text:first+' '+second},authorship:{supportMode:'optional_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:fact}],requestIntent:'brief_adaptable_example',examplePurpose:'Apoiar uma retomada pontual da conversa em curso, sem decidir pelo líder.'}};
+ const edited={text:'Quero ouvir uma contribuição de cada vez para acompanhar o que cada pessoa está trazendo.',presentation:'Uma opção breve para você adaptar ao momento da conversa:',closingSummary:'',nextStep:''};
+ return {p,messages,candidate,edited};
+}
+
+test('Reparo OTO: substitui também apresentação inválida e preserva função ao vivo',async()=>{
+ const {p,messages,candidate,edited}=liveRepairFixture();
+ const h=provider([candidate,{...candidate,text:edited.presentation,delivery:{...candidate.delivery,text:edited.text}}]);
+ const result=await h.p.respond({agent:'OTO',system:p.prompt,messages,history:[],turn:{number:2,max:10}});
+ assert.equal(h.calls.length,2);
+ assert.equal(h.observations[1].repairScope,'display_and_delivery');
+ assert.equal(result.progress.agent,'OTO');assert.equal(result.progress.delivery.kind,'micro_move');
+ assert.equal(result.progress.stage,'explore');
+ assert.equal(result.text.split(edited.text).length-1,1);
+ assert.doesNotMatch(result.text,/reuniões recentes|Outra parte/);
+ assert.deepEqual(h.observations[1].input.authorship,candidate.authorship);
+});
+
+test('Reparo OTO: nova invenção continua bloqueada sem terceira chamada',async()=>{
+ const {p,messages,candidate,edited}=liveRepairFixture();
+ const h=provider([candidate,{...candidate,text:'Em reuniões recentes isso se repetiu.',delivery:{...candidate.delivery,text:edited.text}}]);
+ await assert.rejects(()=>h.p.respond({agent:'OTO',system:p.prompt,messages,history:[],turn:{number:2,max:10}}),/UNSUPPORTED_FACT/);
+ assert.equal(h.calls.length,2);
+});
+
+test('Arquivo C5: respostas reais arquivadas reproduzem saída aceita no adaptador local',async()=>{
+ const real=replay['EX05-C3-COMPARE-L29-T02-preflight'].regressionConversation5;
+ const attempts=real.checkpoint.audit.at(-1).generationAttempts;
+ assert.deepEqual(attempts.map(a=>a.input.delivery.text.trim().split(/\s+/).length),[45,37]);
+ const h=provider([attempts[0].input,attempts[1].rawRepairInput]);
+ const result=await h.p.respond({agent:'FBK',system:profile.prompt,messages:real.messages,history:[],turn:{number:2,max:10}});
+ assert.equal(result.text,real.result.text);
+ assert.equal(h.calls.length,2);
+ assert.deepEqual(h.events.map(e=>e.code),['AUTONOMY_CONSTRAINT_FAILED','ACCEPTED']);
+ assert.equal(h.observations[1].repairScope,'display_and_delivery');
+ assert.deepEqual(h.observations[1].input.authorship,attempts[0].input.authorship);
+ assert.equal(result.text.split(result.progress.delivery.text).length-1,1);
+ assert.doesNotMatch(result.text,/recentes|Depois registre/);
+});
+
 test('L29 focal: candidatos brutos preservam recusa 65/45 e reparo repetido não ganha terceira chamada',async()=>{
  assert.deepEqual(l29.attempts.map(v=>v.delivery.text.trim().split(/\s+/).length),[65,45]);
  for(const v of l29.attempts)assert.throws(()=>validateProgress(v,profile,l29.messages,{number:2}),e=>e.validationReason==='EXAMPLE_TOO_LONG');
@@ -1147,7 +1196,7 @@ test('Condução focal 4: retirada atual de exemplo vence pedido anterior preser
 test('Condução focal 4: composição usa um exemplo canônico limitado por função sem ativar Evolução',()=>{
  const {canonicalExample}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
  const {responseInstructions,CONVERSATION_REVISION}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
- assert.equal(CONVERSATION_REVISION,'EX05-2-conversation-5');
+ assert.equal(CONVERSATION_REVISION,'EX05-2-conversation-6');
  for(const id of ['MNT','CTN','PRF','IMP','FBK','OTO','CRS']){
   const example=canonicalExample(id);assert(example.length>0&&example.length<2300);
   assert.equal(responseInstructions(id).split(example).length-1,1);
