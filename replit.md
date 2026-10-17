@@ -54,7 +54,8 @@ fora dele preservam o bind remoto existente. Use `pnpm build` para build/typeche
 
 - `node --test scripts/local-feedback-eval.test.cjs` para avaliação sintética;
 - `pnpm eval:feedback:list` para inventário rastreado (`S05` apoio canônico;
-  `S11` casos de avaliação) e cobertura do lote;
+  `S11` casos de avaliação) e cobertura do lote atual: quatro conversas completas,
+  quinze turnos e referência/origem preservadas;
 - `pnpm eval:feedback:live` para o lote real, depois de definir as variáveis no
   ambiente do processo. A chave vem apenas de `ANTHROPIC_API_KEY`, sem leitura de
   arquivo; `ANTHROPIC_MODEL`, `ANTHROPIC_MAX_TOKENS` (mínimo 1200, padrão 3000)
