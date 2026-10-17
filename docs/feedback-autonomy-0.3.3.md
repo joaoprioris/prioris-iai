@@ -24,6 +24,16 @@ Proteção a perigo físico permanece fora dessa restrição de exemplos do Feed
 
 ## Implementação e fidelidade técnica
 
+- O caminho real de geração carrega um único escopo operacional de Feedback,
+  derivado do contrato canônico: papel, entradas, ajuda, limites e conclusão.
+  Ele proíbe títulos mecânicos, detalhes/impactos inventados e defesa de leitura
+  corrigida; pedido de abertura não significa encerramento.
+- A biblioteca distingue o apoio canônico `S05:example:P0066-P0073` dos 90
+  momentos de avaliação `S11`. O lote focal cobre três conversas completas, com
+  origem e referência `S11:P0067-P0069`; repetição não é tratada como treino.
+- O avaliador Anthropic local recebe chave/modelo apenas pelo ambiente, não cria
+  rota, não repete uso incerto e contabiliza tokens inclusive na resposta
+  recusada. `thinking` privado é descartado; formato inesperado segue recusado.
 - Instrução autoritativa ao modelo e controle interno de autoria específico do
   Feedback: explore/review/optional_example não são roteiro exibido ao líder.
 - O pedido direto de uma abertura breve é reconhecido pelo ato de pedir e pelo

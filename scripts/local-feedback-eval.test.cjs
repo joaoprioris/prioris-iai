@@ -3,10 +3,64 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const {validateProgress}=require('../artifacts/api-server/src/lib/conversation-guidance.cjs');
 const {validateMethodologicalFidelity}=require('../artifacts/api-server/src/lib/methodological-fidelity.cjs');
 const {createConversationService,ConversationError}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
+const {responseInstructions}=require('../artifacts/api-server/src/lib/conversation-instructions.cjs');
+const {feedbackOperationalScope}=require('../artifacts/api-server/src/lib/feedback-scope.cjs');
+const {extractAnthropicContent}=require('../artifacts/api-server/src/lib/anthropic-content.cjs');
+const {feedbackReferenceInventory}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
+const {feedbackEvaluationCases}=require('../artifacts/api-server/src/lib/feedback-evaluation-cases.cjs');
 const contract=require('../artifacts/api-server/src/lib/agent-contract.json');
 const profile=contract.agents.find(a=>a.id==='FBK');
 const criteria=profile.diagnostic_criteria.map(c=>c.id);
 const shape=(text,operationalClaims=[])=>({text,stage:'explore',completed:[],pending:criteria,lenses:[],closingSummary:'',nextStep:'',delivery:null,operationalClaims,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}});
+
+test('Caminho real carrega um único escopo operacional derivado do Feedback canônico',()=>{
+ const scope=feedbackOperationalScope();
+ assert.equal(scope.canonical.id,'FBK');
+ assert.equal(scope.canonical.purpose,profile.purpose);
+ const prompt=responseInstructions('FBK');
+ assert.equal(prompt.split('ESCOPO OPERACIONAL DE FEEDBACK').length-1,1);
+ assert.match(prompt,/abandonar a leitura corrigida, sem defendê-la/);
+ assert.match(prompt,/cronograma, orçamento/);
+ assert.doesNotMatch(responseInstructions('OTO'),/ESCOPO OPERACIONAL DE FEEDBACK/);
+});
+
+test('Inventário distingue apoio canônico de casos completos de avaliação e preserva refs',()=>{
+ const inventory=feedbackReferenceInventory(),cases=feedbackEvaluationCases();
+ assert.equal(inventory.supportExamples.length,1);
+ assert.equal(inventory.supportExamples[0].id,'S05:example:P0066-P0073');
+ assert.equal(inventory.evaluationCases.length,90);
+ assert.equal(cases.length,3);
+ for(const item of cases){
+  assert.equal(item.purpose,'evaluation_case');
+  assert.ok(item.origin.length>10);
+  assert.ok(item.userTurns.length>=3);
+  assert.ok(item.references.every(ref=>inventory.evaluationCases.some(candidate=>candidate.id===ref.ref&&candidate.source===ref.source)));
+ }
+});
+
+test('Adaptador descarta thinking privado, aceita terminais pertinentes e recusa formatos inesperados',()=>{
+ const textReply={content:[{type:'thinking',thinking:'privado'},{type:'redacted_thinking',data:'privado'},{type:'text',text:'Resposta pública.'}]};
+ assert.deepEqual(extractAnthropicContent(textReply,{mode:'text'}),{text:'Resposta pública.',privateBlocksDiscarded:2});
+ const toolReply={content:[{type:'thinking',thinking:'privado'},{type:'tool_use',name:'registrar_resposta',input:{text:'ok'}}]};
+ assert.deepEqual(extractAnthropicContent(toolReply,{mode:'tool',toolName:'registrar_resposta'}),{input:{text:'ok'},privateBlocksDiscarded:1});
+ assert.throws(()=>extractAnthropicContent({content:[{type:'tool_use',name:'x',input:{}}]},{mode:'text'}),/UNEXPECTED_CONTENT/);
+ assert.throws(()=>extractAnthropicContent({content:[{type:'text',text:'fora do contrato'}]},{mode:'tool',toolName:'registrar_resposta'}),/UNEXPECTED_CONTENT/);
+});
+
+test('Regressão completa de interrupções preserva fatos, correção, abertura e encerramento',()=>{
+ const initial='Quero preparar um feedback para uma pessoa da equipe. Na reunião de ontem, ela me interrompeu duas vezes enquanto eu explicava uma proposta. Quero ouvir o que aconteceu e combinar como vamos conversar nas próximas reuniões.';
+ const request='Pode me dar uma abertura curta e adaptável?';
+ const opening='Na reunião de ontem, você me interrompeu duas vezes enquanto eu explicava uma proposta. Quero ouvir o que aconteceu e combinar como vamos conversar nas próximas reuniões.';
+ const messages=[{role:'user',content:initial},{role:'assistant',content:'Vamos organizar a abordagem.'},{role:'user',content:request}];
+ const opened=validateProgress({...shape('Uma opção breve e adaptável ao seu tom:'),delivery:{kind:'message',text:opening},authorship:{supportMode:'optional_example',requestIntent:'brief_adaptable_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:'Na reunião de ontem, ela me interrompeu duas vezes enquanto eu explicava uma proposta.'},{message:0,quote:'Quero ouvir o que aconteceu e combinar como vamos conversar nas próximas reuniões.'}],examplePurpose:'Oferecer uma abertura breve para adaptação pelo líder.'}},profile,messages,{number:2});
+ assert.doesNotMatch(opened.text,/cronograma|orçamento|dificultou.*raciocínio/i);
+ messages.push({role:'assistant',content:opened.text},{role:'user',content:'Correção: eu não disse que as interrupções dificultaram concluir meu raciocínio. Esse impacto foi uma interpretação sua.'});
+ const corrected=validateProgress(shape('Você tem razão na correção: as duas interrupções foram relatadas; o impacto sobre concluir seu raciocínio não foi. Retiro essa interpretação.'),profile,messages,{number:3});
+ assert.doesNotMatch(corrected.text,/impacto objetivo|ainda assim|mas dificultou/i);
+ messages.push({role:'assistant',content:corrected.text},{role:'user',content:'Pode encerrar por aqui.'});
+ const closed=validateProgress({...shape('Encerramento.'),stage:'close',closingSummary:'Você organizou uma abertura baseada nas duas interrupções relatadas e retirou o impacto que não havia afirmado.',nextStep:'A abertura continua adaptável ao seu tom e preserva o convite para ouvir a outra pessoa.'},profile,messages,{number:4});
+ assert.equal(closed.progress.stage,'close');
+});
 
 test('Feedback completo aceita abertura direta, incorpora correção e encerra',()=>{
  const initial='Preciso dar feedback formal sobre um par. Em duas entregas, os dados chegaram depois do prazo e refiz a consolidação. Em uma delas, mudei o formato perto do prazo. Quero reconhecer minha parte e ouvir a leitura dele.';

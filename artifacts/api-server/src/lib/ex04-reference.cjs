@@ -116,5 +116,13 @@ function classifierAuthority() {
     '\nREGRAS OPERACIONAIS E REVISÃO CANÔNICA VIGENTE:\n'+operationalRules+
     '\nDEFINIÇÕES DE INTERPRETAÇÃO:\n'+JSON.stringify(excerpts);
 }
+function feedbackReferenceInventory() {
+  const supportExamples=library.filter(block=>block.source==='S05'&&block.kind==='definition_example')
+    .map(block=>({id:block.id,source:block.source,sourceSha256:block.sourceSha256,kind:'support_example',refs:block.paragraphs.map(p=>p.ref)}));
+  const evaluationCases=library.filter(block=>block.source==='S11'&&block.kind==='library_reference'&&
+      /(?:\(|^)(?:Antes|Durante|Depois)\)/iu.test(block.paragraphs.map(p=>p.text).join(' ')))
+    .map(block=>({id:block.id,source:block.source,sourceSha256:block.sourceSha256,kind:'evaluation_case',refs:block.paragraphs.map(p=>p.ref)}));
+  return {supportExamples,evaluationCases};
+}
 module.exports={REVISION,MAX_REFERENCE_CHARS,MAX_BLOCKS,common,definitions,resolveContract,
-  retrieve,selectReferences,referenceMessage,classifierAuthority,canonicalExample};
+  retrieve,selectReferences,referenceMessage,classifierAuthority,canonicalExample,feedbackReferenceInventory};
