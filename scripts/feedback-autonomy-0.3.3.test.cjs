@@ -5,6 +5,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),Module=require('node:module');
 const {resolveUserEvidence,deduplicateDelivery}=require('../artifacts/api-server/src/lib/evidence-source.cjs');
 const {validateProgress}=require('../artifacts/api-server/src/lib/conversation-guidance.cjs');
+const {validateMethodologicalFidelity}=require('../artifacts/api-server/src/lib/methodological-fidelity.cjs');
 const {createPilotStore}=require('../artifacts/api-server/src/lib/pilot-store.cjs');
 const {prepareFourthRound,THIRD_IDENTITY,FOURTH_IDENTITY}=require('../artifacts/api-server/src/lib/pilot-rounds.cjs');
 const {createPilotBudget}=require('../artifacts/api-server/src/lib/pilot-budget.cjs');
@@ -122,6 +123,18 @@ test('Feedback completo aceita abertura pedida, incorpora correção causal e re
  turns.push({role:'assistant',content:corrected.text},{role:'user',content:'Pode encerrar por aqui.'});
  const closed=validateProgress({...base,text:'Encerramento.',stage:'close',closingSummary:'Você tem uma abertura curta que nomeia as duas entregas, reconhece a mudança de formato perto do prazo sem tratá-la como causa e convida a leitura do seu par.',nextStep:'O próximo passo fica com você: adaptar essa abertura ao seu tom, mantendo separadas a coincidência temporal e a atribuição de causa.',delivery:null,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}},profile,turns,{number:4});
  assert.equal(closed.progress.stage,'close');assert.doesNotMatch(closed.text,/\?/);assert.match(closed.text,/Podemos retomar o próximo passo em uma nova conversa/);
+});
+test('Negação causal fiel passa e citação negada não sustenta causa afirmativa',()=>{
+ const correction='Correção: eu não disse que minha mudança causou o atraso; ela só aconteceu perto do prazo.';
+ const faithful='Você não disse que sua mudança de formato causou o atraso.';
+ const denied='Minha mudança de formato não causou o atraso.';
+ const asserted='Sua mudança de formato causou o atraso.';
+ const shape=(text,operationalClaims=[])=>({text,stage:'explore',completed:[],pending:profile.diagnostic_criteria.map(c=>c.id),lenses:[],closingSummary:'',nextStep:'',delivery:null,operationalClaims,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}});
+ assert.doesNotThrow(()=>validateMethodologicalFidelity(shape(faithful),[{role:'user',content:correction}],[faithful]));
+ assert.doesNotThrow(()=>validateProgress(shape(faithful),profile,[{role:'user',content:correction}],{number:1}));
+ const claim={kind:'impact',role:'user',message:0,text:asserted,quote:denied};
+ assert.throws(()=>validateMethodologicalFidelity(shape(asserted,[claim]),[{role:'user',content:denied}],[asserted]),/UNSUPPORTED_FACT/);
+ assert.throws(()=>validateProgress(shape(asserted,[claim]),profile,[{role:'user',content:denied}],{number:1}),/UNSUPPORTED_FACT/);
 });
 test('Abertura direta não transforma negativa, pedido citado ou roteiro completo em autorização',()=>{
  const fact='Em duas entregas, os dados chegaram depois do prazo.';
