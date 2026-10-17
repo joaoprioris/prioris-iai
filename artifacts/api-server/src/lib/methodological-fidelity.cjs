@@ -42,12 +42,19 @@ const patterns=[
  {name:'team_incapacity',kind:'viability',match:/\b(?:equipe|time)\b[^.!?]*(?:sem condi[cç][aã]o|n[aã]o (?:tem|teve) condi[cç][aã]o|n[aã]o (?:consegue|conseguiu|pode))[^.!?]*\bcumprir\b/i},
 ];
 const uncertain=s=>/\b(?:hip[oó]tese|talvez|se|caso|poderia|pode ser|pode ajudar|pode preservar|possibilidade)\b|não (?:sabemos|sei|comprova|demonstra|podemos afirmar)|sem (?:base|evidência)|acho que|receio|pretendo|quero|vou tentar/i.test(s);
+const negatesCausality=s=>{
+ const causal=s.search(/\b(?:causou|gerou|provocou|resultou\s+em)\b/i);
+ if(causal<0)return false;
+ const prefix=s.slice(0,causal).split(/[.!?;\n]|\b(?:mas|por[eé]m|contudo)\b/i).at(-1)??'';
+ return /\bn[aã]o\b/i.test(prefix)&&!/\bn[aã]o\s+(?:s[oó]|apenas|somente)\b/i.test(prefix);
+};
 function validateMethodologicalFidelity(value,messages,parts){
  const users=messages.filter(m=>m.role==='user');
  for(const part of parts)for(const sentence of part.split(/(?<=[.!?;\n])\s*|,\s*(?:mas|por[eé]m|contudo)\s+/i)){
   for(const rule of patterns){
    const match=rule.embeddedCausal&&part===value.delivery?.text?(rule.sourceMatch??rule.match):rule.match;
    if(!match.test(sentence))continue;
+   if(rule.name==='causal_assertion'&&negatesCausality(sentence))continue;
    if(rule.name==='communication_effect_assertion'&&/\bn[aã]o\s+(?:(?:vou|posso|podemos)\s+)?(?:afirmar|dizer|confirmar|confirmo)\s+que\s*$/i.test(sentence.slice(0,sentence.search(match))))continue;
    // "pode ser X, não Y" still rules out Y. A possibility for X doesn't
    // establish exclusion of Y, even if another clause is conditional.
@@ -64,7 +71,7 @@ function validateMethodologicalFidelity(value,messages,parts){
     if(typeof source!=='string'||typeof c.quote!=='string'||!source.includes(c.quote)||!(rule.sourceMatch??rule.match).test(c.quote))return false;
     const at=source.indexOf(c.quote);
     const full=source.slice(0,at).split(/[.!?\n]/).at(-1)+c.quote+source.slice(at+c.quote.length).split(/[.!?\n]/)[0];
-    return !uncertain(full)&&!/\bnão (?:disse|afirmei|é verdade|confirmo)\b/i.test(full)&&!full.includes('?');
+    return !uncertain(full)&&!(rule.name==='causal_assertion'&&negatesCausality(full))&&!/\bnão (?:disse|afirmei|é verdade|confirmo)\b/i.test(full)&&!full.includes('?');
    });
    if(!supported)throw Error('UNSUPPORTED_FACT');
   }
