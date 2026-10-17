@@ -24,4 +24,48 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
+## Execução local sem Replit
+
+Pré-requisitos: Node.js 24, pnpm 11 e PostgreSQL 16. O caminho local mantém a
+autenticação por magic link, isolamento por usuário/organização, checagem de
+origem, limite de dez trocas e os controles de histórico. Não existe login de
+desenvolvimento nem usuário embutido.
+
+1. Instale o lockfile: `pnpm install --frozen-lockfile`.
+2. Copie `.env.local.example` para `.env.local` e use credenciais exclusivamente
+   locais. `ANTHROPIC_API_KEY` é necessária somente para conversa real.
+3. Crie um PostgreSQL vazio e descartável e aplique uma vez
+   `psql -X -v ON_ERROR_STOP=1 -d iai_local -f lib/db/migrations/0001-baseline.sql`.
+   A baseline nunca deve ser aplicada a banco existente. Cadastre nesse banco
+   uma organização e um e-mail de teste autorizado; não use dados de conversa
+   reais na avaliação local.
+4. Para login pela interface, configure `AUTH_EMAIL_ENABLED=true` e as variáveis
+   SMTP. O servidor não retorna tokens por API ou log.
+5. Ative o orquestrador com `PRIORIS_FUNCTIONAL_ROUTING_V1=true` e execute
+   `pnpm dev:local`. Interface: `http://localhost:5173`; API: porta interna 8080.
+
+O launcher fixa `PRIORIS_AI_PROVIDER=anthropic`, encaminha `/api` pelo Vite e
+permite cookie HTTP apenas quando `NODE_ENV=development`, `IAI_LOCAL_HTTP=true`
+e `APP_BASE_URL` é loopback. Fora dessas três condições, HTTPS e cookie seguro
+continuam obrigatórios. Use `pnpm build` para build/typecheck e:
+
+- `node --test scripts/local-feedback-eval.test.cjs` para avaliação sintética;
+- `pnpm exec tsx --test scripts/local-runtime.test.ts` para origem/cookie e falha
+  injetada do provider, sem chamada de modelo.
+
+Sem chave Anthropic, a validação estrutural funciona, mas conversa real permanece
+pendente. Nenhum comando de setup faz chamada de modelo, aplica deploy, altera o
+piloto preservado ou redefine seus limites.
+
+## Dependências Replit identificadas
+
+- `.replit` e `.replit-artifact/`: módulos, portas e metadados de publicação;
+- plugins Cartographer, dev banner e runtime error modal: carregados pelo Vite
+  somente quando `REPL_ID` existe; permanecem no lockfile para compatibilidade;
+- provider `replit`: usa `AI_INTEGRATIONS_ANTHROPIC_*` apenas quando selecionado;
+- `REPLIT_DEV_DOMAIN`: origem adicional apenas no ambiente Replit.
+
+O perfil local não depende de Replit Agent, publicação ou integração de modelo
+do Replit. Ele reutiliza o SDK Anthropic e a mesma API Node/TypeScript existentes.
+
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
