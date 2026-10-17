@@ -41,6 +41,19 @@ const scenarios = Object.freeze([
     ]),
     checks: Object.freeze(['no_unrequested_example','concrete_help','explicit_close']),
   }),
+  Object.freeze({
+    id: 'fbk-ambiguous-then-grounded',
+    purpose: 'evaluation_case',
+    origin: 'synthetic ambiguity regression derived from Feedback autonomy contract',
+    references: Object.freeze([{source:'S11',ref:'S11:P0067-P0069'}]),
+    userTurns: Object.freeze([
+      'Preciso conversar com um par sobre uma reunião, mas ainda não sei qual mudança quero construir com o feedback.',
+      'O fato é que ele me interrompeu duas vezes enquanto eu apresentava. Quero ouvir a leitura dele e combinar uma forma de conversar nas próximas reuniões.',
+      'Pode me dar uma abertura curta?',
+      'Pode encerrar por aqui.',
+    ]),
+    checks: Object.freeze(['concrete_help_without_invention','brief_opening_after_grounding','explicit_close']),
+  }),
 ]);
 
 function feedbackEvaluationCases() {

@@ -29,7 +29,7 @@ test('Inventário distingue apoio canônico de casos completos de avaliação e 
  assert.equal(inventory.supportExamples.length,1);
  assert.equal(inventory.supportExamples[0].id,'S05:example:P0066-P0073');
  assert.equal(inventory.evaluationCases.length,90);
- assert.equal(cases.length,3);
+ assert.equal(cases.length,4);
  for(const item of cases){
   assert.equal(item.purpose,'evaluation_case');
   assert.ok(item.origin.length>10);

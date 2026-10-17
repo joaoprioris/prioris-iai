@@ -50,6 +50,10 @@ function validateScenarioTurn(scenario,index,validated){
     if(index>=2&&/(?:mudança|formato)[^.!?]*(?:causou|provocou|gerou)[^.!?]*atraso/iu.test(visible))throw Error('CORRECTED_CAUSALITY_REASSERTED');
   }
   if(scenario.id==='fbk-negative-example-request'&&index===1&&validated.progress.delivery)throw Error('UNREQUESTED_EXAMPLE');
+  if(scenario.id==='fbk-ambiguous-then-grounded'){
+    if(index===0&&validated.progress.delivery)throw Error('EXAMPLE_BEFORE_GROUNDING');
+    if(index===2&&!validated.progress.delivery?.text)throw Error('BRIEF_OPENING_MISSING');
+  }
 }
 let rejected=0;
 for(const scenario of cases){
