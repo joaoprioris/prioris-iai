@@ -62,7 +62,7 @@ function validateFeedbackAuthorship(value,messages,parts){
  const formulation=q=>/\b(?:formul\w*|elabor\w*|escrev\w*|redig\w*|mont\w*|rascunh\w*|suger\w*|propo\w*|adapt\w*)\b/.test(normalized(q));
  const tooBroad=q=>/\b(?:discurso|roteiro)\s+(?:completo|inteiro)|\btoda a conversa\b|\bdecida por mim\b/.test(normalized(q));
  const requestVoice=q=>direct(q)||/^\s*(?:por favor,?\s*)?(?:me\s+)?(?:sugira|proponha|redija|escreva|prepare|mostre|d[eê]|d[aá]|como (?:eu )?(?:abro|come[cç]o|digo))\b/i.test(q)||(a.requestIntent==='brief_adaptable_example'&&(/\?\s*[”"'’]?\s*$/.test(q)||/\b(?:me|eu)\b/i.test(q)));
- const asks=q=>!negative(q)&&!tooBroad(q)&&requestVoice(q)&&(a.requestIntent==='brief_adaptable_example'||(direct(q)&&brief(q)&&(formulation(q)||/\b(?:quero|queria|gostaria|preciso)\b/.test(normalized(q))))||(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:exemplo|sugest[aã]o|uma fala)\b/i.test(q)||
+ const asks=q=>!negative(q)&&!tooBroad(q)&&requestVoice(q)&&(a.requestIntent==='brief_adaptable_example'||(direct(q)&&brief(q)&&(formulation(q)||/\b(?:quero|queria|gostaria|preciso)\b/.test(normalized(q))))||(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:abertura|frase inicial|exemplo|sugest[aã]o|uma fala)\b/i.test(q)||
   /\b(?:pode(?:ria)?|consegue)\b[^.!?\n]{0,40}\b(?:sugerir|propor|mostrar|redigir|escrever|rascunhar|preparar|elaborar)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
   /\b(?:quero|gostaria(?: de)?|me (?:sugira|proponha|mostre|d[eê]|d[aá])|sugira|proponha|redija|escreva|prepare)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
   /\bcomo (?:eu )?(?:abro|come[cç]o|digo)\b/i.test(q)));
