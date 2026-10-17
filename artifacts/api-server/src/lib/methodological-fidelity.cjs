@@ -45,8 +45,8 @@ const uncertain=s=>/\b(?:hip[oó]tese|talvez|se|caso|poderia|pode ser|pode ajuda
 const negatesCausality=s=>{
  const causal=s.search(/\b(?:causou|gerou|provocou|resultou\s+em)\b/i);
  if(causal<0)return false;
- const prefix=s.slice(0,causal).split(/[.!?;\n]|\b(?:mas|por[eé]m|contudo)\b/i).at(-1)??'';
- return /\bn[aã]o\b/i.test(prefix)&&!/\bn[aã]o\s+(?:s[oó]|apenas|somente)\b/i.test(prefix);
+ const prefix=s.slice(0,causal).split(/[.!?;:\n]|[—–]|\b(?:mas|por[eé]m|contudo)\b/i).at(-1)??'';
+ return /\bn[aã]o\b/i.test(prefix)&&!/\bn[aã]o\s+(?:s[oó]|apenas|somente)(?=\s|[,.!?;:]|$)/i.test(prefix);
 };
 function validateMethodologicalFidelity(value,messages,parts){
  const users=messages.filter(m=>m.role==='user');
