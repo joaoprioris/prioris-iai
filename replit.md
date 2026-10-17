@@ -45,14 +45,27 @@ desenvolvimento nem usuário embutido.
 5. Ative o orquestrador com `PRIORIS_FUNCTIONAL_ROUTING_V1=true` e execute
    `pnpm dev:local`. Interface: `http://localhost:5173`; API: porta interna 8080.
 
-O launcher fixa `PRIORIS_AI_PROVIDER=anthropic`, encaminha `/api` pelo Vite e
+O launcher usa Node e o `npm_execpath` do pnpm ativo, sem comando de shell montado,
+fixa `PRIORIS_AI_PROVIDER=anthropic`, encaminha `/api` pelo Vite e
 permite cookie HTTP apenas quando `NODE_ENV=development`, `IAI_LOCAL_HTTP=true`
 e `APP_BASE_URL` é loopback. Fora dessas três condições, HTTPS e cookie seguro
-continuam obrigatórios. Use `pnpm build` para build/typecheck e:
+continuam obrigatórios. Nesse perfil API e Vite escutam somente em `127.0.0.1`;
+fora dele preservam o bind remoto existente. Use `pnpm build` para build/typecheck e:
 
 - `node --test scripts/local-feedback-eval.test.cjs` para avaliação sintética;
+- `pnpm eval:feedback:list` para inventário rastreado (`S05` apoio canônico;
+  `S11` casos de avaliação) e cobertura do lote;
+- `ANTHROPIC_MODEL=... pnpm eval:feedback:live` para o lote real. A chave vem
+  apenas de `ANTHROPIC_API_KEY`; `ANTHROPIC_MAX_TOKENS` (mínimo 1200, padrão
+  3000) e `ANTHROPIC_EFFORT` são opcionais e devem corresponder ao modelo;
 - `pnpm exec tsx --test scripts/local-runtime.test.ts` para origem/cookie e falha
-  injetada do provider, sem chamada de modelo.
+  injetada do provider, além do bind efetivo de API/Vite, sem chamada de modelo.
+
+O lote usa `maxRetries: 0`, interrompe após erro de uso incerto e registra tokens
+da resposta antes de aceitá-la ou rejeitá-la. Blocos `thinking` e
+`redacted_thinking` não são exibidos nem gravados; `tool_use` inesperado continua
+recusado. Cada correção de código exige repetir as regressões e o lote completo;
+isso não é fine-tuning nem aprendizagem automática.
 
 Sem chave Anthropic, a validação estrutural funciona, mas conversa real permanece
 pendente. Nenhum comando de setup faz chamada de modelo, aplica deploy, altera o

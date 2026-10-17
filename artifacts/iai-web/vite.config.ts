@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { runtimeHost } from "../../scripts/local-runtime-config.cjs";
 
 const rawPort = process.env.PORT;
 
@@ -18,6 +19,7 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 const basePath = process.env.BASE_PATH;
+const host = runtimeHost();
 
 if (!basePath) {
   throw new Error(
@@ -62,7 +64,7 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: "0.0.0.0",
+    host,
     allowedHosts: true,
     fs: {
       strict: true,
@@ -82,7 +84,7 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "0.0.0.0",
+    host,
     allowedHosts: true,
   },
 });

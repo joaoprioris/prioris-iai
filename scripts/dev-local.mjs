@@ -8,6 +8,11 @@ if (missing.length) {
 
 const apiPort = process.env.IAI_API_PORT ?? "8080";
 const webPort = process.env.IAI_WEB_PORT ?? "5173";
+const packageManager = process.env.npm_execpath;
+if (!packageManager) {
+  console.error("Execute este launcher por pnpm dev:local para reutilizar o gerenciador ativo.");
+  process.exit(1);
+}
 const shared = {
   ...process.env,
   NODE_ENV: "development",
@@ -17,11 +22,11 @@ const shared = {
 };
 
 const children = [
-  spawn("pnpm", ["--filter", "@workspace/api-server", "run", "dev"], {
+  spawn(process.execPath, [packageManager, "--filter", "@workspace/api-server", "run", "dev"], {
     stdio: "inherit",
     env: { ...shared, PORT: apiPort },
   }),
-  spawn("pnpm", ["--filter", "@workspace/iai-web", "run", "dev"], {
+  spawn(process.execPath, [packageManager, "--filter", "@workspace/iai-web", "run", "dev"], {
     stdio: "inherit",
     env: { ...shared, PORT: webPort, BASE_PATH: "/", IAI_API_ORIGIN: `http://127.0.0.1:${apiPort}` },
   }),
