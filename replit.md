@@ -85,3 +85,70 @@ O perfil local não depende de Replit Agent, publicação ou integração de mod
 do Replit. Ele reutiliza o SDK Anthropic e a mesma API Node/TypeScript existentes.
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+
+## Estado verificado — 18/10/2026: Feedback fora do Replit
+
+PR2 permanece aberto, sem merge ou deploy. A API própria foi conectada por credencial apenas em memória; nenhum segredo consta do código ou deste registro.
+
+Causas reproduzidas: (1) basisEvidence era opcional no esquema, mas obrigatório para a abertura no validador; (2) uma cópia integral do exemplo em text causava DUPLICATE_DELIVERY e nova geração; (3) “apresentei” na fala proposta do líder era confundido com alegação de histórico do assistente.
+
+Correções: arrays de evidência obrigatórios no esquema; normalização exata da cópia integral para campo separado, sem reescrita semântica; distinção explícita de autoria no verificador de histórico. Base factual e demais limites permanecem verificados. Escopo orienta responder ao pedido atual e preservar o objetivo. Metodologia de AGENTES não foi alterada.
+
+Verificação: 15/15 regressões passaram; o caso capturado falhou antes com DUPLICATE_DELIVERY e depois com UNSUPPORTED_FACT, demonstrando também a confusão de autoria. Compilação do executor passou. O executor reutiliza createConversationService e createModelProviders reais, classificação, geração, validação e reparo. Armazenamento em memória: não valida HTTP/login/PostgreSQL/SED.
+
+Consumo acumulado estimado das chamadas registradas: US$0.871577; 28 chamadas ao modelo. A contagem prévia de tokens permite reserva conservadora dentro de US$1 acumulado. Sem retry após uso incerto. Isso não representa extrato de cobrança.
+
+### Conversa de referência completa, anterior às correções finais
+
+**Líder:** Quero preparar um feedback para uma pessoa da equipe. Na reunião de ontem, ela me interrompeu duas vezes enquanto eu explicava uma proposta. Quero ouvir o que aconteceu e combinar como vamos conversar nas próximas reuniões.
+
+**IAí:** Você quer abrir espaço para entender o contexto e alinhar a dinâmica daqui para frente. Duas interrupções em uma reunião específica podem significar urgência, discordância ou apenas uma diferença de ritmo — você ainda não sabe.
+
+A tensão está entre nomear o que te chamou atenção e preservar condições para uma conversa aberta, sem fazer da interrupção o problema central antes de ouvir.
+
+Como você pretende abrir essa conversa com ela?
+
+**Líder:** Pode me dar uma abertura curta e adaptável?
+
+**IAí:** Uma opção é nomear o fato observável — as duas interrupções na reunião de ontem durante sua explicação — e explicitar sua dupla intenção: ouvir o contexto dela e alinhar como vocês vão conversar nas próximas reuniões. Você pode ajustar o tom e as palavras conforme sua relação e o ambiente.
+
+Exemplo opcional para revisar sua abordagem:
+“Ontem na reunião, você me interrompeu duas vezes enquanto eu explicava a proposta. Quero entender o que aconteceu e combinar como a gente se organiza daqui pra frente.”
+
+**Líder:** Quero manter a fala só nas duas interrupções, sem supor o impacto. Pode deixar a abertura mais natural, sem tom de acusação?
+
+**IAí:** Você pode nomear o fato observável — as duas interrupções na reunião de ontem — e abrir espaço para ouvir o contexto, sem atribuir peso ou supor impacto antes da conversa. O tom busca curiosidade em vez de acusação.
+
+Exemplo opcional para revisar sua abordagem:
+“Ontem na reunião, percebi que você me interrompeu duas vezes enquanto eu falava. Queria entender o que aconteceu.”
+
+**Líder:** Pode encerrar por aqui.
+
+**IAí:** Você preparou uma abertura que nomeia o fato observável — as duas interrupções na reunião de ontem — sem supor impacto, intenção ou tom de acusação. A abertura preserva espaço para ouvir o contexto da pessoa e mantém condições para uma conversa produtiva. O alinhamento sobre as próximas reuniões ficou em aberto, podendo ser conduzido a partir do que ela trouxer na conversa.
+
+Realizar a conversa com a pessoa da equipe usando a abertura preparada, ouvir o contexto dela e, conforme o andamento, propor o alinhamento sobre a dinâmica das próximas reuniões. Você pode voltar ao IAí caso precise ajustar a abordagem ou preparar outro trecho da conversa.
+
+Exemplo opcional para revisar sua abordagem:
+“Ontem na reunião, percebi que você me interrompeu duas vezes enquanto eu falava. Queria entender o que aconteceu.”
+
+Podemos retomar o próximo passo em uma nova conversa.
+
+### Verificação real final da abertura — uma solicitação, não uma conversa completa
+
+**Líder:** Quero preparar um feedback para uma pessoa da equipe. Na reunião de ontem, ela me interrompeu duas vezes enquanto eu explicava uma proposta. Quero ouvir o que aconteceu e combinar como vamos conversar nas próximas reuniões.
+
+Pode me dar uma abertura curta e adaptável?
+
+**IAí:** Você quer entender a razão da interrupção e construir um acordo de conduta para as próximas reuniões. Uma abertura possível:
+
+Exemplo opcional para revisar sua abordagem:
+“Ontem você me interrompeu duas vezes enquanto eu apresentava a proposta. Quero entender o que aconteceu e combinar como a gente conversa nas próximas reuniões.”
+
+Referência da versão executada (SHA-256 dos fontes): 5e17ca4ed9bfd9f6d6facb372a4672a6dff49661d157038de2f12192ba89254c
+
+### Próximo passo e limites
+
+A abertura final foi aceita sem reparo, em duas chamadas (classificação e resposta). Nenhuma conversa integral da revisão final foi aprovada. Próximo passo: completar uma conversa adaptativa nessa revisão, incluindo pedido de ajuste, correção quando pertinente e encerramento; depois verificar casos distintos da biblioteca. Não ampliar ou hospedar como produto validado. O Engenheiro IAí respondeu limite de uso na última tentativa.
+
+Comandos: `PRIORIS_AI_PROVIDER=anthropic` e chave apenas no ambiente do processo; `node scripts/evaluate-feedback-live.mjs --scenario fbk-peer-interruption-correction` para conversa completa; acrescente `--request-only` para diagnóstico de uma abertura; `--check-pipeline` verifica imports sem chamada; `--list` inventaria cenários. IAI_EVAL_STATE aponta para uso local sem chave. Estado e código canônicos estão neste PR; compilados e registros locais são temporários.
