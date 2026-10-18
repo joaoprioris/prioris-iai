@@ -13,6 +13,29 @@ const profile=contract.agents.find(a=>a.id==='FBK');
 const criteria=profile.diagnostic_criteria.map(c=>c.id);
 const shape=(text,operationalClaims=[])=>({text,stage:'explore',completed:[],pending:criteria,lenses:[],closingSummary:'',nextStep:'',delivery:null,operationalClaims,authorship:{supportMode:'explore',approachEvidence:[],examplePurpose:''}});
 
+test('Resposta real duplicada conserva fatos e apresenta o exemplo uma unica vez',()=>{
+ const fact='Na reunião de ontem, ela me interrompeu duas vezes enquanto eu explicava uma proposta.';
+ const request='Pode me dar uma abertura curta e adaptável?';
+ const example='Ontem, quando apresentei a proposta, você me interrompeu duas vezes. Quero entender o que aconteceu e combinar como organizamos nossas conversas nas reuniões.';
+ const candidate={...shape('Aqui está uma abertura:\n\n"'+example+'"\n\nVocê pode ajustar o tom conforme o contexto.'),delivery:{kind:'message',text:example},authorship:{supportMode:'optional_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:fact}],examplePurpose:'Oferecer uma abertura breve baseada no relato.'}};
+ const result=validateProgress(candidate,profile,[{role:'user',content:fact},{role:'user',content:request}],{number:2});
+ assert.equal(result.text.split(example).length-1,1);
+ assert.match(result.text,/Você pode ajustar o tom/);
+ assert.ok(result.progress.displayNormalizations.some(n=>n.kind==='delivery_moved_to_separate_field'));
+ assert.equal(result.progress.authorship.basisEvidence[0].quote,fact);
+});
+
+test('Separar exemplo identico nao dispensa base factual',()=>{
+ const text='Quero entender o que aconteceu.';
+ const candidate={...shape('Uma opção: "'+text+'"'),delivery:{kind:'message',text},authorship:{supportMode:'optional_example',approachEvidence:[],requestEvidence:[{message:0,quote:'Pode me dar uma abertura?'}],examplePurpose:'Oferecer uma abertura breve.'}};
+ assert.throws(()=>validateProgress(candidate,profile,[{role:'user',content:'Pode me dar uma abertura?'}],{number:1}),/AUTONOMY_CONSTRAINT_FAILED/);
+});
+
+test('Apresentei na voz do assistente ainda exige historico proprio',()=>{
+ const candidate=shape('Eu apresentei uma abertura antes.');
+ assert.throws(()=>validateProgress(candidate,profile,[{role:'user',content:'Quero preparar uma conversa.'}],{number:1}),/UNSUPPORTED_FACT/);
+});
+
 test('Caminho real carrega um único escopo operacional derivado do Feedback canônico',()=>{
  const scope=feedbackOperationalScope();
  assert.equal(scope.canonical.id,'FBK');
