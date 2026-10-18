@@ -48,8 +48,23 @@ function resolveUserEvidence(reference,messages){
   normalization:changed?{raw:{message:reference.message,quote:reference.quote},resolved:{message,quote},sourceRole:'user',sourceConversationIndex:users[message].conversationIndex,reason:quote!==reference.quote?'presentation_and_reference':'reference_only'}:null,
  };
 }
-function deduplicateDelivery(parts,delivery){
+function deduplicateDelivery(parts,delivery,options={}){
  if(!delivery)return {parts:[...parts],append:false,normalizations:[]};
+ if(options.separate===true){
+  const normalizations=[];
+  const clean=parts.map((part,i)=>{
+   const matches=locatePresentation(part,delivery);
+   for(const match of matches.reverse()){
+    let {start,end}=match;
+    const pairs={'"':'"','“':'”','«':'»','‘':'’'};
+    if(start>0&&pairs[part[start-1]]===part[end]){start--;end++;}
+    part=part.slice(0,start)+part.slice(end);
+    normalizations.push({kind:'delivery_moved_to_separate_field',part:i});
+   }
+   return part.trim();
+  });
+  return {parts:clean,append:true,normalizations};
+ }
  let seen=false;
  const normalizations=[];
  const clean=parts.map((part,i)=>{
