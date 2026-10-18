@@ -102,7 +102,9 @@
         "required": [
           "supportMode",
           "approachEvidence",
-          "examplePurpose"
+          "examplePurpose",
+          "requestEvidence",
+          "basisEvidence"
         ],
         "properties": {
           "requestIntent": {
@@ -176,7 +178,7 @@
                 }
               }
             },
-            "description": "Pedido explícito do líder por exemplo ou sugestão de abertura; necessário sem abordagem própria."
+            "description": "Pedido explícito do líder por exemplo ou sugestão de abertura; necessário sem abordagem própria. Sempre inclua este campo: [] quando não houver pedido; com exemplo pedido pelo líder, cite o pedido literal."
           },
           "basisEvidence": {
             "type": "array",
@@ -202,7 +204,7 @@
                 }
               }
             },
-            "description": "Fatos concretos relatados pelo líder que apoiam o exemplo solicitado; não mera intenção ou pergunta."
+            "description": "Fatos concretos relatados pelo líder que apoiam o exemplo solicitado; não mera intenção ou pergunta. Sempre inclua este campo: [] sem exemplo; com delivery, cite pelo menos um fato observável já relatado que fundamenta a fala."
           }
         }
       },
