@@ -46,12 +46,12 @@ function validateProgress(value, profile, messages, turn = {}) {
   }
   const rawParts = terminal ? [value.closingSummary.trim(), value.nextStep.trim()] : [value.text.trim()];
   const deliveryText = deliveryKind ? value.delivery.text.trim() : null;
-  const deduplicated = deduplicateDelivery(rawParts, deliveryText);
+  const deduplicated = deduplicateDelivery(rawParts, deliveryText, {separate:profile.id==='FBK'});
   const visibleParts = deduplicated.parts;
   let authorship = null;
   if (['FBK','OTO'].includes(profile.id)) {
     const checked = validateFeedbackAuthorship(value, messages, [...visibleParts, ...(deliveryText ? [deliveryText] : [])]);
-    if(profile.id==='FBK')validateExampleComposition(value,rawParts);
+    if(profile.id==='FBK')validateExampleComposition(value,visibleParts);
     authorship = checked.authorship; referenceNormalizations.push(...checked.normalizations);
     if (deliveryText && !deduplicated.append && !visibleParts.some(p => /\b(?:opcional|opção|exemplo)\b/i.test(p))) throw Error('AUTONOMY_CONSTRAINT_FAILED');
   }
