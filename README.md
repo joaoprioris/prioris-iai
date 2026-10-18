@@ -8,7 +8,7 @@ Atualizado em **18/10/2026**. Repositório privado do proprietário.
 
 - `main`: implementação histórica; não é um app aprovado pelo proprietário.
 - [PR2 / branch de desenvolvimento](https://github.com/joaoprioris/prioris-iai/pull/2): execução local e alterações de Feedback, ainda em rascunho, sem merge ou deploy.
-- [Fontes metodológicas](docs/restart/README.md#fontes-para-reconstruir): transcrições de 32 documentos do proprietário, incluindo fundamentos, agentes, momentos, Health Monitor, Risk Engine e IEC.
+- [Fontes metodológicas](docs/restart/README.md#3-fontes-para-reconstruir): transcrições de 32 documentos do proprietário, incluindo fundamentos, agentes, momentos, Health Monitor, Risk Engine e IEC.
 - A estabilidade conversacional **não foi demonstrada**. O registro SED ponta a ponta **não foi entregue**. Testes técnicos e relatos históricos não alteram esse estado.
 
 O pedido vigente é simplificar: estabilizar a conversa de **um agente, Feedback**, e depois integrar o SED. A dívida cultural já deve orientar a resposta como lente invisível. O produto completo continua sendo o ecossistema descrito na metodologia.
