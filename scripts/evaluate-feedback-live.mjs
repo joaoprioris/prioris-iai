@@ -18,7 +18,9 @@ if(process.argv.includes('--list')){
 }
 const at=process.argv.indexOf('--scenario');
 if(at<0||!allCases.some(s=>s.id===process.argv[at+1]))throw Error('SELECT_ONE_SCENARIO_WITH_--scenario');
-const scenario=allCases.find(s=>s.id===process.argv[at+1]);
+const requestOnly=process.argv.includes('--request-only');
+const originalScenario=allCases.find(s=>s.id===process.argv[at+1]);
+const scenario=requestOnly?{...originalScenario,userTurns:[originalScenario.userTurns.slice(0,2).join('\n\n')]}:originalScenario;
 if(!process.env.ANTHROPIC_API_KEY&&!process.argv.includes('--check-pipeline'))throw Error('ANTHROPIC_API_KEY_REQUIRED');
 if(process.env.PRIORIS_AI_PROVIDER!=='anthropic')throw Error('DIRECT_ANTHROPIC_REQUIRED');
 const statePath=process.env.IAI_EVAL_STATE||resolve(root,'../api-budget.json');
@@ -95,7 +97,7 @@ const service=createConversationService({repository,...providers,agentPrompts:Ob
 session={status:'active',exchangeCount:0,context:{}};
 if(process.argv.includes('--check-pipeline')){output({event:'pipeline_ready',modelCalls:0,provider:'actual createModelProviders',service:'actual createConversationService'});process.exit(0);}
 let passed=true,lastText='';
-output({event:'start',scenario:scenario.id,origin:scenario.origin,references:scenario.references,baseHead:'79b0a57b7359b8a90324988bf7d444fd2e79d694',sourceHash,pipeline:'production service + providers; isolated memory storage',capUSD:cap});
+output({event:'start',scenario:scenario.id,origin:scenario.origin,references:scenario.references,baseHead:'79b0a57b7359b8a90324988bf7d444fd2e79d694',sourceHash,pipeline:'production service + providers; isolated memory storage',evaluationMode:requestOnly?'single-request diagnostic':'full conversation',capUSD:cap});
 for(let index=0;index<scenario.userTurns.length;index++){
  activeTurn=index+1;lastGeneration=null;lastValidation=null;
  let content=scenario.userTurns[index];
@@ -108,12 +110,12 @@ for(let index=0;index<scenario.userTurns.length;index++){
   lastText=result.text;
   const flags=[];
   if(index<scenario.userTurns.length-1&&result.status==='closed')flags.push('PREMATURE_CLOSE');
-  if(index===scenario.userTurns.length-1&&result.status!=='closed')flags.push('EXPLICIT_CLOSE_IGNORED');
+  if(!requestOnly&&index===scenario.userTurns.length-1&&result.status!=='closed')flags.push('EXPLICIT_CLOSE_IGNORED');
   if(lastValidation?.code&&lastValidation.code!=='ACCEPTED')flags.push('RECOVERY_NOT_MODEL_SUCCESS');
   if(/^(?:Leitura(?: do momento)?|Tensão(?: central)?|Direcionamento(?: prático)?):?/imu.test(result.text))flags.push('MECHANICAL_HEADINGS');
   output({event:'assistant',turn:activeTurn,text:result.text,status:result.status,route:result.route,flags});
   if(flags.length){passed=false;break;}
  }catch(error){passed=false;output({event:'turn_stopped',turn:activeTurn,error:redact(error.message),validation:lastValidation?.code,generationStage:lastGeneration?.input?.stage});break;}
 }
-output({event:'summary',scenario:scenario.id,completed:passed,modelCalls:state.calls.length-initialCallCount,budget:budget.snapshot(),acceptance:'requires human review of the transcript; no claim of HTTP/login/database/SED validation'});
+output({event:'summary',scenario:scenario.id,completed:passed,evaluationMode:requestOnly?'single-request diagnostic':'full conversation',modelCalls:state.calls.length-initialCallCount,budget:budget.snapshot(),acceptance:'requires human review of the transcript; no claim of HTTP/login/database/SED validation'});
 process.exitCode=passed?0:1;
