@@ -70,7 +70,7 @@ function validateFeedbackAuthorship(value,messages,parts){
  const explicit=!withdrawn&&requested.some(r=>{const q=r.evidence.quote,source=users[r.evidence.message]?.content??'',at=source.indexOf(q),prefix=source.slice(0,at).split(/[.!?\n]/).at(-1)??'';return asks(q)&&!negative(prefix+q)&&!reported(prefix+q)&&!/\b(?:n[aã]o|nunca)\b[^.!?\n]{0,35}\b(?:ajud\w*|formul\w*|elabor\w*|frase inicial)\b/i.test(prefix+q)&&!/^\s*(?:ele|ela|meu chefe|minha chefe|minh[oa] colega)\b/i.test(prefix+q);});
  const factual=grounded.some(r=>!r.evidence.quote.includes('?')&&!/^(?:quero|preciso|gostaria|tenho que)\b/i.test(r.evidence.quote.trim()));
  const requestedSupport=explicit&&factual;
- const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote));
+ const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*|tentaria(?=\s*:))\b[\s\S]{12,}/i.test(r.evidence.quote));
  const hasExample=Boolean(value.delivery?.text?.trim());
  if(hasExample&&withdrawn)reject('EXAMPLE_WITHDRAWN');
  if(a.supportMode==='review'&&!resolved.length)reject('REVIEW_WITHOUT_APPROACH');
