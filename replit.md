@@ -93,9 +93,9 @@ PR2 permanece aberto, sem merge ou deploy. A API própria foi conectada por cred
 
 Causas reproduzidas: (1) basisEvidence era opcional no esquema, mas obrigatório para a abertura no validador; (2) uma cópia integral do exemplo em text causava DUPLICATE_DELIVERY e nova geração; (3) “apresentei” na fala proposta do líder era confundido com alegação de histórico do assistente.
 
-Correções: arrays de evidência obrigatórios no esquema; normalização exata da cópia integral para campo separado, sem reescrita semântica; distinção explícita de autoria no verificador de histórico. Base factual e demais limites permanecem verificados. Escopo orienta responder ao pedido atual e preservar o objetivo. Metodologia de AGENTES não foi alterada.
+Correções: arrays de evidência obrigatórios no esquema; normalização exata da cópia integral em parágrafo próprio para campo separado; citações embutidas em comentários continuam sujeitas à recusa, sem remoção silenciosa; distinção explícita de autoria no verificador de histórico. Base factual e demais limites permanecem verificados. Escopo orienta responder ao pedido atual e preservar o objetivo. Metodologia de AGENTES não foi alterada.
 
-Verificação: 15/15 regressões passaram; o caso capturado falhou antes com DUPLICATE_DELIVERY e depois com UNSUPPORTED_FACT, demonstrando também a confusão de autoria. Compilação do executor passou. O executor reutiliza createConversationService e createModelProviders reais, classificação, geração, validação e reparo. Armazenamento em memória: não valida HTTP/login/PostgreSQL/SED.
+Verificação: 16/16 regressões passaram; o caso capturado falhou antes com DUPLICATE_DELIVERY e depois com UNSUPPORTED_FACT, demonstrando também a confusão de autoria. Compilação do executor passou. O executor reutiliza createConversationService e createModelProviders reais, classificação, geração, validação e reparo. Armazenamento em memória: não valida HTTP/login/PostgreSQL/SED.
 
 Consumo acumulado estimado das chamadas registradas: US$0.871577; 28 chamadas ao modelo. A contagem prévia de tokens permite reserva conservadora dentro de US$1 acumulado. Sem retry após uso incerto. Isso não representa extrato de cobrança.
 
