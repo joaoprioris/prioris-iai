@@ -36,6 +36,14 @@ test('Apresentei na voz do assistente ainda exige historico proprio',()=>{
  assert.throws(()=>validateProgress(candidate,profile,[{role:'user',content:'Quero preparar uma conversa.'}],{number:1}),/UNSUPPORTED_FACT/);
 });
 
+test('Citacao do exemplo dentro de comentario nao e removida silenciosamente',()=>{
+ const fact='Ela me interrompeu duas vezes na reunião.';
+ const request='Pode me dar uma abertura?';
+ const example='Quero conversar sobre as duas interrupções e ouvir sua leitura.';
+ const candidate={...shape('Não use a frase "'+example+'" sem ajustar ao contexto.'),delivery:{kind:'message',text:example},authorship:{supportMode:'optional_example',approachEvidence:[],requestEvidence:[{message:1,quote:request}],basisEvidence:[{message:0,quote:fact}],examplePurpose:'Oferecer uma abertura breve baseada no relato.'}};
+ assert.throws(()=>validateProgress(candidate,profile,[{role:'user',content:fact},{role:'user',content:request}],{number:2}),/DUPLICATE_DELIVERY/);
+});
+
 test('Caminho real carrega um único escopo operacional derivado do Feedback canônico',()=>{
  const scope=feedbackOperationalScope();
  assert.equal(scope.canonical.id,'FBK');
