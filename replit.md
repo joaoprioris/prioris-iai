@@ -152,3 +152,48 @@ Referência da versão executada (SHA-256 dos fontes): 5e17ca4ed9bfd9f6d6facb372
 A abertura final foi aceita sem reparo, em duas chamadas (classificação e resposta). Nenhuma conversa integral da revisão final foi aprovada. Próximo passo: completar uma conversa adaptativa nessa revisão, incluindo pedido de ajuste, correção quando pertinente e encerramento; depois verificar casos distintos da biblioteca. Não ampliar ou hospedar como produto validado. O Engenheiro IAí respondeu limite de uso na última tentativa.
 
 Comandos: `PRIORIS_AI_PROVIDER=anthropic` e chave apenas no ambiente do processo; `node scripts/evaluate-feedback-live.mjs --scenario fbk-peer-interruption-correction` para conversa completa; acrescente `--request-only` para diagnóstico de uma abertura; `--check-pipeline` verifica imports sem chamada; `--list` inventaria cenários. IAI_EVAL_STATE aponta para uso local sem chave. Estado e código canônicos estão neste PR; compilados e registros locais são temporários.
+
+
+## Conversa concluída e avaliada — 18/10/2026
+
+Execução com o serviço e os provedores reais do app e API Anthropic; armazenamento isolado em memória. Três trocas, encerramento `closed`. Usuário simulado; não é aprovação do proprietário nem validação da interface publicada. Avaliação retrospectiva separada, baseada na transcrição e nas definições canônicas: satisfação do usuário simulado e aderência metodológica satisfatórias, sem falhas materiais identificadas. A avaliação responsável por esta execução também considerou o caso satisfatório: revisão de julgamento de caráter, preservação da elaboração do líder, formulação adaptável e resposta à objeção hipotética sem perder o objetivo.
+
+**Usuário simulado — troca 1**
+
+Preciso preparar uma conversa com um analista da equipe. Nas duas últimas reuniões de projeto, ele me interrompeu enquanto eu explicava a proposta. Eu costumo deixar passar para não constrangê-lo, mas quero combinar que cada um termine sua fala. Também quero ouvir o que ele estava tentando trazer. Minha ideia era começar dizendo que ele precisa aprender a respeitar as pessoas. Como você avalia essa abertura?
+
+**IAí — troca 1**
+
+Você quer combinar que cada um termine sua fala e também entender o que ele estava trazendo — dois movimentos legítimos. A abertura "você precisa aprender a respeitar as pessoas" leva o peso para um julgamento de caráter, não para o fato observável. Ela provavelmente gera defesa antes de você chegar ao combinado ou à escuta que planejou. Qual outra forma de abrir preservaria o fato — as interrupções — e o que você quer construir a partir daqui?
+
+**Usuário simulado — troca 2**
+
+O fato é esse que já contei: nas duas reuniões ele começou a falar enquanto eu ainda explicava a proposta. Não sei a intenção dele. Entendi o risco da minha frase. Eu tentaria: nas duas últimas reuniões você me interrompeu e eu queria entender o que aconteceu. Pode me ajudar a deixar essa abertura natural e incluir meu pedido de que a gente termine a fala?
+
+**IAí — troca 2**
+
+Sua elaboração já está mais ancorada no fato e abre espaço para ele responder. Para incluir o combinado sem soar como cobrança antes de ouvir, você pode adicionar o pedido logo depois da escuta, mantendo o movimento de entender e alinhar na mesma conversa.
+
+Exemplo opcional para revisar sua abordagem:
+“Nas duas últimas reuniões você começou a falar enquanto eu ainda explicava — queria entender o que estava acontecendo. E depois a gente combina de cada um terminar a fala.”
+
+**Usuário simulado — troca 3**
+
+Essa abertura já ficou usável. Minha preocupação agora é ele dizer que eu também interrompo. Isso às vezes acontece mesmo. Quero reconhecer minha parte sem abandonar o pedido e sem transformar a conversa numa disputa. Como posso me posicionar se isso acontecer?
+
+**IAí — troca 3**
+
+Você substituiu uma abertura que julgava caráter por uma que ancora no fato observável e preserva escuta e combinado. Construiu uma formulação utilizável e examinou como reconhecer sua parte sem abandonar o pedido se ele trouxer simetria. A conversa está preparada para abordar o comportamento recorrente e construir um acordo bilateral, sem disputa.
+
+Conduza a conversa com a abertura que você já tem, ouça a resposta dele e use o combinado para os dois se ele trouxer que você também interrompe.
+
+Exemplo opcional para revisar sua abordagem:
+“Sim, também acontece comigo — e é por isso que quero combinar isso para nós dois.”
+
+Podemos retomar o próximo passo em uma nova conversa.
+
+**Avaliação retrospectiva do usuário simulado**
+
+Saí com uma abertura clara, ancorada no fato e não no julgamento. Entendi como incluir meu pedido de forma natural. E quando questionei um cenário de defesa (ele dizer que eu também interrompo), recebi uma resposta prática que me posiciona sem transformar isso em disputa. Posso conduzir essa conversa agora.
+
+Limite: resultado de um caso de preparação de feedback, não prova de todos os agentes ou situações. A conversa futura e suas objeções permaneceram em Feedback; proposta literal do líder reconhecida como elaboração própria. Sem merge ou implantação.
