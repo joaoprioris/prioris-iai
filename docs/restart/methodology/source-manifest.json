@@ -1,0 +1,372 @@
+{
+  "date": "2026-10-18",
+  "purpose": "Developer handoff: source transcription, not deployed runtime",
+  "original_docx_included": true,
+  "source_count": 32,
+  "files": [
+    {
+      "group": "fundamentos",
+      "ref": "F01",
+      "source": "ARQUITETURA E LÓGICA DO SISTEMA IAí.docx",
+      "sha256": "03798c2e60c438ee26d77455fb3890c1c8b8a7efb385f3de0114c52d7c4f9c3e",
+      "bytes": 37603,
+      "paragraphs": 599,
+      "tables": 8,
+      "drawings": 0,
+      "legacy_pictures": 108
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F02",
+      "source": "DEFINIÇÃO_OFICIAL_DÍVIDA_CULTURAL.docx",
+      "sha256": "8f2135934ea17a8b8e2b721f76403280ae9be57214e94f9bfd052ade340433c8",
+      "bytes": 20440,
+      "paragraphs": 151,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 27
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F03",
+      "source": "DOSSIE_METODOLOGICO.docx",
+      "sha256": "d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb07570b",
+      "bytes": 2223895,
+      "paragraphs": 405,
+      "tables": 14,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F04",
+      "source": "DOSSIÊ CONSOLIDADO — SISTEMA IAí - PRIORIS.docx",
+      "sha256": "07fc19466268537b1afd54a3211275e2672336ad1370d2c9f0cf14d12d4a26e7",
+      "bytes": 25806,
+      "paragraphs": 319,
+      "tables": 1,
+      "drawings": 0,
+      "legacy_pictures": 23
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F05",
+      "source": "FRASES OFICIAIS - MISSÃO, VISÃO, PROPÓSITO ETC.docx",
+      "sha256": "e8ded9035e57fc323c179e2cde5b972057d03197d0cbd3b782b9b0da6b53042a",
+      "bytes": 18769,
+      "paragraphs": 99,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 12
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F06",
+      "source": "INTERAÇÃO USER x IAí.docx",
+      "sha256": "eebd3eeafe606b4ccfbe29faa117c07e908979735b2b0802fcfa9e55169b8843",
+      "bytes": 22252,
+      "paragraphs": 185,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 36
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F07",
+      "source": "MANUAL_OFICIAL_AUDITORIA.docx",
+      "sha256": "5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c749e",
+      "bytes": 2225162,
+      "paragraphs": 406,
+      "tables": 13,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F08",
+      "source": "METODOLOGIA_COMPLETA - PRIORIS.docx",
+      "sha256": "492618590fa8e91e67e7e8f893558be223d5aaf0ae714c48d1fed312ea97f2fa",
+      "bytes": 2229675,
+      "paragraphs": 403,
+      "tables": 16,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F09",
+      "source": "METODOLOGIA_DIVIDA_CULTURAL.docx",
+      "sha256": "dc6af7cd5bb671adbec12c3464fa801107a9c09d29017e2b29638561140107c1",
+      "bytes": 2235673,
+      "paragraphs": 790,
+      "tables": 13,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F10",
+      "source": "ONE_PAGER_PRIORIS.docx",
+      "sha256": "2cbc8bd2e76c6bea3af887d34a91bb776b04002f57b3e25c7c9104c9e19f9a00",
+      "bytes": 2207840,
+      "paragraphs": 21,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F11",
+      "source": "PRINCÍPIOS DE ATUAÇÃO.docx",
+      "sha256": "b24785d424d99c6af7059b63d638d7e8bdb312560c5bde44638aecfe2daf8156",
+      "bytes": 16848,
+      "paragraphs": 46,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 7
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F12",
+      "source": "ROTEIRO - APRESENTAÇÃO Prioris.docx",
+      "sha256": "d6a9d23b57c0b0fe42ccbea4be1134ecf536002114cba7ef140e953dbe2c2435",
+      "bytes": 31957,
+      "paragraphs": 148,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 11
+    },
+    {
+      "group": "fundamentos",
+      "ref": "F13",
+      "source": "SIGNIFICADO DO NOME PRIORIS - Nova versão da narrativa.docx",
+      "sha256": "b1ced0cf0dcda4893359e3fe9ba4f7a1a1985c7b085a0552d38b78a8317a9cb1",
+      "bytes": 17945,
+      "paragraphs": 87,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 3
+    },
+    {
+      "group": "agentes",
+      "ref": "F01",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 1 — Mentor Estratégico - Definição.docx",
+      "sha256": "a7aaeff1c281a726b652acc6e2c630189e25345d3ee63b66028e4f0c01baaae9",
+      "bytes": 15750,
+      "paragraphs": 76,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 8
+    },
+    {
+      "group": "agentes",
+      "ref": "F02",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 2 — Contencao  Terapia de Bolso - Definição.docx",
+      "sha256": "5ff0cf0e468c76a2cf5e14258298a579ded38c7c00f4066874cdf5a228b532ac",
+      "bytes": 15953,
+      "paragraphs": 77,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 13
+    },
+    {
+      "group": "agentes",
+      "ref": "F03",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 3 — Perfil & Padrões - Definição.docx",
+      "sha256": "a6e28712b5ca2fb8c7e6f5cbe9c7e2f47f49feea5bdc94e026b9055590ca5f61",
+      "bytes": 15816,
+      "paragraphs": 77,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 13
+    },
+    {
+      "group": "agentes",
+      "ref": "F04",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 4 — Impacto Humano & Relações - Definição.docx",
+      "sha256": "6530c6ee997b91a1cdbcb21bbce6c48087af6d881c74aafdaf4b24f435ddcfa3",
+      "bytes": 15675,
+      "paragraphs": 74,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 8
+    },
+    {
+      "group": "agentes",
+      "ref": "F05",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 5 — Feedback Estruturado - Definição.docx",
+      "sha256": "f57f8cb11cba95cf83ca146ea4aee24c09b63a0df781378c57ba6f0f454d15f1",
+      "bytes": 15668,
+      "paragraphs": 73,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 8
+    },
+    {
+      "group": "agentes",
+      "ref": "F06",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 6 — 1-1 de Decisão - Definição.docx",
+      "sha256": "ff041e14ad07fb7ced94e015c136f7638bfb51659d5a8c484dc96228d2aab4c2",
+      "bytes": 16227,
+      "paragraphs": 81,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 13
+    },
+    {
+      "group": "agentes",
+      "ref": "F07",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 7 — Análise de Crises - Definição.docx",
+      "sha256": "90db520d17903e1f9d9864afa2980bbd113e68181fc912a5ce930b6d7f7e4e87",
+      "bytes": 16587,
+      "paragraphs": 80,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 13
+    },
+    {
+      "group": "agentes",
+      "ref": "F08",
+      "source": "AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 8 — Evolução Contínua - Definição.docx",
+      "sha256": "e6238a2df47a84e9e56dc37c0a618bb04216ea3b9a3fc70fbf4a6bbd8ad10331",
+      "bytes": 18891,
+      "paragraphs": 99,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 13
+    },
+    {
+      "group": "agentes",
+      "ref": "F09",
+      "source": "AGENTES/CONVERSACIONAIS/DOCUMENTO CANÔNICO AGENTES GERAL.docx",
+      "sha256": "9212979ae46c9a21e6154806558dc43fd9abd18cdd4e4b05287458f8740a1a6c",
+      "bytes": 23905,
+      "paragraphs": 218,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 20
+    },
+    {
+      "group": "agentes",
+      "ref": "F10",
+      "source": "AGENTES/CONVERSACIONAIS/PROMPT - MOMENTOS DO LÍDER/Agente 3 — Perfil & Padrões v5.docx",
+      "sha256": "664457f7138d556e17c452d88675b0e702a2afc80b8fc11b802a3e2ae94c6377",
+      "bytes": 19377,
+      "paragraphs": 301,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "agentes",
+      "ref": "F11",
+      "source": "AGENTES/CONVERSACIONAIS/PROMPT - MOMENTOS DO LÍDER/Agente 4 — Impacto Humano & Relações.docx",
+      "sha256": "3f80e3f30601ed6c3312eb2e721714975c6d634ebd52b29d511f9586a31761d9",
+      "bytes": 20191,
+      "paragraphs": 287,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "agentes",
+      "ref": "F12",
+      "source": "AGENTES/CONVERSACIONAIS/PROMPT - MOMENTOS DO LÍDER/Agente 5 — Feedback Estruturado.docx",
+      "sha256": "426c3d520c44b76fd350763f55de000582693e72a4d0f7e06e8e86190d9cf784",
+      "bytes": 20241,
+      "paragraphs": 287,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "agentes",
+      "ref": "F13",
+      "source": "AGENTES/CONVERSACIONAIS/PROMPT - MOMENTOS DO LÍDER/Agente 6 — 11 de Decisão v2.docx",
+      "sha256": "758124a08b11d48f83bb0bcce749b5e945c3c44fe7c42696c717c98c332e4fa1",
+      "bytes": 20709,
+      "paragraphs": 287,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "agentes",
+      "ref": "F14",
+      "source": "AGENTES/CONVERSACIONAIS/PROMPT - MOMENTOS DO LÍDER/Agente 7 — Análise de Crises - Momentos do líder.docx",
+      "sha256": "a66e97747cd9a870fb33c970264af0eec5c6e8c8db880b64c7f6b19e2ad02393",
+      "bytes": 32644,
+      "paragraphs": 524,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 104
+    },
+    {
+      "group": "agentes",
+      "ref": "F15",
+      "source": "AGENTES/CONVERSACIONAIS/PROMPT - MOMENTOS DO LÍDER/Guia de Conversão de Momentos em Experiência Real do IAí.docx",
+      "sha256": "82f7bc776a6d354d578dc3ac14982f0ba5dd78968288dd8fd801cb7b1c9bf239",
+      "bytes": 23496,
+      "paragraphs": 247,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 47
+    },
+    {
+      "group": "agentes",
+      "ref": "F16",
+      "source": "AGENTES/CONVERSACIONAIS/PROMPT - MOMENTOS DO LÍDER/MOMENTOS DE ATIVAÇÃO DO IAí — CORRIGIDO.docx",
+      "sha256": "c5694874bd3c6724943998657f0db3bd5eee6b7246bc9b36157b56096ae5c707",
+      "bytes": 25219,
+      "paragraphs": 307,
+      "tables": 0,
+      "drawings": 0,
+      "legacy_pictures": 52
+    },
+    {
+      "group": "agentes",
+      "ref": "F17",
+      "source": "AGENTES/SISTÊMICO/CULTURAL_RISK_ENGINE.docx",
+      "sha256": "8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6fa",
+      "bytes": 2224206,
+      "paragraphs": 344,
+      "tables": 13,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "agentes",
+      "ref": "F18",
+      "source": "AGENTES/SISTÊMICO/HEALTH_MONITOR.docx",
+      "sha256": "5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc96630",
+      "bytes": 2226320,
+      "paragraphs": 430,
+      "tables": 15,
+      "drawings": 0,
+      "legacy_pictures": 0
+    },
+    {
+      "group": "agentes",
+      "ref": "F19",
+      "source": "AGENTES/SISTÊMICO/MODELO_IEC.docx",
+      "sha256": "cb5983043a250c1ca18bd560db9b1943515d83d2beaa972d060611189f6b8304",
+      "bytes": 2183286,
+      "paragraphs": 407,
+      "tables": 18,
+      "drawings": 0,
+      "legacy_pictures": 0
+    }
+  ],
+  "limitations": [
+    "DOCX layout, images, headers and footers are not rendered.",
+    "References P identify top-level body paragraphs; table cells use T/R/C.",
+    "Body text is preserved; table cell fill metadata preserves explicit color-based matrix notation.",
+    "No generated text is promoted to source authority."
+  ],
+  "original_archive": {
+    "path": "fontes-originais.tar.xz",
+    "sha256": "c85cfa6c85ea6feb4aa46f9b1d3adb354cf80415329f77445d87145f74eb8feb",
+    "bytes": 2770716,
+    "files": 32
+  }
+}
