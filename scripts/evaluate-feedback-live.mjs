@@ -8,7 +8,7 @@ const apiRequire=createRequire(new URL('../artifacts/api-server/package.json',im
 const {feedbackEvaluationCases}=require('../artifacts/api-server/src/lib/feedback-evaluation-cases.cjs');
 const {feedbackReferenceInventory,resolveContract}=require('../artifacts/api-server/src/lib/ex04-reference.cjs');
 const {createConversationService}=require('../artifacts/api-server/src/lib/conversation-service.cjs');
-const {createPilotBudget}=require('../artifacts/api-server/src/lib/pilot-budget.cjs');
+const {PRICES}=require('../artifacts/api-server/src/lib/pilot-budget.cjs');
 const root=fileURLToPath(new URL('../',import.meta.url));
 const allCases=feedbackEvaluationCases();
 const output=entry=>console.log(JSON.stringify(entry));
@@ -25,8 +25,10 @@ const statePath=process.env.IAI_EVAL_STATE||resolve(root,'../api-budget.json');
 const cap=Number(process.env.IAI_EVAL_MAX_USD||1);
 if(!(cap>0&&cap<=1))throw Error('INVALID_EVALUATION_CAP');
 const state=existsSync(statePath)?JSON.parse(readFileSync(statePath,'utf8')):{};
+const initialCallCount=state.calls?.length||0;
 const save=()=>writeFileSync(statePath,JSON.stringify(state,null,2));
-const budget=createPilotBudget(state,save);
+state.charged??=0;state.calls??=[];
+const budget={snapshot:()=>({capUSD:state.cap/1e6,estimatedUSD:state.charged/1e6,remainingUSD:Math.max(0,state.cap-state.charged)/1e6,calls:state.calls.length,blocked:state.blocked,estimated:true})};
 state.cap=Math.floor(cap*1e6);
 if(state.calls?.some(c=>c.status!=='accounted'))throw Error('UNCONFIRMED_USAGE_REQUIRES_REVIEW');
 state.blocked=false;state.blockReason=null;save();
@@ -51,14 +53,34 @@ const client={messages:{create:async payload=>{
  const call=++calls;
  output({event:'call_start',turn:activeTurn,call,model:payload.model,max_tokens:payload.max_tokens});
  try{
-  const reply=await budget.call(payload,p=>rawClient.messages.create(p));
+  const price=PRICES[payload.model];
+  if(!price||payload.max_tokens>price.maxOutput||state.blocked)throw Error('PILOT_BUDGET_BLOCKED');
+  // The provider's free token counter avoids stopping a small real bill on a
+  // byte-based reservation. Keep framing margin and 2x input-price reserve.
+  const count=await rawClient.messages.countTokens({model:payload.model,system:payload.system,messages:payload.messages,tools:payload.tools,tool_choice:payload.tool_choice});
+  if(!Number.isSafeInteger(count.input_tokens)||count.input_tokens<0)throw Error('TOKEN_COUNT_UNVERIFIED');
+  const inputBound=Math.ceil(count.input_tokens*1.05)+8192;
+  const reserved=inputBound*price.input*2+payload.max_tokens*price.output;
+  if(state.charged+reserved>state.cap)throw Error('PILOT_BUDGET_LIMIT');
+  const entry={model:payload.model,inputBound,maxOutput:payload.max_tokens,reservedMicroUSD:reserved,status:'reserved'};
+  state.charged+=reserved;state.calls.push(entry);save();
+  let reply;
+  try{reply=await rawClient.messages.create(payload);}catch(error){entry.status='uncertain-held';state.blocked=true;save();throw error;}
+  const u=reply.usage;
+  const numbers=['input_tokens','output_tokens','cache_creation_input_tokens','cache_read_input_tokens'].map(k=>u?.[k]??(k.startsWith('cache_')?0:NaN));
+  if(numbers.some(n=>!Number.isSafeInteger(n)||n<0)){entry.status='unknown-usage-held';state.blocked=true;save();throw Error('PILOT_USAGE_UNVERIFIED');}
+  const [input,usedOutput,cacheWrite,cacheRead]=numbers;
+  const estimated=input*price.input+usedOutput*price.output+cacheWrite*price.input*2+cacheRead*price.input;
+  entry.usage={input,output:usedOutput,cacheWrite,cacheRead};entry.estimatedMicroUSD=estimated;
+  if(input+cacheWrite+cacheRead>inputBound||usedOutput>payload.max_tokens||estimated>reserved){entry.status='bound-exceeded';state.blocked=true;save();throw Error('PILOT_USAGE_UNVERIFIED');}
+  state.charged+=estimated-reserved;entry.status='accounted';save();
   output({event:'usage',turn:activeTurn,call,model:payload.model,usage:reply.usage,budget:budget.snapshot()});
   return reply;
  }catch(error){output({event:'call_stopped',turn:activeTurn,call,error:redact(error.message),budget:budget.snapshot()});throw error;}
 }}};
 const providers=createModelProviders({client,
- onGenerationObservation:entry=>{lastGeneration=entry;output({event:'generation',turn:activeTurn,attempt:entry.attempt,agent:entry.agent,text:entry.input?.text,delivery:entry.input?.delivery,stage:entry.input?.stage});},
- onValidationObservation:entry=>{lastValidation=entry;output({event:'validation',turn:activeTurn,attempt:entry.attempt,phase:entry.phase,code:entry.code});},
+ onGenerationObservation:entry=>{lastGeneration=entry;output({event:'generation',turn:activeTurn,attempt:entry.attempt,agent:entry.agent,text:entry.input?.text,delivery:entry.input?.delivery,authorship:entry.input?.authorship,stage:entry.input?.stage});},
+ onValidationObservation:entry=>{lastValidation=entry;output({event:'validation',turn:activeTurn,attempt:entry.attempt,phase:entry.phase,code:entry.code,reason:entry.reason});},
 });
 const contract=resolveContract(require('../artifacts/api-server/src/lib/agent-contract.json'));
 const repository={
@@ -73,7 +95,7 @@ const service=createConversationService({repository,...providers,agentPrompts:Ob
 session={status:'active',exchangeCount:0,context:{}};
 if(process.argv.includes('--check-pipeline')){output({event:'pipeline_ready',modelCalls:0,provider:'actual createModelProviders',service:'actual createConversationService'});process.exit(0);}
 let passed=true,lastText='';
-output({event:'start',scenario:scenario.id,origin:scenario.origin,references:scenario.references,sourceHead:'79b0a57b7359b8a90324988bf7d444fd2e79d694',pipeline:'production service + providers; isolated memory storage',capUSD:cap});
+output({event:'start',scenario:scenario.id,origin:scenario.origin,references:scenario.references,baseHead:'79b0a57b7359b8a90324988bf7d444fd2e79d694',sourceHash,pipeline:'production service + providers; isolated memory storage',capUSD:cap});
 for(let index=0;index<scenario.userTurns.length;index++){
  activeTurn=index+1;lastGeneration=null;lastValidation=null;
  let content=scenario.userTurns[index];
@@ -93,5 +115,5 @@ for(let index=0;index<scenario.userTurns.length;index++){
   if(flags.length){passed=false;break;}
  }catch(error){passed=false;output({event:'turn_stopped',turn:activeTurn,error:redact(error.message),validation:lastValidation?.code,generationStage:lastGeneration?.input?.stage});break;}
 }
-output({event:'summary',scenario:scenario.id,completed:passed,modelCalls:calls,budget:budget.snapshot(),acceptance:'requires human review of the transcript; no claim of HTTP/login/database/SED validation'});
+output({event:'summary',scenario:scenario.id,completed:passed,modelCalls:state.calls.length-initialCallCount,budget:budget.snapshot(),acceptance:'requires human review of the transcript; no claim of HTTP/login/database/SED validation'});
 process.exitCode=passed?0:1;
