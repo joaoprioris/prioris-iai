@@ -7,7 +7,7 @@ Registro para retomar sem perder contexto. Branch: `claude/funny-allen-6z18ab`. 
 - Os 80 momentos do arquivo "Agente 5 Feedback Estruturado" são do agente de Feedback. Contenção entra como lente leve. O MIC já está na orientação. Lentes de antifragilidade ficam para depois.
 - Não gravar SED enquanto as conversas não estiverem boas, nem SED provisório.
 - Nunca usar as palavras de tratamento clínico ou de profissional de saúde mental em texto de produto.
-- Teto TOTAL de US$ 5 em API. Gasto acumulado registrado pela trava: cerca de US$ 2,94.
+- Teto TOTAL de US$ 5 em API. Gasto acumulado registrado pela trava: cerca de US$ 3,03.
 - Iterar com `PRIORIS_FEEDBACK_MODEL=claude-haiku-5-5`. A chave está em `PRIORIS_API_KEY`; confirmar antes com a chamada gratuita de lista de modelos.
 
 ## Resultado entregue
