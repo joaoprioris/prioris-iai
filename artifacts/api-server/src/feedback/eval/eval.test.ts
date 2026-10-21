@@ -21,6 +21,16 @@ describe("orçamento", () => {
     assert.equal(costUsd("claude-sonnet-5-5", { inputTokens: 1_000_000, outputTokens: 100_000 }), 3);
   });
 
+  it("conta escrita e leitura de cache pelos multiplicadores oficiais", () => {
+    const cost = costUsd("claude-sonnet-5-5", {
+      inputTokens: 0,
+      cacheWriteTokens: 1_000_000,
+      cacheReadTokens: 1_000_000,
+      outputTokens: 0,
+    });
+    assert.equal(cost, 2 * 1.25 + 2 * 0.05);
+  });
+
   it("recusa a chamada que estouraria o teto, sem chamar a API", async () => {
     let calls = 0;
     const real = {

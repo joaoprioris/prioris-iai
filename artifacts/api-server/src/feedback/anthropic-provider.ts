@@ -6,6 +6,8 @@ export type Effort = "low" | "medium" | "high";
 export interface Usage {
   inputTokens: number;
   outputTokens: number;
+  cacheWriteTokens?: number;
+  cacheReadTokens?: number;
 }
 
 export interface LlmCall {
@@ -14,6 +16,8 @@ export interface LlmCall {
   messages: ChatMessage[];
   maxTokens: number;
   effort: Effort;
+  /** Cache automático do prefixo (instrução e histórico). Só vale a pena em prefixos de 512 tokens ou mais. */
+  cache?: boolean;
 }
 
 type MessagesClient = Pick<Anthropic, "messages">;
@@ -32,6 +36,7 @@ export async function callAnthropic(
     system: call.system,
     messages: call.messages,
     output_config: { effort: call.effort },
+    ...(call.cache ? { cache_control: { type: "ephemeral" } } : {}),
   };
   const response = await client.messages.create(
     body as unknown as Anthropic.MessageCreateParamsNonStreaming,
@@ -43,9 +48,20 @@ export async function callAnthropic(
     .map((block) => (block.type === "text" ? block.text : ""))
     .join("")
     .trim();
+  const usage = response.usage as unknown as {
+    input_tokens: number;
+    output_tokens: number;
+    cache_creation_input_tokens?: number | null;
+    cache_read_input_tokens?: number | null;
+  };
   return {
     text,
-    usage: { inputTokens: response.usage.input_tokens, outputTokens: response.usage.output_tokens },
+    usage: {
+      inputTokens: usage.input_tokens,
+      outputTokens: usage.output_tokens,
+      cacheWriteTokens: usage.cache_creation_input_tokens ?? 0,
+      cacheReadTokens: usage.cache_read_input_tokens ?? 0,
+    },
   };
 }
 
@@ -67,6 +83,7 @@ export function createAnthropicProvider(options: {
         messages,
         maxTokens: options.maxTokens ?? 1500,
         effort: options.effort ?? "low",
+        cache: true,
       });
       return text;
     },
