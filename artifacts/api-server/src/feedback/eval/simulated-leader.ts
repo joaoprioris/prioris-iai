@@ -10,7 +10,7 @@ export interface LeaderRating {
   usaria_de_novo: boolean;
 }
 
-const MAX_LEADER_TOKENS = 400;
+const MAX_LEADER_TOKENS = 1200;
 
 function persona(scenario: Scenario): string {
   return `Isto é uma simulação de teste. Você interpreta um líder real que usa o IAí, um app de apoio a decisões de liderança, para pensar sobre uma situação do trabalho.

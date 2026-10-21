@@ -62,6 +62,20 @@ export async function runConversation(deps: Deps, scenario: Scenario): Promise<C
   return { ...base, endedBy, rating, verdict, checks, acceptance: accept(rating, verdict, checks) };
 }
 
+/** runTurn engole a causa do erro do provider; aqui ela fica registrada para diagnóstico da rodada. */
+function loggingProvider(provider: FeedbackProvider): FeedbackProvider {
+  return {
+    async complete(input) {
+      try {
+        return await provider.complete(input);
+      } catch (error) {
+        console.log(`  falha do agente: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+    },
+  };
+}
+
 function option(name: string): string | undefined {
   const index = process.argv.indexOf(`--${name}`);
   return index >= 0 ? process.argv[index + 1] : undefined;
@@ -92,7 +106,7 @@ async function main(): Promise<void> {
   const apiKey = process.env.PRIORIS_API_KEY ?? requireEnv("ANTHROPIC_API_KEY");
   const client = guardClient(new Anthropic({ apiKey }), guard);
   const deps: Deps = {
-    agent: createAnthropicProvider({ model: models.agent, client }),
+    agent: loggingProvider(createAnthropicProvider({ model: models.agent, client })),
     nextLeader: (scenario, history) => nextLeaderMessage(client, models.leader, scenario, history),
     rate: (scenario, history) => rateConversation(client, models.leader, scenario, history),
     judge: (scenario, history) => judgeConversation(client, models.judge, scenario.foco, history),

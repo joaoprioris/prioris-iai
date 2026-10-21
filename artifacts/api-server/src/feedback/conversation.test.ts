@@ -4,6 +4,7 @@ import {
   countExchanges,
   MAX_USER_MESSAGE_CHARS,
   runTurn,
+  stripTrailingQuestions,
   type ChatMessage,
   type FeedbackProvider,
 } from "./conversation.ts";
@@ -62,7 +63,10 @@ describe("runTurn", () => {
     assert.equal(result.exchange, 2);
     assert.equal(result.closed, false);
     assert.equal(calls[0].system, FEEDBACK_GUIDANCE);
-    assert.deepEqual(calls[0].messages.at(-1), { role: "user", content: "preciso cobrar uma pessoa" });
+    assert.deepEqual(calls[0].messages.at(-1), {
+      role: "user",
+      content: "preciso cobrar uma pessoa",
+    });
     assert.equal(calls[0].messages.length, 3);
     assert.equal(countExchanges(result.history), 2);
     assert.equal(history.length, 2);
@@ -79,7 +83,9 @@ describe("runTurn", () => {
     assert.equal(result.exchange, 4);
 
     const { provider: other, calls } = fakeProvider("não deveria chamar");
-    assert.deepEqual(await runTurn(other, result.history, "mais uma coisa"), { status: "closed" });
+    assert.deepEqual(await runTurn(other, result.history, "mais uma coisa"), {
+      status: "closed",
+    });
     assert.equal(calls.length, 0);
   });
 
@@ -110,18 +116,84 @@ describe("runTurn", () => {
     const history = historyWith(2);
     for (const reply of [new Error("fora do ar"), "   "]) {
       const { provider } = fakeProvider(reply);
-      assert.deepEqual(await runTurn(provider, history, "oi"), { status: "error" });
+      assert.deepEqual(await runTurn(provider, history, "oi"), {
+        status: "error",
+      });
     }
     assert.equal(countExchanges(history), 2);
   });
 
   it("rejeita fala vazia ou longa demais sem chamar o provider", async () => {
     const { provider, calls } = fakeProvider("x");
-    assert.deepEqual(await runTurn(provider, [], "   "), { status: "invalid", reason: "empty" });
+    assert.deepEqual(await runTurn(provider, [], "   "), {
+      status: "invalid",
+      reason: "empty",
+    });
     assert.deepEqual(await runTurn(provider, [], "a".repeat(MAX_USER_MESSAGE_CHARS + 1)), {
       status: "invalid",
       reason: "too_long",
     });
     assert.equal(calls.length, 0);
+  });
+});
+
+describe("vocabulário vetado", () => {
+  it("regenera uma vez com aviso e entrega a segunda resposta", async () => {
+    const replies = ["Parece conversa de terapia, mas dá para seguir.", "Dá para seguir com uma conversa direta."];
+    const calls: string[] = [];
+    const provider: FeedbackProvider = {
+      async complete({ system }) {
+        calls.push(system);
+        return replies[calls.length - 1];
+      },
+    };
+    const result = await runTurn(provider, [], "não quero soar como terapia de RH");
+    assert.equal(result.status, "ok");
+    if (result.status === "ok") assert.equal(result.reply, replies[1]);
+    assert.equal(calls.length, 2);
+    assert.ok(calls[1].includes("vocabulário proibido"));
+  });
+
+  it("devolve erro sem consumir troca se a segunda resposta também usar o termo", async () => {
+    const { provider, calls } = fakeProvider("Isso é quase uma terapia.");
+    const result = await runTurn(provider, [], "oi");
+    assert.equal(result.status, "error");
+    assert.equal(calls.length, 2);
+  });
+});
+
+describe("encerramento sem pergunta", () => {
+  it("regenera a última troca quando a resposta termina com pergunta", async () => {
+    const replies = [
+      "Você decidiu falar amanhã. Qual será a primeira frase?",
+      "Você decidiu falar amanhã, com as suas palavras.",
+    ];
+    const calls: string[] = [];
+    const provider: FeedbackProvider = {
+      async complete({ system }) {
+        calls.push(system);
+        return replies[calls.length - 1];
+      },
+    };
+    const result = await runTurn(provider, historyWith(MAX_EXCHANGES - 1), "fechado");
+    assert.equal(result.status, "ok");
+    if (result.status === "ok") {
+      assert.ok(!result.reply.includes("?"));
+      assert.ok(result.closed);
+    }
+    assert.equal(calls.length, 2);
+  });
+});
+
+describe("stripTrailingQuestions", () => {
+  it("tira só a pergunta que fecha o texto", () => {
+    assert.equal(stripTrailingQuestions("Você decidiu falar amanhã. Qual será a frase?"), "Você decidiu falar amanhã.");
+  });
+
+  it("mantém perguntas dentro de aspas e no meio do texto", () => {
+    const text = 'Você pode abrir com "o que você viu nessas reuniões?". Isso basta.';
+    assert.equal(stripTrailingQuestions(text), text);
+    const quoted = 'Uma saída é perguntar "como você está vendo isso?"';
+    assert.equal(stripTrailingQuestions(quoted), quoted);
   });
 });

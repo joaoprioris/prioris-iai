@@ -42,7 +42,10 @@ export async function callAnthropic(
     body as unknown as Anthropic.MessageCreateParamsNonStreaming,
   );
   if (response.stop_reason === "max_tokens" || (response.stop_reason as string) === "refusal") {
-    throw new Error(`resposta incompleta: ${response.stop_reason}`);
+    const blocks = response.content.map((block) => block.type).join(",");
+    throw new Error(
+      `resposta incompleta: ${response.stop_reason} (modelo ${call.model}, limite ${call.maxTokens}, saída ${response.usage.output_tokens}, blocos ${blocks})`,
+    );
   }
   const text = response.content
     .map((block) => (block.type === "text" ? block.text : ""))

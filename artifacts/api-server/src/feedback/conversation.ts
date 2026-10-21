@@ -1,6 +1,9 @@
 import {
   CLOSING_PHRASE,
   FEEDBACK_GUIDANCE,
+  CLOSING_QUESTION_RETRY_INSTRUCTION,
+  FORBIDDEN_IN_REPLIES,
+  FORBIDDEN_RETRY_INSTRUCTION,
   LAST_EXCHANGE_INSTRUCTION,
   MAX_EXCHANGES,
 } from "./guidance.ts";
@@ -17,7 +20,13 @@ export interface FeedbackProvider {
 }
 
 export type TurnResult =
-  | { status: "ok"; reply: string; exchange: number; closed: boolean; history: ChatMessage[] }
+  | {
+      status: "ok";
+      reply: string;
+      exchange: number;
+      closed: boolean;
+      history: ChatMessage[];
+    }
   | { status: "closed" }
   | { status: "invalid"; reason: "empty" | "too_long" }
   | { status: "error" };
@@ -31,6 +40,19 @@ export function isClosed(history: ChatMessage[]): boolean {
   if (countExchanges(history) >= MAX_EXCHANGES) return true;
   const last = history[history.length - 1];
   return last?.role === "assistant" && last.content.trimEnd().endsWith(CLOSING_PHRASE);
+}
+
+/** Remove só as perguntas que fecham o texto; perguntas no meio ou dentro de aspas ficam como estão. */
+export function stripTrailingQuestions(text: string): string {
+  let result = text.trim();
+  for (;;) {
+    const match = result.match(/(^|[.!?\n])[^.!?\n]*\?$/);
+    if (!match) break;
+    const next = result.slice(0, match.index! + (match[1] ? match[1].length : 0)).trim();
+    if (!next) break;
+    result = next;
+  }
+  return result;
 }
 
 function withClosingPhrase(reply: string): string {
@@ -57,9 +79,30 @@ export async function runTurn(
   const system = isLast ? `${FEEDBACK_GUIDANCE}\n\n${LAST_EXCHANGE_INSTRUCTION}` : FEEDBACK_GUIDANCE;
   const messages: ChatMessage[] = [...history, { role: "user", content }];
 
+  const hasForbidden = (text: string) => FORBIDDEN_IN_REPLIES.some((pattern) => pattern.test(text));
+
   let raw: string;
   try {
     raw = await provider.complete({ system, messages });
+    // Vocabulário vetado nunca chega ao líder: uma nova tentativa avisada e, se persistir, erro sem consumir troca.
+    if (hasForbidden(raw ?? "")) {
+      raw = await provider.complete({
+        system: `${system}\n\n${FORBIDDEN_RETRY_INSTRUCTION}`,
+        messages,
+      });
+      if (hasForbidden(raw ?? "")) return { status: "error" };
+    }
+    // Encerrar com pergunta deixa o líder sem como responder: uma nova tentativa sem interrogação.
+    const closing = isLast || raw.trimEnd().endsWith(CLOSING_PHRASE);
+    if (closing && raw.replace(CLOSING_PHRASE, "").includes("?")) {
+      const again = await provider.complete({
+        system: `${system}\n\n${CLOSING_QUESTION_RETRY_INSTRUCTION}`,
+        messages,
+      });
+      if (again && again.trim() && !hasForbidden(again)) raw = again;
+      // Se a resposta ainda terminar em pergunta, essa pergunta final sai da resposta de encerramento.
+      raw = stripTrailingQuestions(raw);
+    }
   } catch {
     return { status: "error" };
   }

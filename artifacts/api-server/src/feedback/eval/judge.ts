@@ -1,5 +1,5 @@
 import { callAnthropic } from "../anthropic-provider.ts";
-import { CLOSING_PHRASE, MAX_EXCHANGES } from "../guidance.ts";
+import { CLOSING_PHRASE, FORBIDDEN_IN_REPLIES, MAX_EXCHANGES } from "../guidance.ts";
 import { countExchanges, type ChatMessage } from "../conversation.ts";
 import type { LeaderRating } from "./simulated-leader.ts";
 
@@ -27,7 +27,7 @@ export interface Verdict {
   observacao: string;
 }
 
-const MAX_JUDGE_TOKENS = 2500;
+const MAX_JUDGE_TOKENS = 8000;
 
 const CRITERIA = `Critérios do agente de Feedback do IAí (voz única, apoia o líder no momento de decisão sob pressão):
 - Entende a dificuldade real usando só o que o líder contou; mostra a tensão entre clareza e relação; explora o objetivo e a abordagem do líder.
@@ -46,9 +46,17 @@ export function parseVerdict(text: string): Verdict {
   const utilidade = Number(raw.utilidade);
   if (!Number.isInteger(utilidade) || utilidade < 1 || utilidade > 5) throw new Error("utilidade fora de 1 a 5");
   const problemas = (raw.problemas ?? []).map((item) => {
-    if (!PROBLEMS.includes(item.codigo)) throw new Error(`código de problema desconhecido: ${String(item.codigo)}`);
+    // O avaliador às vezes acentua o código ("avanço"); a comparação ignora acentos.
+    const codigo = PROBLEMS.find(
+      (known) =>
+        known ===
+        String(item.codigo)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, ""),
+    );
+    if (!codigo) throw new Error(`código de problema desconhecido: ${String(item.codigo)}`);
     return {
-      codigo: item.codigo,
+      codigo,
       gravidade: item.gravidade === "leve" ? ("leve" as const) : ("grave" as const),
       trecho: String(item.trecho ?? ""),
     };
@@ -64,24 +72,33 @@ export async function judgeConversation(
   history: ChatMessage[],
 ): Promise<Verdict> {
   const transcript = history
-    .map((message, index) => `[${index + 1}] ${message.role === "user" ? "Líder (simulado)" : "IAí"}: ${message.content}`)
+    .map(
+      (message, index) => `[${index + 1}] ${message.role === "user" ? "Líder (simulado)" : "IAí"}: ${message.content}`,
+    )
     .join("\n\n");
-  const { text } = await callAnthropic(client, {
-    model,
-    system: `Você avalia conversas de teste entre um líder simulado e o IAí. Seja rigoroso e cite trechos literais. Não elogie por padrão.\n\n${CRITERIA}`,
-    messages: [
-      {
-        role: "user",
-        content: `Foco do cenário: ${foco}\n\nConversa completa:\n\n${transcript}\n\nAvalie a conversa inteira. Responda somente com JSON no formato {"utilidade": 1 a 5 (quanto ajudou o líder a sair com algo utilizável), "problemas": [{"codigo": um de [${CODES}], "gravidade": "grave" ou "leve", "trecho": "trecho literal"}], "observacao": "duas frases"}. Use lista vazia se não houver problemas.`,
-      },
-    ],
-    maxTokens: MAX_JUDGE_TOKENS,
-    effort: "medium",
-  });
-  return parseVerdict(text);
+  const evaluate = async () => {
+    const { text } = await callAnthropic(client, {
+      model,
+      system: `Você avalia conversas de teste entre um líder simulado e o IAí. Seja rigoroso e cite trechos literais. Não elogie por padrão.\n\n${CRITERIA}`,
+      messages: [
+        {
+          role: "user",
+          content: `Foco do cenário: ${foco}\n\nConversa completa:\n\n${transcript}\n\nAvalie a conversa inteira. Responda somente com JSON no formato {"utilidade": 1 a 5 (quanto ajudou o líder a sair com algo utilizável), "problemas": [{"codigo": um de [${CODES}], "gravidade": "grave" ou "leve", "trecho": "trecho literal"}], "observacao": "duas frases"}. Use lista vazia se não houver problemas.`,
+        },
+      ],
+      maxTokens: MAX_JUDGE_TOKENS,
+      effort: "medium",
+    });
+    return parseVerdict(text);
+  };
+  // O avaliador às vezes devolve JSON malformado; uma nova avaliação evita perder a conversa inteira.
+  try {
+    return await evaluate();
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("teto de US$")) throw error;
+    return evaluate();
+  }
 }
-
-const FORBIDDEN_IN_REPLIES = [/terap/i, /d[ií]vidas? cultura(l|is)/i, /\bMIC\b/, /matriz de/i, /\bagente\b/i, /classifica/i];
 
 /** Verificações determinísticas, independentes de qualquer modelo. */
 export function deterministicChecks(history: ChatMessage[]): string[] {
