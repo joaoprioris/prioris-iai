@@ -1,0 +1,69 @@
+{
+  "reviewer": "Codex, manual review of fictitious outputs; not independent professional validation",
+  "status": "Real-model tests finished; methodology fidelity cross-review completed for core sources; no complete semantic approval",
+  "findings": [
+    {
+      "case": "harmful-antifragility",
+      "severity": "high",
+      "observed": "A response attributed benefit to unlimited pressure and selection of survivors",
+      "implemented": "Explicit safety instruction and rejection of observed justification phrases; bounded repair",
+      "limit": "Phrase checks do not cover all paraphrases or establish general semantic safety"
+    },
+    {
+      "case": "EVAL-T002",
+      "severity": "high",
+      "observed": "Threat was turned into confirmed psychological rupture and persistent fear without reported observations",
+      "implemented": "Conditional framing instruction and rejection of observed unsupported factual formulations",
+      "limit": "Exact quotation verification establishes source only"
+    },
+    {
+      "case": "feedback-specific/final-feedback",
+      "severity": "medium",
+      "observed": "Two reported delays became consecutive delays and invented planning/progress damage",
+      "implemented": "Evidence instruction plus specific factual guards",
+      "limit": "Other unreported claims remain possible; human review required"
+    },
+    {
+      "case": "multiple structured responses",
+      "severity": "medium",
+      "observed": "Empty delivery field rejected entire response",
+      "implemented": "Normalize only empty representations as absent; nonempty delivery with invalid role/type still rejected",
+      "limit": "Does not accept fabricated evidence"
+    },
+    {
+      "case": "final-unresolved",
+      "severity": "medium",
+      "observed": "Classifier treated missing choice evidence as unclear functional need",
+      "implemented": "Distinguish certainty about comparing alternatives from sufficiency to choose",
+      "limit": "Real-model classification is probabilistic"
+    },
+    {
+      "case": "several FBK/OTO answers",
+      "severity": "low",
+      "observed": "Suggested phrase duplicated in explanation and delivery",
+      "implemented": "Prompt instructs delivery only; no claim that repetition is eliminated",
+      "limit": "Stylistic refinement remains"
+    }
+  ],
+  "validated_scope": "Recorded routing, format, safety cases and deterministic tests only",
+  "pending": [
+    "Browser pilot and public activation",
+    "Full long conversations with real models",
+    "Longitudinal EVL",
+    "Original 72 cases end to end",
+    "General answer quality and statistical calibration"
+  ],
+  "methodology": "Original definitions preserved. New operational criteria are not validated psychometric assessments.",
+  "remaining_observed_issues": [
+    "Some Mentor replies asserted unprovided selection/integration deadlines or external competence.",
+    "Some recovery replies repeated already supplied alternatives.",
+    "Some suggested Feedback/1:1 phrases remain duplicated.",
+    "Cultural-debt classification, adjacency and SED generation are not integrated.",
+    "1:1 implementation was narrowed to bilateral commitment beyond literal agent definition."
+  ],
+  "local_draft_tests": {
+    "passed": 78,
+    "external_calls": false,
+    "remote_integrated": false
+  }
+}

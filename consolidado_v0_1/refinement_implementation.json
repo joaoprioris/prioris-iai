@@ -1,0 +1,136 @@
+{
+  "version": "0.2.0",
+  "agents": [
+    {
+      "id": "MNT",
+      "mode": "conversacional",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 1 — Mentor Estratégico - Definição.docx",
+        "sha256": "7de8c0e683311e704f89d9b4efede6fb20a8a10fe5441391e6de7391cb7aabcf",
+        "catalog_key": "01"
+      },
+      "criteria": [
+        "MNT.problem",
+        "MNT.alternatives",
+        "MNT.tradeoff",
+        "MNT.next"
+      ],
+      "lens_count": 11
+    },
+    {
+      "id": "CTN",
+      "mode": "conversacional",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 2 — Contencao  Terapia de Bolso - Definição.docx",
+        "sha256": "1fc8a4b19f87b09ab74fbbfa8223ea8882892f4a47a1976230f65e14a1ccb858",
+        "catalog_key": "02"
+      },
+      "criteria": [
+        "CTN.reaction",
+        "CTN.impulse",
+        "CTN.pause",
+        "CTN.next"
+      ],
+      "lens_count": 11
+    },
+    {
+      "id": "PRF",
+      "mode": "conversacional",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 3 — Perfil & Padrões - Definição.docx",
+        "sha256": "fa2eef4d570251bb7c5106ded5c8b9f76f3b7916b9ad3f2b983b296d46676398",
+        "catalog_key": "03"
+      },
+      "criteria": [
+        "PRF.recurrence",
+        "PRF.hypothesis",
+        "PRF.counterexample",
+        "PRF.next"
+      ],
+      "lens_count": 11
+    },
+    {
+      "id": "IMP",
+      "mode": "conversacional",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 4 — Impacto Humano & Relações - Definição.docx",
+        "sha256": "7b2c1bb6a30a65990300499528387f56d77149c08b069b8a5092afe6e381defa",
+        "catalog_key": "04"
+      },
+      "criteria": [
+        "IMP.event",
+        "IMP.impact",
+        "IMP.tension",
+        "IMP.next"
+      ],
+      "lens_count": 11
+    },
+    {
+      "id": "FBK",
+      "mode": "conversacional",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 5 — Feedback Estruturado - Definição.docx",
+        "sha256": "e6567ef47764fb6b5d2fd77e5b635a3e5947419ab48742b3902e2c94967cad00",
+        "catalog_key": "05"
+      },
+      "criteria": [
+        "FBK.intent",
+        "FBK.facts",
+        "FBK.distortion",
+        "FBK.next"
+      ],
+      "lens_count": 11
+    },
+    {
+      "id": "OTO",
+      "mode": "conversacional",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 6 — 1-1 de Decisão - Definição.docx",
+        "sha256": "f14b16ff323f200f8746e15e2467852853aaec177aec992e1d6ed1e81d30a180",
+        "catalog_key": "06"
+      },
+      "criteria": [
+        "OTO.moment",
+        "OTO.target",
+        "OTO.risk",
+        "OTO.next"
+      ],
+      "lens_count": 11
+    },
+    {
+      "id": "CRS",
+      "mode": "conversacional",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 7 — Análise de Crises - Definição.docx",
+        "sha256": "546e02b7074be429133c278df264cc49f7ced03964e5eda4cda4f63bb10c1132",
+        "catalog_key": "07"
+      },
+      "criteria": [
+        "CRS.risk",
+        "CRS.containment",
+        "CRS.support",
+        "CRS.next"
+      ],
+      "lens_count": 11
+    },
+    {
+      "id": "EVL",
+      "mode": "longitudinal",
+      "source": {
+        "path": "C:\\Users\\jpame\\OneDrive\\CV\\PRODUTOS e IDEIAS\\PRIORIS\\AGENTES\\CONVERSACIONAIS\\DEFINIÇÃO\\Agente 8 — Evolução Contínua - Definição.docx",
+        "sha256": "e6238a2df47a84e9e56dc37c0a618bb04216ea3b9a3fc70fbf4a6bbd8ad10331",
+        "catalog_key": "08"
+      },
+      "criteria": [],
+      "lens_count": 11
+    }
+  ],
+  "original_definition_sections_preserved": true,
+  "new_criteria_status": "Operational interpretation, not validated diagnosis",
+  "source_hashes": {
+    "agent_contract.json": "160842ec35e7dbf4c42ce8c30154ea663bfd7613e14b330e12324c7db1975991",
+    "functional-orchestrator.ts": "5f02d9335722fd5634e68bf9ebe2e3d3701f8d1a439b05354ffce8603b5f0bb2",
+    "conversation-guidance.cjs": "3af4dcf6a53acfc23acfced62b80a5fc3d72c92d43abb100fc9e40ddf9305161",
+    "conversation-service.cjs": "2ba9a5c89a9c61d287216d26ae283b973ac8cfe3b7960a26fd0f17d8291f5f2f"
+  }
+}

@@ -1,0 +1,43 @@
+CONTINUIDADE IAí / PRIORIS — 12/10/2026
+
+Workspace: C:\Users\jpame\OneDrive\Documentos\ChatGPT\Revisão - Me AjudAí Lab
+Fontes: C:\Users\jpame\OneDrive\CV\PRODUTOS e IDEIAS\PRIORIS
+
+REGRAS DO PROPRIETÁRIO
+É proibido alterar a metodologia por interpretação própria. Questionar contradições antes de escolher. A pasta AGENTES contém as definições corretas dos agentes.
+Referências centrais: DOSSIE_METODOLOGICO; ARQUITETURA E LÓGICA DO SISTEMA IAí; DOSSIÊ CONSOLIDADO — SISTEMA IAí - PRIORIS; INTERAÇÃO USER x IAí; METODOLOGIA_COMPLETA - PRIORIS.
+Entrada do líder: dor/contexto, sem conhecer dívidas/agentes. Cinco estados: Antes, Durante, Depois, Padrão e Vazio. Mecânica e dívidas invisíveis; uma voz IAí.
+Até dez trocas na conversa inteira, inclusive após transição; fechamento com síntese, lacunas e próximo passo. Encerramento antecipado permitido quando houver clareza suficiente, conforme documento canônico.
+Preservar profundidade, economizando tokens: reutilizar leituras e evidências; testes locais primeiro; IA real somente para lacunas específicas com custo limitado. Não iniciar baterias extensas redundantes.
+Primeiro piloto: João, situações fictícias. Histórico pessoal privado com opção de desligar/apagar. Sem compras, nova publicação, e-mails reais, credenciais expostas ou escrita em produção.
+Não ler a pasta nova de Área de Trabalho/CLAUDE. Os originais não foram editados.
+
+ESTADO COMPROVADO
+Replit: https://replit.com/@joaoprioris/Leadership-Support-Tool
+Projeto: 4ba82eb6-87ce-4b44-8498-2461103c0175; conta PRIORIS. Não confundir com Chrome pessoal.
+Novo router v0.2 integrado no desenvolvimento, desligado globalmente. Sem republicação. Piloto no navegador ainda não validado.
+82 testes técnicos remotos e 22 PostgreSQL/HTTP isolados passaram na versão integrada. IA real: 15 cenários de rota/formato, sete transições adaptadas e uma conversa contínua encerrada na nona troca, com continuação recusada. Conteúdo NÃO aprovado integralmente: houve recuperações, repetição e suposições indevidas. Resultados versionados e hashes em review/consolidado_v0_1.
+Cinco estados preparados somente em rascunho local: NÃO integrados, NÃO testados com IA real. 78 testes locais passaram incluindo esse rascunho; não confundir com a versão remota.
+SED organizacional, classificação estruturada de dívida/adjacência, Health Monitor/Risk Engine completos, IEC/DCO e Evolução longitudinal NÃO estão ativados.
+Biblioteca: 419 variantes indexadas, 24 selecionadas para benchmark ainda não executado. Rótulos documentais são referências de comparação, não comprovação de dívida instalada. 64 entradas antigas tiveram apenas classificação; nenhum dos 72 cenários originais foi aprovado de ponta a ponta.
+
+PRÓXIMO TRABALHO
+1. Ler methodology_control.json e methodology_crosswalk.json, sem refazer a leitura inteira do chat.
+2. Corrigir 1:1 conforme definição: condução de conversas relevantes ao vivo, abertura/tensão/direção/fechamento; a restrição a fechamento bilateral foi interpretação do assistente e não é regra documental. Não redefinir a metodologia para obter testes aprovados.
+3. Conferir demais fronteiras dos agentes e os cinco estados. Atualizar testes com cenários documentados e preservar resultados anteriores por versão.
+4. Avançar na leitura invisível de dívida e adjacência conforme definições/condições da metodologia. Não usar palavras-chave nem correspondência dívida→agente como substitutos de interpretação funcional.
+5. Preparar SED conforme campos e estados documentados, separado do histórico pessoal; não confundir progresso da conversa com SED. Contradições sobre principal obrigatória/estados provisórios precisam de rastreabilidade e, quando afetarem metodologia, decisão do proprietário.
+6. Testar biblioteca por amostras diversas primeiro, sem expor os rótulos esperados ao classificador. Não contratar ou executar testes caros para compensar lacunas documentais.
+
+ARQUIVOS DE RETOMADA
+review/consolidado_v0_1/PRIORIS_Cruzamento_Metodologia_e_Implementacao_v0.1.xlsx (21 pontos, sete fontes lidas integralmente nesta etapa: cinco centrais + duas definições).
+review/consolidado_v0_1/methodology_control.json
+review/consolidado_v0_1/methodology_crosswalk.json
+review/consolidado_v0_1/verified_development_state.json
+review/consolidado_v0_1/semantic_review.json
+review/PRIORIS_Agentes_Consolidado_v0.2.zip (inclui implementação parcial e rascunhos explicitamente identificados; não é pacote de produção).
+
+ACESSO E CUIDADOS
+O navegador foi interrompido no fim da etapa anterior. Confirmar acesso antes de afirmar integração. Não repetir env/Secrets em saídas. ANTHROPIC_API_KEY existente: usar somente no servidor, jamais copiar chave para arquivos locais. Não iniciar chamadas reais só para testar reconexão.
+O SDK Anthropic já foi usado em testes fictícios com teto por rodada; não há saldo/fatura verificados. Nenhuma nova chamada real foi iniciada depois do pedido de economia.
+Não reexecutar build_consolidation.py sobre evidências atuais: reconstrói a base inicial e pode sobrescrever refinamentos. Atualizar somente o necessário.
