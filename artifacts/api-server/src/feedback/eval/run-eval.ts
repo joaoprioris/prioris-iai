@@ -88,7 +88,9 @@ async function main(): Promise<void> {
     finalJudge: process.env.PRIORIS_EVAL_FINAL_JUDGE_MODEL,
   };
   const guard = new BudgetGuard(cap, spentBefore);
-  const client = guardClient(new Anthropic({ apiKey: requireEnv("ANTHROPIC_API_KEY") }), guard);
+  // PRIORIS_API_KEY evita o nome reservado ANTHROPIC_API_KEY, que o ambiente do Claude Code não usa para autenticar.
+  const apiKey = process.env.PRIORIS_API_KEY ?? requireEnv("ANTHROPIC_API_KEY");
+  const client = guardClient(new Anthropic({ apiKey }), guard);
   const deps: Deps = {
     agent: createAnthropicProvider({ model: models.agent, client }),
     nextLeader: (scenario, history) => nextLeaderMessage(client, models.leader, scenario, history),
