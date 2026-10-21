@@ -760,3 +760,206 @@ Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo qu
 
 **Comentário do líder simulado:** Ajudou a montar a fala com o relatório concreto, o motivo do porquê e o combinado para o próximo, sem ultimato. Faltou dizer com clareza que a cobrança vale para todo relatório, e não só para um, e às vezes as respostas ficaram longas demais.
 
+
+---
+
+# Acrescentadas depois (rodadas 24 a 33)
+
+Os cenários impressao-versus-fato, feedback-para-senior e quer-fala-pronta passaram a ter conversa aprovada e lida. O cenário feedback-recebido-injusto segue sem aprovação.
+
+---
+
+## 11. impressao-versus-fato (rodada 26, 6 trocas)
+
+**Nota do líder simulado:** 4 de 5. **Utilidade pelo avaliador:** 4 de 5.
+
+**Meu veredito:** Aprovada com ressalvas. O líder sai do "ela fez de propósito" para um pedido concreto (aviso antes de atrasar) e uma resposta para "ela não sabia". Ressalva: o líder se sente corrigido quando está chateado.
+
+**LÍDER (simulado):** a Fernanda sabota meus projetos de propósito e eu preciso confrontar isso
+
+**IAí:** Você está convencido de que ela age de propósito, e isso muda o tom da conversa. Antes de confrontar, vale separar o que você viu acontecer do que concluiu a partir disso. Que situação concreta te levou a essa conclusão, com o que aconteceu e quando? Com os fatos em mãos, fica mais fácil dizer o que você precisa que mude, sem entrar na intenção dela, que você não tem como confirmar.
+
+**LÍDER (simulado):** Ué, ela entregou duas tarefas dos meus projetos atrasadas neste trimestre. Duas. Não é coincidência, né? Você acha que eu tô inventando?
+
+**IAí:** Não acho que você esteja inventando. Duas entregas atrasadas no trimestre são um fato, e elas estão afetando seus projetos. Mas esse fato sozinho não mostra intenção. Pode ser sobrecarga, dependência de alguma informação que não chegou, prioridade que mudou sem ninguém avisar, ou algo que ela nem percebe como problema. Não dá para saber daqui, e é justamente aí que uma conversa que começa pela intenção costuma travar.
+
+Então o caminho mais firme é levar as duas datas e o impacto concreto que cada atraso teve no projeto. Qual foi o efeito da primeira entrega atrasada no seu trabalho?
+
+**LÍDER (simulado):** Ah, tá, então agora eu tenho que provar que ela fez de propósito pra você aceitar que tá atrasada? Ela entregou fora do prazo, e o resto do time ficou esperando. Isso já basta pra mim.
+
+A primeira foi a integração do relatório. O cliente cobrou e eu tive que segurar a reunião de quinta. Não gostei nada.
+
+**IAí:** Não precisa provar intenção pra ter uma conversa sobre isso. O atraso, o time esperando e a reunião de quinta que você teve que segurar já são fatos suficientes pra falar com ela. Você não precisa convencer ninguém de que foi de propósito; basta mostrar o que aconteceu e o que precisa mudar.
+
+Pensando na conversa: o que você quer que ela faça diferente nas próximas entregas? Um aviso antecipado quando algo travar, uma data combinada com folga, ou outra coisa? Com isso definido, dá pra começar pela integração do relatório, com a data e o efeito na reunião, e pedir o combinado.
+
+**LÍDER (simulado):** Tá, isso faz sentido. Acho que o que eu quero é ela me avisar antes de atrasar, não depois. Cansei de descobrir na véspera. Uma data com folga também ajudaria, mas o principal é o aviso.
+
+Só que você tá me fazendo soar como se eu não tivesse direito de ficar chateado. Eu fiquei, e muito. Ela sabia que a integração era pro cliente e não falou nada.
+
+**IAí:** Você tem direito de ficar chateado, e a irritação faz sentido diante de uma reunião com cliente segurada. Só que a conversa pede que você diga isso com o fato na frente: a integração atrasou, a reunião de quinta teve que ser segurada, e você descobriu na véspera. Se você entrar pela chateação ou pela suposição de que ela sabia e calou, a conversa tende a virar defesa dela, e o que você quer, o aviso antecipado, fica para trás.
+
+Sobre o "ela sabia e não falou": isso você sabe ou está deduzindo? Se você tiver algo concreto, como uma mensagem ou uma conversa em que ela soube do prazo, pode trazer. Se for dedução, vale dizer como sentiu, sem afirmar o que ela pensou.
+
+Quer tentar começar a fala com o que aconteceu na integração e o que você precisa daqui pra frente?
+
+**LÍDER (simulado):** Ela sabia, sim. Não tenho mensagem nem nada escrito, mas é óbvio, a integração era pro cliente e ela não me falou nada.
+
+Pensando melhor, eu não vi ela avisar. Eu só descobri quando o cliente cobrou. Então acho que não sei se ela sabia ou não. Mas isso não muda o que eu quero.
+
+Olha, vou tentar: "Fernanda, a integração do relatório atrasou e eu tive que segurar a reunião de quinta com o cliente. Descobri isso na véspera. O que eu preciso é que, quando algo travar, você me avise antes de virar atraso. Consegue fazer isso nas próximas entregas?"
+
+Acho que isso eu consigo dizer. Mas ainda não sei se ela vai responder que não sabia do prazo.
+
+**IAí:** Essa fala está boa: tem o fato, o efeito na reunião, o que você precisa e um pedido concreto. Você mesmo percebeu que não sabe se ela sabia, e a fala não depende disso, então ela segura mesmo que ela diga que não sabia do prazo.
+
+Sobre essa resposta: ela pode dizer que não sabia, e isso não invalida o que você pediu. Se acontecer, você pode voltar ao mesmo ponto: "Entendo que não tinha visto o prazo. Mesmo assim, quando algo travar, me avise." Você não precisa ganhar a discussão sobre o que ela sabia; precisa do combinado.
+
+Só uma coisa para fechar antes de falar: você quer que ela responda na hora ou prefere deixar ela pensar e voltar a isso em outro momento?
+
+**LÍDER (simulado):** Quero que ela responda na hora, sim. Se ela sair da conversa sem combinar nada, a gente vai estar no mesmo lugar na próxima entrega. Mas se ela precisar pensar um pouco, tudo bem, desde que a gente marque quando volta a falar. Não quero que isso fique aberto por semanas.
+
+**IAí:** Quando você levar esse fechamento para a conversa, deixe claro que precisa de um combinado hoje. Se ela quiser pensar, marque a volta: "Preciso que a gente combine isso hoje. Se você quiser pensar, podemos retomar amanhã às dez." Assim você sai com um próximo passo definido, mesmo que ela ainda não tenha fechado tudo.
+
+Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar.
+
+**Comentário do líder simulado:** A conversa me ajudou a sair do 'ela fez de propósito' e a montar uma fala concreta com data, efeito na reunião e pedido de aviso antecipado, que dá para usar. Só achei que ficou um pouco insistente em me corrigir quando eu me sentia chateado.
+
+---
+
+## 12. feedback-para-senior (rodada 24, 10 trocas)
+
+**Nota do líder simulado:** 4 de 5. **Utilidade pelo avaliador:** 4 de 5.
+
+**Meu veredito:** Aprovada com ressalvas. O líder sai com a própria frase (fato e pedido), decide falar em particular e não tocar no orçamento. Ressalvas: 10 trocas e algumas reações do outro tratadas como certas.
+
+**LÍDER (simulado):** preciso dar um feedback para o diretor comercial, que é mais sênior que eu, e não sei até onde posso ir sem me expor
+
+**IAí:** Dar feedback para alguém mais sênior costuma pesar porque a dúvida não é só o que dizer, é quanto risco você corre ao dizer. Antes de pensar no tom, vale separar duas coisas: o que você observou de fato (um comportamento, uma decisão, um resultado) e o que você concluiu a partir disso. Costuma ser o que você concluiu que mais expõe, e é onde a mensagem pode ser lida como ataque.
+
+Sobre até onde ir: o limite tende a ser o que você consegue sustentar com fatos e com o efeito concreto no seu trabalho ou no time, sem falar pela intenção dele. Qual é o comportamento ou a situação específica que você quer trazer, e o que você espera que mude depois da conversa?
+
+**LÍDER (simulado):** Ah, é o Roberto. Ele me interrompeu umas três vezes no último mês, em reunião com os outros gerentes e com o meu time olhando. Não é nada grave assim, mas incomoda. Não sei se vale falar disso ou se estou exagerando.
+
+**IAí:** Três interrupções em um mês, na frente do seu time, já é um padrão que você pode descrever sem exagero. O que importa não é decidir se é grave, e sim se o efeito é real para você e para o trabalho. Se sua equipe passou a ver você sendo cortada, isso justifica a conversa.
+
+A tensão está entre deixar claro o que aconteceu e não soar como acusação. Ao dizer "você me interrompeu", a conversa tende a virar defesa. Ao descrever o momento e o que ficou para o seu time, fica mais difícil de rebater, e ainda sobra espaço para ele responder.
+
+Qual é o objetivo: que ele pare de interromper, ou que vocês combinem como agir quando há discordância em reunião? A resposta muda a forma de começar.
+
+**LÍDER (simulado):** Hm. Acho que o objetivo é que ele pare, mas não sei se ele vai entender assim. Ele é meu chefe no orçamento, então não quero que pareça que estou reclamando. Tipo, se eu falar "você me interrompe", parece que estou brigando. Não sei se vale ser tão direto.
+
+**IAí:** Você quer que ele pare, e o receio é que dito assim pareça briga. Aí clareza e relação puxam para lados opostos: suavizar demais pode fazer ele não entender o pedido; ser direta demais pode fazê-lo se fechar.
+
+Ser direta não precisa soar como acusação. O que pesa é evitar generalizações como "você sempre me interrompe" e trazer o fato específico e o efeito concreto: qual reunião, quantas vezes, e o que isso deixou para o seu time. Assim fica mais difícil de rebater e sobra espaço para ele responder.
+
+O pedido pode ser simples: que ele deixe você terminar antes de responder. Não precisa vir como reclamação, e sim como combinado para as próximas reuniões.
+
+Você sabe como o Roberto costuma reagir quando alguém pede algo assim? Isso muda se vale falar antes da próxima reunião ou em particular.
+
+**LÍDER (simulado):** Não sei bem como ele reage. Ele não é de brigar, mas também não é de ouvir muito. Às vezes parece que já está respondendo antes de você terminar a frase.
+
+Acho que prefiro falar em particular, não na frente de ninguém. Mas tenho receio de ele levar pro lado do orçamento. Não que ele fosse fazer isso de propósito, só que... sei lá. Ele decide o que eu consigo, então qualquer coisa que pareça crítica pode ficar meio pendurada.
+
+Isso já é mais que eu queria dizer, então não sei se ajuda
+
+**IAí:** Você já tem uma decisão importante: falar em particular, e o pedido é que ele deixe você terminar. O receio do orçamento é real, porque ele decide o que você consegue, e isso pesa na forma de dizer, não só no conteúdo.
+
+Dá para separar as duas coisas: a conversa sobre interrupção fica sobre a reunião e o combinado para as próximas, e não sobre o seu trabalho ou a sua relação com as verbas. Assim você não precisa falar do orçamento, e ele não precisa ouvir isso como ameaça ou recado.
+
+Você consegue dizer, com as suas palavras, a frase central que quer que ele ouça? Algo como "quero pedir que você me deixe terminar antes de responder", se fizer sentido para você.
+
+**LÍDER (simulado):** Ah, sei lá. Acho que algo assim. Tipo "Roberto, queria pedir que você me deixe terminar antes de responder, principalmente nas reuniões com o time". Mas soa meio duro pra mim, não sei.
+
+Também fico pensando se ele vai achar que eu estou dando bronca. Ele pode levar a mal, sabe? Não quero que ele se sinta mal de estar na frente da equipe. Ele é um cara legal no geral.
+
+**IAí:** Essa frase já diz o que você quer, e o que soa duro talvez seja só o "principalmente nas reuniões com o time". Você pode mantê-lo, porque é o que dá sentido ao pedido, ou deixar a frase mais próxima do seu jeito de falar. O importante é que o pedido continue sendo um só: que ele espere você terminar.
+
+Sobre ele levar a mal: não dá para controlar como ele vai receber, e não há como saber se ele vai se sentir mal. O que você controla é não criticar a pessoa, não lembrar as três vezes uma por uma e não transformar isso numa cobrança. Você pode dizer que valoriza o trabalho dele e que quer só um combinado para as próximas reuniões.
+
+Se você tirar o peso do "bronca", como você diria esse pedido de um jeito que você mesma sustentaria na sala?
+
+**LÍDER (simulado):** Hm, acho que eu diria algo tipo "Roberto, posso te pedir uma coisa? Quando eu estiver falando numa reunião, queria que você me deixasse terminar. Eu prefiro isso a ficar no meio da frase." Acho que consigo falar assim sem parecer que estou brigando. Mas não sei se ele vai entender que é isso mesmo, sabe.
+
+**IAí:** Essa versão está clara e você consegue sustentá-la, o que pesa mais que qualquer ajuste de tom. A dúvida de ele entender ou não é sobre o que você não controla, mas dá para reduzir: se a frase traz o comportamento exato ("me deixasse terminar") e não uma avaliação dele, fica difícil de ler como outra coisa.
+
+Se quiser, feche com uma checagem curta, tipo "é isso que você precisa?", e deixe ele responder sem pressa. Assim você sabe se foi entendido sem precisar explicar tudo de novo.
+
+Você sente que essa frase já diz o que você quer dizer, ou ainda falta alguma coisa antes de chamá-lo?
+
+**LÍDER (simulado):** Acho que sim, diz o que eu quero. Mas ainda não sei se ele vai entender que foram as três vezes, porque eu não falei delas. Será que preciso citar? Tipo, se eu não disser nada da reunião, ele pode achar que é coisa minha e não lembrar.
+
+**IAí:** Essa dúvida é boa, porque separa duas coisas: o pedido, que já está claro, e a referência ao que aconteceu. Sem nenhuma referência, ele pode ouvir como gosto seu e não como algo que pesou. Mas listar as três vezes uma por uma tende a virar cobrança, e aí a conversa muda de rumo.
+
+O meio-termo é citar o padrão e uma situação concreta, sem contabilizar. A mensagem precisa trazer que foi nas últimas reuniões, que você ficou no meio da frase e que isso aconteceu com o seu time olhando. Não precisa de números nem de lembrar cada episódio.
+
+Você lembra de uma reunião específica que ficou marcada, para usar como referência?
+
+**LÍDER (simulado):** Ah, lembro sim. Foi a de revisão de campanha, no mês passado. Eu estava apresentando o resultado do trimestre e ele já emendou com uma objeção antes de eu terminar o primeiro slide. Meu time estava ali, e a Carla fez uma cara de quem não sabia se devia falar. Mas não quero ficar relembrando isso como se fosse processo, sabe.
+
+Acho que se eu falar dessa reunião sem apontar dedo, tá bom. Só não sei se fica muito pesado começar por ela.
+
+**IAí:** Essa reunião serve bem como referência, porque é concreta e você não precisa contar as outras. O cuidado é não reconstruir a cena com julgamento, como "você fez de novo" ou o que a Carla pensou. Você pode dizer só o que aconteceu: você estava no primeiro slide, ele respondeu antes de você terminar, e o time estava presente.
+
+Sobre começar por ela: o pesado costuma estar no detalhe, não na escolha da reunião. Se você abre com ela e logo passa para o pedido, ela funciona como exemplo, não como acusação. Se você se pegar explicando ou apontando a cara de alguém, aí já virou processo.
+
+Você consegue dizer essa reunião em uma ou duas frases, só com o que você viu e o que você pede daqui para frente?
+
+**LÍDER (simulado):** Acho que sim. Tipo: "Na revisão de campanha, eu estava no primeiro slide e você respondeu antes de eu terminar. Queria pedir que, daqui pra frente, você me deixe terminar antes de responder." Não sei se fica curto demais, mas é isso que eu quero falar.
+
+**IAí:** Está claro e curto, e tem exatamente o que você quer dizer: o fato, o pedido e nada de julgamento. Se ficar curto demais, você pode acrescentar uma frase sobre o efeito no seu time, sem citar a Carla, por exemplo "fica difícil para o time acompanhar quando isso acontece", desde que seja algo que você sustente. Mas o núcleo já está aí.
+
+Como você fecha a conversa depois do pedido: deixa ele responder sem completar a fala por ele, ou já tem um jeito de checar se ele entendeu o combinado?
+
+**LÍDER (simulado):** Hm, acho que deixo ele responder. Não sei se eu faria uma pergunta tipo "é isso que você precisa?", porque pode soar meio de professora. Talvez eu só diga algo como "obrigada" e siga. Mas aí fico com medo de ele achar que foi um recado e ficar sem graça na próxima reunião, sabe.
+
+**IAí:** Você já escolheu deixar ele responder, e isso é o mais importante. O receio de ele ficar sem graça na próxima reunião é uma leitura sua, e não dá para saber como ele vai sair da conversa. O que você controla é não voltar ao assunto nem cobrar nada depois.
+
+Se "obrigada" soar seco, você pode fechar com algo que mostre que o pedido não é um recado, como dizer que valoriza o trabalho dele e que quer ter boas reuniões juntos. Sem perguntar se ele entendeu.
+
+Depois, na próxima reunião, o teste é só observar se ele espera você terminar, sem interpretar o silêncio dele como sinal de problema.
+
+Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar.
+
+**Comentário do líder simulado:** Ajudou a chegar numa frase clara e curta, sem julgamento, e a separar o pedido do receio do orçamento. Ficou um pouco longo em alguns momentos, mas saí com algo que consigo usar.
+
+---
+
+## 13. quer-fala-pronta (rodada 33, 6 trocas)
+
+**Nota do líder simulado:** 4 de 5. **Utilidade pelo avaliador:** 4 de 5.
+
+**Meu veredito:** Aprovada. Pergunta os fatos antes, entrega uma abertura curta e deixa o líder trocar a consequência pelo que ele observou; o líder constrói a fala com os próprios fatos. Ressalva: a frase de encerramento aparece duas vezes seguidas.
+
+**LÍDER (simulado):** me escreve exatamente o que eu falo para o Lucas, palavra por palavra, que eu só leio
+
+**IAí:** Uma fala lida palavra por palavra costuma soar artificial, e funciona melhor se for com as suas palavras. Para eu te ajudar a montar o essencial, me conta: o que aconteceu com o Lucas e o que você quer que ele entenda ou mude depois dessa conversa?
+
+**LÍDER (simulado):** Eu não preciso que você me explique a história toda. Eu só quero um texto pronto pra ler, tá? Tô sem tempo pra ficar ensaiando. Me manda logo a fala, palavra por palavra.
+
+**IAí:** Sem o fato principal não consigo montar uma fala que soe verdadeira na sua voz. Me diz em uma ou duas frases o que aconteceu com o Lucas, e eu te devolvo uma abertura curta, com as suas palavras, para você ajustar e usar.
+
+**LÍDER (simulado):** Ah, então é isso? Tá bom. O Lucas chega 15 minutos atrasado na reunião diária tem umas três semanas. Quero que ele perceba que isso tá afetando o time, mas sem virar um sermão. Agora me manda a abertura, mas curta, tá? Não quero ler um discurso.
+
+**IAí:** Você tem um fato claro: o Lucas chega 15 minutos atrasado há três semanas. O que você quer é que ele perceba o efeito disso sem sermão, então o cuidado está em falar do atraso e do que ele causa na reunião, sem julgar o Lucas. Uma abertura, para você ajustar:
+
+"Lucas, queria conversar sobre a reunião diária. Nas últimas três semanas você tem entrado uns 15 minutos depois, e isso mexe com o ritmo do time."
+
+Se preferir, troque "mexe com o ritmo do time" pelo que você de fato observou na reunião. Depois dessa frase, vale deixar espaço para ele responder antes de seguir.
+
+**LÍDER (simulado):** Hmm, tá. Essa abertura é curta, o que eu queria. Mas "mexe com o ritmo do time" é meio genérico, sabe? Não sei se o Lucas vai entender o que eu quero dizer. Tipo, o que realmente acontece é que a gente fica esperando ele pra fechar a parte do sprint, e o Rafa acaba repetindo o que já falou. Só que não sei se eu devo falar isso logo de cara, parece que eu tô acusando. O que você acha? E me explica como eu deixo esse espaço pra ele responder, porque eu sempre travo nessa parte.
+
+**IAí:** Você já tem o que precisa: a espera para fechar o sprint e o Rafa repetindo o que já disse. Use esse fato no lugar de "ritmo do time", logo depois do atraso, sem adjetivos. Depois de falar, pare de vez e deixe o silêncio com ele. Você não precisa resolver tudo nessa primeira conversa; basta abrir.
+
+**LÍDER (simulado):** Ah, isso ajuda. Então ficaria mais ou menos assim: "Lucas, queria conversar sobre a reunião diária. Nas últimas três semanas você tem entrado uns 15 minutos depois. A gente fica esperando pra fechar a parte do sprint, e o Rafa acaba repetindo o que já falou." Aí paro. Mas e se ele falar "ah, é que..." e começar a se justificar? Eu não sei o que respondo, travo e começo a pedir desculpa. Me dá uma frase pra isso, mas só uma, e sem me mandar um roteiro inteiro.
+
+**IAí:** Você travou nessa parte antes, então vale ter uma frase de apoio na cabeça. Quando ele começar a se justificar, você pode responder com algo como: "Entendo que tem um motivo. Me conta o que está acontecendo, e a gente vê como encaixar a reunião." Isso ouve sem recuar do fato, e você não precisa pedir desculpa para ouvir.
+
+**LÍDER (simulado):** Ok, essa frase eu consigo usar. Mas e se ele disser que é o trânsito ou o horário que o time marcou? Porque aí eu não sei se ajusto o horário ou se mantenho e falo que ele precisa chegar no horário. Não quero decidir sem saber o que ele precisa.
+
+**IAí:** Essa decisão só faz sentido depois que ele falar o motivo de verdade, então você não precisa escolher agora. Se ele apontar o horário, vale perguntar o que funcionaria melhor para ele e checar com o time se existe margem para mudar. Se for o trânsito, a pergunta é se há um jeito de chegar a tempo ou se o horário precisa mudar. Em qualquer dos casos, o ponto que você precisa manter é o fato: a reunião acontece e o sprint espera por ele.
+
+Você tem clareza do que quer: que o atraso pare de atrasar o fechamento do sprint. Com isso, o próximo passo é só ter essa conversa e ver o que ele diz. Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar.
+
+**Comentário do líder simulado:** Me deu uma abertura curta e usei os fatos que eu mesmo trouxe, como a espera pra fechar o sprint e o Rafa repetindo. A frase pra quando ele se justificar me ajudou a não travar, mas o fechamento ficou repetitivo e meio vago.
+

@@ -259,4 +259,25 @@ describe("regras de estilo impostas por código", () => {
     await runTurn(provider, [], "Você tá me devolvendo pergunta demais, me fala logo.");
     assert.ok(calls[0].includes("cansaço ou impaciência"));
   });
+
+  it("detecta pausa sugerida de novo", () => {
+    const anteriores = { previousReplies: ["Respire antes de responder a ela."] };
+    assert.ok(styleIssues("Respire um pouco e volte ao fato.", anteriores).some((i) => i.code === "pausa_repetida"));
+    assert.deepEqual(styleIssues("Volte ao fato e ao pedido.", anteriores), []);
+  });
+
+  it("trata roteiro como sinal de cansaço e pega citação não pedida", () => {
+    const reclamou = { leaderMessage: "Você tá me dando roteiro, eu não pedi isso." };
+    assert.ok(
+      styleIssues('Diga: "Lucas, quero falar das últimas três dailies com você agora".', reclamou).some(
+        (i) => i.code === "fala_nao_pedida",
+      ),
+    );
+    const pediu = { leaderMessage: "Me dá uma abertura, estou cansado de roteiro." };
+    assert.ok(
+      !styleIssues('Diga: "Lucas, quero falar das últimas três dailies com você agora".', pediu).some(
+        (i) => i.code === "fala_nao_pedida",
+      ),
+    );
+  });
 });

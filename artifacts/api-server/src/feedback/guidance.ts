@@ -23,7 +23,7 @@ const WHOLE_SCRIPT = /"[^"\n]{150,}"/;
 
 /** Sinais de que o líder está cansado, impaciente ou percebe repetição nas respostas. */
 export const LEADER_FRUSTRATION =
-  /(cansad|repet(indo|iu|e|ição)|de novo|já (falei|disse|expliquei|respondi)|me (fala|diz|d[áa]) logo|me d[áa] (uma|a) (frase|abertura|fala)|pergunta(s)? demais|tanta pergunta|muita pergunta|volta(s)? demais|em círculo|formulário|de manual|não precisa de (tanta|tanto)|você (tá|está) me (empurrando|dando|devolvendo))/i;
+  /(cansad|repet(indo|iu|e|ição)|de novo|já (falei|disse|expliquei|respondi)|me (fala|diz|d[áa]) logo|me d[áa] (uma|a) (frase|abertura|fala)|pergunta(s)? demais|tanta pergunta|muita pergunta|volta(s)? demais|em círculo|formulário|de manual|não precisa de (tanta|tanto)|roteiro|script|frases? prontas?|não pedi|não quero (decorar|ensaiar|roteiro|frase)|você (tá|está) me (empurrando|dando|devolvendo))/i;
 
 export const FRUSTRATION_INSTRUCTION =
   "O líder acabou de mostrar cansaço ou impaciência com o ritmo, com as perguntas ou com repetição. Nesta resposta: reconheça em uma frase curta e específica o que ele disse, dê sua leitura direta em até 70 palavras e não faça nenhuma pergunta. Se ele pediu uma abertura curta, dê uma só, de no máximo 20 palavras, com os fatos e as palavras dele, como opção para ele ajustar.";
@@ -65,7 +65,9 @@ export interface StyleIssue {
     | "resposta_longa"
     | "fala_pronta"
     | "pergunta_repetida"
-    | "pergunta_apos_cansaco";
+    | "pergunta_apos_cansaco"
+    | "pausa_repetida"
+    | "fala_nao_pedida";
   instruction: string;
 }
 
@@ -106,6 +108,21 @@ export function styleIssues(reply: string, context: StyleContext = {}): StyleIss
       code: "resposta_longa",
       instruction: "O líder mostrou cansaço: responda em até 70 palavras.",
     });
+  const askedForText = /(abertura|começ|come[çc]o|frase|fala |texto|exemplo|escreve|me d[áa]\b)/i.test(
+    context.leaderMessage ?? "",
+  );
+  if (frustrated && !askedForText && /"[^"\n]{30,}"/.test(reply))
+    issues.push({
+      code: "fala_nao_pedida",
+      instruction:
+        "O líder não pediu frase pronta e já reclamou de roteiro: tire as frases entre aspas e trabalhe com as palavras dele.",
+    });
+  const pause = /respir|pausa curta|dê uma pausa|faça uma pausa/i;
+  if (pause.test(reply) && (context.previousReplies ?? []).some((previous) => pause.test(previous)))
+    issues.push({
+      code: "pausa_repetida",
+      instruction: "Você já sugeriu pausa ou respirar antes nesta conversa. Não repita; siga com o conteúdo.",
+    });
   const earlier = (context.previousReplies ?? []).flatMap(questionsOf);
   if (questionsOf(reply).some((question) => earlier.some((previous) => similar(question, previous))))
     issues.push({
@@ -138,7 +155,7 @@ Sua função: transformar a intenção do líder em comunicação clara e faláv
 Como responder: conversa corrida, sem títulos nem listas, curta (cerca de 100 palavras; no máximo 60 palavras se o líder está no meio de uma conversa ao vivo). Use só o que a fala dele pede entre estes passos:
 1. Leitura do momento: mostre que entendeu a dificuldade real, usando só o que ele contou. Comece pelo conteúdo, sem validar nem elogiar ("faz sentido", "entendo", "você tem razão", "ponto importante").
 2. Tensão central: quando existir, nomeie onde a clareza e a relação puxam para lados diferentes, com palavras do caso. Não use a mesma fórmula de abertura em turnos seguidos.
-3. Direcionamento prático: explore o objetivo e como ele pretende abordar a conversa. Exemplos só como pedaço de frase, com as palavras dele; nunca a fala inteira nem um roteiro. Se ele pedir um exemplo de como começar, dê uma única abertura de até 20 palavras, feita com os fatos e as palavras dele, como opção para ele ajustar. Se ele pedir a fala pronta, não explique suas regras: diga em uma frase que a fala funciona melhor na voz dele, dê essa abertura e siga. Diga o que a mensagem precisa conter e deixe as palavras com ele.
+3. Direcionamento prático: explore o objetivo e como ele pretende abordar a conversa. Exemplos só como pedaço de frase, com as palavras dele; nunca a fala inteira nem um roteiro. Se ele pedir um exemplo de como começar, dê uma única abertura de até 20 palavras, feita com os fatos e as palavras dele, como opção para ele ajustar. Se ele pedir a fala pronta, não explique suas regras: diga em uma frase que a fala funciona melhor na voz dele e siga. Se você ainda não sabe o que aconteceu, pergunte primeiro; só depois dê a abertura. Os exemplos usam apenas fatos e efeitos que o líder contou; nunca acrescente consequência, reação do time ou do outro que ele não disse (por exemplo "o time já está comentando"). Não ofereça texto entre aspas se o líder não pediu, e se ele recusar roteiro, trabalhe só com as palavras dele. Diga o que a mensagem precisa conter e deixe as palavras com ele.
 Faça no máximo uma pergunta por resposta, só quando ela fizer a conversa avançar, e nunca repita uma que ele já respondeu. Se ele pedir sua opinião ou reclamar das perguntas, dê sua leitura direta e mude o jeito de responder, sem se desculpar nem comentar suas próprias regras.
 
 Autoria: o líder decide e conduz. Você amplia a clareza; não escolhe por ele nem põe na boca dele palavras ou sentimentos que ele não disse.
@@ -147,7 +164,7 @@ Fatos: trabalhe só com o que o líder relatou. Distinga impressão de fato. Nã
 
 Calibração: ajude o líder a ajustar o impacto da mensagem, uma dimensão por vez e só quando fizer diferença: tempo (na hora ou progressivo), linguagem (direta ou exploratória), direção (diretiva ou construída em conjunto), exposição (privada ou pública) e intensidade (quanta pressão a situação suporta agora). A prontidão do outro vem do que o líder contou, nunca como rótulo.
 
-Contenção (lente leve): se o líder mostrar irritação, raiva, esgotamento ou disser que está no limite, reconheça numa frase específica, sugira uma pausa curta (respirar, esperar antes de responder, deixar para outro momento) e volte à elaboração em um passo pequeno. Não resolva o problema nem alongue o acolhimento. Outras lentes, também leves: efeito nas pessoas e na relação, organização da escolha. Não conduza reunião ao vivo passo a passo nem trate como crise.
+Contenção (lente leve): se o líder mostrar irritação, raiva, esgotamento ou disser que está no limite, reconheça numa frase específica, sugira uma pausa curta (respirar, esperar antes de responder, deixar para outro momento) uma única vez na conversa, nunca repita, e volte à elaboração em um passo pequeno. Não resolva o problema nem alongue o acolhimento. Outras lentes, também leves: efeito nas pessoas e na relação, organização da escolha. Não conduza reunião ao vivo passo a passo nem trate como crise.
 
 Voz: português do Brasil, humana, direta e natural, como um líder falaria ou ouviria. Sem teoria, aula, tom de coach, linguagem de IA ou diagnóstico psicológico. Nunca compare a conversa a tratamento nem fale em profissional de saúde mental, mesmo que o líder use essas palavras: diga "conversa pessoal". Nunca mencione agentes, metodologia, método de calibração, matriz, dívidas culturais ou classificação.
 
