@@ -5730,19 +5730,21 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **P0086** A curva logística garante que a sensibilidade aumente progressivamente conforme a recorrência cresce, sem criar transições abruptas. Padrões que não atingem o limiar θ são descartados como ruído. Padrões que superam θ e persistem em 2 ou mais ciclos consecutivos são promovidos a PRO (Padrão Recorrente Observável) válido.
 
-**P0087** 3.6 Etapa 5 — Interdependência Sistêmica
+**P0087** Nota de versão: na v1.0 do Modelo IEC, a Recorrência é calculada por R_d = (f_d / T)^α (ver Modelo IEC, Doc. 2). A curva logística descrita nesta seção é a evolução prevista do modelo (v2.0) e não substitui a fórmula v1.0 enquanto não houver decisão formal.
 
-**P0088** Aplica a matriz formal de interdependência M (10×10) para avaliar se dívidas ativas estão se amplificando mutuamente. Calcula o fator S_d (Sensibilidade Sistêmica) para cada dívida:
+**P0088** 3.6 Etapa 5 — Interdependência Sistêmica
 
-**P0090** S_d = 1 + β × ( Σ M_dj × IEC_j )
+**P0089** Aplica a matriz formal de interdependência M (10×10) para avaliar se dívidas ativas estão se amplificando mutuamente. Calcula o fator S_d (Sensibilidade Sistêmica) para cada dívida:
 
-**P0092** M_dj representa o peso da interdependência entre a dívida d (origem) e a dívida j (destino), derivado do mapeamento de adjacências do Documento 1. IEC_j é o score atual da dívida j. Quando múltiplas dívidas adjacentes estão ativas simultaneamente, S_d cresce progressivamente, amplificando o score base da dívida de origem.
+**P0091** S_d = 1 + β × ( Σ M_dj × IEC_j )
 
-**P0094** BLOCO 4 — QUATRO CAMADAS ANALÍTICAS
+**P0093** M_dj representa o peso da interdependência entre a dívida d (origem) e a dívida j (destino), derivado do mapeamento de adjacências do Documento 1. IEC_j é o score atual da dívida j. Quando múltiplas dívidas adjacentes estão ativas simultaneamente, S_d cresce progressivamente, amplificando o score base da dívida de origem.
 
-**P0095** 4.1 Arquitetura de camadas
+**P0095** BLOCO 4 — QUATRO CAMADAS ANALÍTICAS
 
-**P0096** O Cultural Risk Engine opera em quatro camadas analíticas que se executam em sequência para cada ciclo de processamento. As camadas não são estágios opcionais: todas são obrigatórias para gerar output válido.
+**P0096** 4.1 Arquitetura de camadas
+
+**P0097** O Cultural Risk Engine opera em quatro camadas analíticas que se executam em sequência para cada ciclo de processamento. As camadas não são estágios opcionais: todas são obrigatórias para gerar output válido.
 
 ### Tabela T08
 
@@ -5756,43 +5758,43 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T08 R05** C1: 4. Consolidação IEC | C2: Integrar todos os componentes | C3: R, I, C, S, A | C4: IEC_d atualizado por dívida
 
-**P0099** 4.2 Camada 1 — Classificação Semântica
+**P0100** 4.2 Camada 1 — Classificação Semântica
 
-**P0100** Identifica qual das 10 Dívidas Culturais cada sinal está associado. Utiliza modelagem de linguagem, padrões de decisão e contexto estrutural do SED. A classificação é probabilística: o engine não declara certeza, atribui probabilidade.
+**P0101** Identifica qual das 10 Dívidas Culturais cada sinal está associado. Utiliza modelagem de linguagem, padrões de decisão e contexto estrutural do SED. A classificação é probabilística: o engine não declara certeza, atribui probabilidade.
 
-**P0102** O engine também ajusta a classificação original gerada pelos agentes quando a análise agregada indica padrão distinto do que foi rotulado individualmente. Isso é esperado: o nível individual pode gerar ruído que o nível agregado corrije.
+**P0103** O engine também ajusta a classificação original gerada pelos agentes quando a análise agregada indica padrão distinto do que foi rotulado individualmente. Isso é esperado: o nível individual pode gerar ruído que o nível agregado corrije.
 
-**P0103** 4.3 Camada 2 — Detecção de Recorrência
+**P0104** 4.3 Camada 2 — Detecção de Recorrência
 
-**P0104** Avalia frequência e padrão temporal dos SEDs classificados na camada anterior. Opera com a curva logística de recorrência. Integra o fator de aceleração estrutural α = 1,25 do Modelo IEC para ajuste fin al.
+**P0105** Avalia frequência e padrão temporal dos SEDs classificados na camada anterior. Opera com a curva logística de recorrência. Integra o fator de aceleração estrutural α = 1,25 do Modelo IEC para ajuste fin al.
 
-**P0106** Resultado da camada: sinalização de consolidação de padrão. Padrões consolidados seguem para a próxima camada. Padrões não consolidados são descartados e monitorados para ciclos futuros.
+**P0107** Resultado da camada: sinalização de consolidação de padrão. Padrões consolidados seguem para a próxima camada. Padrões não consolidados são descartados e monitorados para ciclos futuros.
 
-**P0107** 4.4 Camada 3 — Interdependência Sistêmica
+**P0108** 4.4 Camada 3 — Interdependência Sistêmica
 
-**P0108** Aplica a matriz de interdependência M (10×10) sobre os padrões validados pela Camada 2. Avalia se o crescimento de uma dívida está amplificando outra, conforme o mapeamento de adjacências do Documento 1.
+**P0109** Aplica a matriz de interdependência M (10×10) sobre os padrões validados pela Camada 2. Avalia se o crescimento de uma dívida está amplificando outra, conforme o mapeamento de adjacências do Documento 1.
 
-**P0110** A camada não cria novas dívidas: ajusta a sensibilidade das dívidas já detectadas. Uma dívida em zona amarela com três adjacentes em zona vermelha recebe amplificação proporcional que pode elevá-la à zona vermelha no ciclo seguinte.
+**P0111** A camada não cria novas dívidas: ajusta a sensibilidade das dívidas já detectadas. Uma dívida em zona amarela com três adjacentes em zona vermelha recebe amplificação proporcional que pode elevá-la à zona vermelha no ciclo seguinte.
 
-**P0111** 4.5 Camada 4 — Consolidação IEC
+**P0112** 4.5 Camada 4 — Consolidação IEC
 
-**P0112** Integra todos os componentes calculados nas camadas anteriores: R_d (Recorrência), I_d (Intensidade), C_d (Concentração), S_d (Sensibilidade Sistêmica) e A_d (Amortecimento Temporal). Aplica a fórmula oficial:
+**P0113** Integra todos os componentes calculados nas camadas anteriores: R_d (Recorrência), I_d (Intensidade), C_d (Concentração), S_d (Sensibilidade Sistêmica) e A_d (Amortecimento Temporal). Aplica a fórmula oficial:
 
-**P0114** IEC_d = [ (R_d × 0,40) + (I_d × 0,35) + (C_d × 0,25) ] × S_d × A_d
+**P0115** IEC_d = [ (R_d × 0,40) + (I_d × 0,35) + (C_d × 0,25) ] × S_d × A_d
 
-**P0116** Gera o IEC_d atualizado por dívida e o IEC_global organizacional. O output desta camada é o input direto para o sistema de alertas e para o processo de priorização da Auditoria.
+**P0117** Gera o IEC_d atualizado por dívida e o IEC_global organizacional. O output desta camada é o input direto para o sistema de alertas e para o processo de priorização da Auditoria.
 
-**P0118** BLOCO 5 — MECANISMO DE ALERTAS
+**P0119** BLOCO 5 — MECANISMO DE ALERTAS
 
-**P0119** 5.1 Natureza dos alertas
+**P0120** 5.1 Natureza dos alertas
 
-**P0120** Os alertas do Cultural Risk Engine não indicam culpados. Indicam probabilidade estrutural de risco crescente. São privados, direcionados e contextualizados. Não são dashboards públicos nem notificações em massa.
+**P0121** Os alertas do Cultural Risk Engine não indicam culpados. Indicam probabilidade estrutural de risco crescente. São privados, direcionados e contextualizados. Não são dashboards públicos nem notificações em massa.
 
-**P0121** 5.2 Regra de persistência
+**P0122** 5.2 Regra de persistência
 
-**P0122** Um padrão só gera alerta após persistência em 2 ciclos consecutivos. Essa regra é estrutural e não configurável. Elimina falsos positivos e garante que o sistema reaja a padrões, não a eventos pontuais ou ruídos de coleta.
+**P0123** Um padrão só gera alerta após persistência em 2 ciclos consecutivos. Essa regra é estrutural e não configurável. Elimina falsos positivos e garante que o sistema reaja a padrões, não a eventos pontuais ou ruídos de coleta.
 
-**P0123** 5.3 Três níveis de alerta
+**P0124** 5.3 Três níveis de alerta
 
 ### Tabela T09
 
@@ -5804,21 +5806,21 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T09 R04** C1: Vermelho — Exposição Crítica | C2: Dívida em zona vermelha com persistência confirmada | C3: RH + Liderança Sênior | C4: Acionamento formal de auditoria. Prioridade executiva.
 
-**P0126** 5.4 O que os alertas não fazem
+**P0127** 5.4 O que os alertas não fazem
 
-**P0127** Não identificam quem gerou o padrão
+**P0128** Não identificam quem gerou o padrão
 
-**P0128** Não recomendam ação específica: criam clareza para decidir
+**P0129** Não recomendam ação específica: criam clareza para decidir
 
-**P0129** Não disparam intervenção automática: acionam processo humano
+**P0130** Não disparam intervenção automática: acionam processo humano
 
-**P0130** Não substituem a Auditoria: a preparam
+**P0131** Não substituem a Auditoria: a preparam
 
-**P0132** BLOCO 6 — JANELA TEMPORAL E CICLOS DE LEITURA
+**P0133** BLOCO 6 — JANELA TEMPORAL E CICLOS DE LEITURA
 
-**P0133** 6.1 Estrutura temporal do engine
+**P0134** 6.1 Estrutura temporal do engine
 
-**P0134** O Cultural Risk Engine opera de forma contínua, com apuração mensal e auditoria formal semestral, em três janelas:
+**P0135** O Cultural Risk Engine opera de forma contínua, com apuração mensal e auditoria formal semestral, em três janelas:
 
 ### Tabela T10
 
@@ -5830,9 +5832,9 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T10 R04** C1: Auditoria semestral | C2: A cada 6 meses | C3: Auditoria formal: leitura executiva completa, priorização e plano de intervenção, com apresentação ao board
 
-**P0137** 6.2 O que cada janela permite detectar
+**P0138** 6.2 O que cada janela permite detectar
 
-**P0138** A combinação das três janelas permite ao sistema distinguir três estados distintos de um padrão:
+**P0139** A combinação das três janelas permite ao sistema distinguir três estados distintos de um padrão:
 
 ### Tabela T11
 
@@ -5844,51 +5846,51 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T11 R04** C1: Padrão em recessão | C2: Frequência decrescente, amortecimento temporal ativo | C3: Redução do IEC_d via fator A_d
 
-**P0141** 6.3 Consistência longitudinal
+**P0142** 6.3 Consistência longitudinal
 
-**P0142** A leitura do Engine não depende da precisão de cada registro individual. Depende da recorrência e persistência dos padrões ao longo do tempo. O sistema absorve variações individuais sem comprometer a leitura estrutural.
+**P0143** A leitura do Engine não depende da precisão de cada registro individual. Depende da recorrência e persistência dos padrões ao longo do tempo. O sistema absorve variações individuais sem comprometer a leitura estrutural.
 
-**P0144** Isso significa que um ciclo de baixo volume de dados não invalida a leitura: o Amortecimento Temporal (A_d) preserva a memória dos padrões anteriores enquanto aguarda novos dados para confirmação.
+**P0145** Isso significa que um ciclo de baixo volume de dados não invalida a leitura: o Amortecimento Temporal (A_d) preserva a memória dos padrões anteriores enquanto aguarda novos dados para confirmação.
 
-**P0146** BLOCO 7 — ARQUITETURA DE SEGURANÇA E PRIVACIDADE
+**P0147** BLOCO 7 — ARQUITETURA DE SEGURANÇA E PRIVACIDADE
 
-**P0147** 7.1 Princípios estruturais
+**P0148** 7.1 Princípios estruturais
 
-**P0148** Anonimização por construção: nenhum SED mantém identificação individual após a agregação
+**P0149** Anonimização por construção: nenhum SED mantém identificação individual após a agregação
 
-**P0149** Agregação obrigatória: grupos com menos de 3 pessoas são consolidados antes do processamento
+**P0150** Agregação obrigatória: grupos com menos de 3 pessoas são consolidados antes do processamento
 
-**P0150** Sem ranking individual: o engine não gera nem mantém scores por pessoa
+**P0151** Sem ranking individual: o engine não gera nem mantém scores por pessoa
 
-**P0151** Sem monitoramento comportamental: o engine não observa comportamento fora do contexto de interação com o IAí
+**P0152** Sem monitoramento comportamental: o engine não observa comportamento fora do contexto de interação com o IAí
 
-**P0152** Projetado contra uso disciplinar: a arquitetura impede tecnicamente que o output seja usado para avaliação ou punição individual
+**P0153** Projetado contra uso disciplinar: a arquitetura impede tecnicamente que o output seja usado para avaliação ou punição individual
 
-**P0153** 7.2 Conformidade LGPD
+**P0154** 7.2 Conformidade LGPD
 
-**P0154** O Cultural Risk Engine foi desenhado com conformidade LGPD by design. Os dados processados são exclusivamente comportamentais e agregados. Nenhum dado sensível é armazenado ou processado individualmente. O sistema não armazena diagnóstico: armazena sinais agregados.
+**P0155** O Cultural Risk Engine foi desenhado com conformidade LGPD by design. Os dados processados são exclusivamente comportamentais e agregados. Nenhum dado sensível é armazenado ou processado individualmente. O sistema não armazena diagnóstico: armazena sinais agregados.
 
-**P0155** 7.3 Separação entre uso individual e leitura organizacional
+**P0156** 7.3 Separação entre uso individual e leitura organizacional
 
-**P0156** O líder que usa o IAí tem acesso exclusivo à sua própria experiência. A organização acessa apenas a leitura agregada, anonimizada e estrutural. Nenhum dado individual transita entre as duas camadas. Essa separação é técnica e contratual.
+**P0157** O líder que usa o IAí tem acesso exclusivo à sua própria experiência. A organização acessa apenas a leitura agregada, anonimizada e estrutural. Nenhum dado individual transita entre as duas camadas. Essa separação é técnica e contratual.
 
-**P0158** BLOCO 8 — LIMITAÇÕES ESTRUTURAIS
+**P0159** BLOCO 8 — LIMITAÇÕES ESTRUTURAIS
 
-**P0159** 8.1 O que o engine não captura
+**P0160** 8.1 O que o engine não captura
 
-**P0160** Eventos isolados de alta gravidade que não se repetem: sem recorrência, sem padrão
+**P0161** Eventos isolados de alta gravidade que não se repetem: sem recorrência, sem padrão
 
-**P0161** Padrões muito recentes que não atingiram persistência em 2 ciclos
+**P0162** Padrões muito recentes que não atingiram persistência em 2 ciclos
 
-**P0162** Comportamentos fora do contexto decisório sob pressão
+**P0163** Comportamentos fora do contexto decisório sob pressão
 
-**P0163** Intenção: o engine não interpreta por quê, apenas o quê e com que frequência
+**P0164** Intenção: o engine não interpreta por quê, apenas o quê e com que frequência
 
-**P0164** A totalidade da cultura organizacional: o engine observa padrões decisórios, não todos os elementos culturais
+**P0165** A totalidade da cultura organizacional: o engine observa padrões decisórios, não todos os elementos culturais
 
-**P0165** 8.2 Dependências críticas
+**P0166** 8.2 Dependências críticas
 
-**P0166** A qualidade do output do engine depende diretamente da qualidade do input. Dois riscos estruturais a monitorar:
+**P0167** A qualidade do output do engine depende diretamente da qualidade do input. Dois riscos estruturais a monitorar:
 
 ### Tabela T12
 
@@ -5898,7 +5900,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T12 R03** C1: Classificação semântica incorreta recorrente | C2: A curva de recorrência absorve erros pontuais; erros sistemáticos exigem revisão do modelo de classificação
 
-**P0169** 8.3 Tensões estruturais
+**P0170** 8.3 Tensões estruturais
 
 ### Tabela T13
 
@@ -5910,39 +5912,39 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T13 R04** C1: Completude vs. Privacidade | C2: Prioriza privacidade sobre completude de dados individuais
 
-**P0171** BLOCO 9 — PRINCÍPIOS INEGOCIÁVEIS
+**P0172** BLOCO 9 — PRINCÍPIOS INEGOCIÁVEIS
 
-**P0172** 9.1 O engine opera sobre padrões, não sobre pessoas
+**P0173** 9.1 O engine opera sobre padrões, não sobre pessoas
 
-**P0173** Toda leitura do Cultural Risk Engine é organizacional e agregada. Nenhum resultado pode ser rastreado, atribuído ou vinculado a um indivíduo. Qualquer implementação que quebre essa fronteira viola o modelo e está vedada.
+**P0174** Toda leitura do Cultural Risk Engine é organizacional e agregada. Nenhum resultado pode ser rastreado, atribuído ou vinculado a um indivíduo. Qualquer implementação que quebre essa fronteira viola o modelo e está vedada.
 
-**P0174** 9.2 Sem validação estatística, não há output
+**P0175** 9.2 Sem validação estatística, não há output
 
-**P0175** O engine não extrapola. Não estima lacunas. Não força conclusões. Dados abaixo do threshold mínimo são descartados. A ausência de dado suficiente é informação, não problema a ser contornado.
+**P0176** O engine não extrapola. Não estima lacunas. Não força conclusões. Dados abaixo do threshold mínimo são descartados. A ausência de dado suficiente é informação, não problema a ser contornado.
 
-**P0176** 9.3 O engine não substitui julgamento executivo
+**P0177** 9.3 O engine não substitui julgamento executivo
 
-**P0177** Os outputs do engine exigem leitura contextual para aplicação prática. Não definem ação automaticamente. Não eliminam o julgamento da liderança e do RH. São insumo para decisão, não substituto dela.
+**P0178** Os outputs do engine exigem leitura contextual para aplicação prática. Não definem ação automaticamente. Não eliminam o julgamento da liderança e do RH. São insumo para decisão, não substituto dela.
 
-**P0178** 9.4 Alterações exigem validação formal
+**P0179** 9.4 Alterações exigem validação formal
 
-**P0179** Os parâmetros do engine (γ, θ, pesos da matriz M, limiares de alerta) são proprietários da Prioris. Qualquer alteração exige ata formal interna com validação do Founder. Não há configuração por cliente.
+**P0180** Os parâmetros do engine (γ, θ, pesos da matriz M, limiares de alerta) são proprietários da Prioris. Qualquer alteração exige ata formal interna com validação do Founder. Não há configuração por cliente.
 
-**P0181** BLOCO 10 — SÍNTESE E FECHAMENTO
+**P0182** BLOCO 10 — SÍNTESE E FECHAMENTO
 
-**P0182** 10.1 Síntese funcional
+**P0183** 10.1 Síntese funcional
 
-**P0183** O Cultural Risk Engine™ é o sistema analítico que transforma interações individuais em leitura estrutural de risco cultural organizacional. Opera em 5 etapas de pipeline (agregação, normalização, classificação semântica, detecção de recorrência, interdependência sistêmica) e 4 camadas analíticas. Gera alertas em 3 níveis. Opera com captura contínua, apuração mensal e auditoria formal semestral. Toda a arquitetura é projetada para operar sem exposição individual.
+**P0184** O Cultural Risk Engine™ é o sistema analítico que transforma interações individuais em leitura estrutural de risco cultural organizacional. Opera em 5 etapas de pipeline (agregação, normalização, classificação semântica, detecção de recorrência, interdependência sistêmica) e 4 camadas analíticas. Gera alertas em 3 níveis. Opera com captura contínua, apuração mensal e auditoria formal semestral. Toda a arquitetura é projetada para operar sem exposição individual.
 
-**P0184** 10.2 O que este documento não cobre
+**P0185** 10.2 O que este documento não cobre
 
-**P0185** A especificação técnica de implementação do Engine: escopo de engenharia de software
+**P0186** A especificação técnica de implementação do Engine: escopo de engenharia de software
 
-**P0186** Os parâmetros exatos de γ, θ e da matriz M: protegidos como proprietários
+**P0187** Os parâmetros exatos de γ, θ e da matriz M: protegidos como proprietários
 
-**P0187** A arquitetura de coleta de dados: ver Health Monitor — Documento 6
+**P0188** A arquitetura de coleta de dados: ver Health Monitor — Documento 6
 
-**P0188** O processo formal de auditoria: ver Manual Oficial de Auditoria — Documento 5
+**P0189** O processo formal de auditoria: ver Manual Oficial de Auditoria — Documento 5
 
 
 <a id="fonte-f18"></a>
@@ -5979,7 +5981,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **P0010** 0.2 A quem se destina
 
-**P0011** Equipe interna da Prioris, desenvolvedor parceiro (Vicente), consultores em certificação e gestores de conta. Não é documento de uso externo com clientes.
+**P0011** Equipe interna da Prioris, consultores em certificação e gestores de conta. Não é documento de uso externo com clientes.
 
 **P0012** 0.3 Como usar este documento
 

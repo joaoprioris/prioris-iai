@@ -41,9 +41,9 @@
       "group": "fundamentos",
       "ref": "F04",
       "source": "DOSSIÊ CONSOLIDADO — SISTEMA IAí - PRIORIS.docx",
-      "sha256": "ae7d02e3277caa960117d4256157f21a50018ceb1b00e790b1fb058d6f55c518",
-      "bytes": 22703,
-      "paragraphs": 319,
+      "sha256": "db1ded2e9ebc9cdee81260927073efe4d7a2b699336cafe29f9f0c56628f1622",
+      "bytes": 22630,
+      "paragraphs": 318,
       "tables": 1,
       "drawings": 0,
       "legacy_pictures": 23
@@ -327,9 +327,9 @@
       "group": "agentes",
       "ref": "F17",
       "source": "AGENTES/SISTÊMICO/CULTURAL_RISK_ENGINE.docx",
-      "sha256": "5e7730190876b3d987e9931df5f3e3e7026719e687bbfa2c84acbeb8300d90b3",
-      "bytes": 2193298,
-      "paragraphs": 344,
+      "sha256": "21016eb396b39540fe635722b11ceaab5a60380f8da54ab71874ea46c714a197",
+      "bytes": 2193449,
+      "paragraphs": 345,
       "tables": 13,
       "drawings": 0,
       "legacy_pictures": 0
@@ -338,8 +338,8 @@
       "group": "agentes",
       "ref": "F18",
       "source": "AGENTES/SISTÊMICO/HEALTH_MONITOR.docx",
-      "sha256": "a6a94f6ae98a0a6c79bcf7fa3f88deb4a7b1616395eed131e4778a20be361f1d",
-      "bytes": 2195315,
+      "sha256": "7f8cd037c6720b0ec681cb0870fe46ba8c64d64700a4659f1bd0e5ed592cef52",
+      "bytes": 2195296,
       "paragraphs": 430,
       "tables": 15,
       "drawings": 0,
@@ -365,8 +365,8 @@
   ],
   "original_archive": {
     "path": "fontes-originais.tar.xz",
-    "sha256": "76b4879eb8135b11aa6343d72f45c97183d728e6042e5562135edfa64e864ee9",
-    "bytes": 2788704,
+    "sha256": "3c2e62fbf9769b88ac09f4f891fc2f0580efb0231313c11b8f15813e62408253",
+    "bytes": 2788740,
     "files": 32
   }
 }

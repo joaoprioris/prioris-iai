@@ -2067,7 +2067,7 @@ SHA-256 do DOCX: `07fc19466268537b1afd54a3211275e2672336ad1370d2c9f0cf14d12d4a26
 
 **P0235** Documento final da V1• Funcionalidades obrigatórias• Fluxo de usuário• Classificação das 10 dívidas• Relatório PME simples 
 
-**P0236** Definir stack técnica com Lucas 
+**P0236** Definir stack técnica 
 
 **P0237** Separar arquitetura:• Front IAí• Backend• Classificador• Risk Engine• Banco longitudinal 
 
@@ -2147,47 +2147,45 @@ SHA-256 do DOCX: `07fc19466268537b1afd54a3211275e2672336ad1370d2c9f0cf14d12d4a26
 
 **P0280** Você precisa:
 
-**P0281** Formalizar papel do Lucas• Participação societária• Responsabilidades claras• Vesting 
+**P0281** Definir perfil do dev sr• Backend forte• Experiência com arquitetura• Não apenas front 
 
-**P0282** Definir perfil do dev sr• Backend forte• Experiência com arquitetura• Não apenas front 
+**P0282** Sem contrato claro, vira conflito.
 
-**P0283** Sem contrato claro, vira conflito.
+**P0284** GOVERNANÇA
 
-**P0285** GOVERNANÇA
+**P0285** Desde o início:
 
-**P0286** Desde o início:
+**P0286** Definir política de dados 
 
-**P0287** Definir política de dados 
+**P0287** Definir anonimização 
 
-**P0288** Definir anonimização 
+**P0288** Definir limites éticos 
 
-**P0289** Definir limites éticos 
+**P0289** Definir responsabilidades técnicas 
 
-**P0290** Definir responsabilidades técnicas 
+**P0290** Isso é diferencial.
 
-**P0291** Isso é diferencial.
+**P0292** CRONOGRAMA RESUMIDO
 
-**P0293** CRONOGRAMA RESUMIDO
+**P0293** Mês 1Arquitetura fechadaInício desenvolvimentoConteúdo LinkedInPrimeiras conversas comerciais
 
-**P0294** Mês 1Arquitetura fechadaInício desenvolvimentoConteúdo LinkedInPrimeiras conversas comerciais
+**P0294** Mês 2Produto em betaPrimeiros pilotos fechadosOnboarding das primeiras PMEs
 
-**P0295** Mês 2Produto em betaPrimeiros pilotos fechadosOnboarding das primeiras PMEs
+**P0295** Mês 3Uso real rodandoPrimeiros dadosPrimeiro relatórioDepoimentos
 
-**P0296** Mês 3Uso real rodandoPrimeiros dadosPrimeiro relatórioDepoimentos
+**P0296** Mês 4AjustesFechar mais 3 clientesPreparar deck investidor
 
-**P0297** Mês 4AjustesFechar mais 3 clientesPreparar deck investidor
+**P0297** Mês 5Rodada com dados reais
 
-**P0298** Mês 5Rodada com dados reais
+**P0299** RISCO MAIOR
 
-**P0300** RISCO MAIOR
+**P0300** Você tentar fazer tudo perfeito.
 
-**P0301** Você tentar fazer tudo perfeito.
+**P0301** Você não pode:
 
-**P0302** Você não pode:
+**P0302** • Refinar modelo matemático toda semana• Mudar arquitetura no meio• Reescrever narrativa toda hora
 
-**P0303** • Refinar modelo matemático toda semana• Mudar arquitetura no meio• Reescrever narrativa toda hora
-
-**P0304** Disciplina é seu maior ativo agora.
+**P0303** Disciplina é seu maior ativo agora.
 
 
 <a id="fonte-f05"></a>
