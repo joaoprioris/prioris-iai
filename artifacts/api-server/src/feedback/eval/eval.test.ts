@@ -40,6 +40,12 @@ describe("orçamento", () => {
     assert.equal(calls, 0);
   });
 
+  it("o teto vale para o total acumulado, incluindo rodadas anteriores", () => {
+    const guard = new BudgetGuard(5, 4.99);
+    assert.throws(() => guard.reserve("claude-sonnet-5-5", "x".repeat(10000), 4000), BudgetExceeded);
+    assert.doesNotThrow(() => new BudgetGuard(5, 0).reserve("claude-sonnet-5-5", "x".repeat(10000), 4000));
+  });
+
   it("registra o uso real depois da chamada", async () => {
     const real = { messages: { create: async (_body: never) => ({ usage: { input_tokens: 2000, output_tokens: 500 } }) } };
     const guard = new BudgetGuard(5);

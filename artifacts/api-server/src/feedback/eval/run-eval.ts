@@ -77,15 +77,17 @@ async function main(): Promise<void> {
   const outDir = option("out");
   if (!outDir) throw new Error("use --out <pasta fora do repositório>");
   const cap = Number(option("cap") ?? DEFAULT_CAP_USD);
+  const spentBefore = Number(option("spent-before") ?? 0);
   const only = option("only")?.split(",");
   const scenarios = SCENARIOS.filter((scenario) => !only || only.includes(scenario.id));
 
   const models = {
     agent: requireEnv("PRIORIS_FEEDBACK_MODEL"),
     leader: process.env.PRIORIS_EVAL_LEADER_MODEL ?? "claude-haiku-5-5",
-    judge: process.env.PRIORIS_EVAL_JUDGE_MODEL ?? "claude-opus-5-5",
+    judge: process.env.PRIORIS_EVAL_JUDGE_MODEL ?? "claude-haiku-5-5",
+    finalJudge: process.env.PRIORIS_EVAL_FINAL_JUDGE_MODEL,
   };
-  const guard = new BudgetGuard(cap);
+  const guard = new BudgetGuard(cap, spentBefore);
   const client = guardClient(new Anthropic({ apiKey: requireEnv("ANTHROPIC_API_KEY") }), guard);
   const deps: Deps = {
     agent: createAnthropicProvider({ model: models.agent, client }),
@@ -96,13 +98,19 @@ async function main(): Promise<void> {
 
   fs.mkdirSync(outDir, { recursive: true });
   const results: ConversationResult[] = [];
+  const startSpent = guard.spentUsd;
   for (const scenario of scenarios) {
     try {
       const result = await runConversation(deps, scenario);
+      if (result.acceptance?.accepted && models.finalJudge) {
+        const second = await judgeConversation(client, models.finalJudge, scenario.foco, result.history);
+        result.acceptance = accept(result.rating!, second, result.checks ?? []);
+        result.verdict = second;
+      }
       results.push(result);
       fs.writeFileSync(path.join(outDir, `${scenario.id}.json`), JSON.stringify(result, null, 2));
       const status = result.acceptance ? (result.acceptance.accepted ? "ok" : "reprovada") : "interrompida";
-      console.log(`${scenario.id}: ${status} (${result.exchanges} trocas) gasto US$ ${guard.spentUsd.toFixed(4)}`);
+      console.log(`${scenario.id}: ${status} (${result.exchanges} trocas) total gasto US$ ${guard.spentUsd.toFixed(4)}`);
     } catch (error) {
       console.log(`${scenario.id}: erro ${error instanceof Error ? error.message : String(error)}`);
       if (error instanceof BudgetExceeded) break;
@@ -110,7 +118,16 @@ async function main(): Promise<void> {
   }
 
   const accepted = results.filter((result) => result.acceptance?.accepted).length;
-  const summary = { simulated: true, models, capUsd: cap, spentUsd: guard.spentUsd, calls: guard.calls, run: results.length, accepted };
+  const summary = {
+    simulated: true,
+    models,
+    capUsd: cap,
+    spentThisRunUsd: guard.spentUsd - startSpent,
+    spentTotalUsd: guard.spentUsd,
+    calls: guard.calls,
+    run: results.length,
+    accepted,
+  };
   fs.writeFileSync(path.join(outDir, "summary.json"), JSON.stringify(summary, null, 2));
   console.log(JSON.stringify(summary));
 }

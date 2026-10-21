@@ -30,12 +30,14 @@ export function costUsd(model: string, usage: Usage): number {
 
 /** Trava dura: recusa a chamada se o pior caso estourar o teto definido pelo dono. */
 export class BudgetGuard {
-  spentUsd = 0;
+  spentUsd: number;
   calls = 0;
   readonly capUsd: number;
 
-  constructor(capUsd: number = DEFAULT_CAP_USD) {
+  /** O teto vale para o total de todas as rodadas; spentBeforeUsd carrega o que já foi gasto. */
+  constructor(capUsd: number = DEFAULT_CAP_USD, spentBeforeUsd = 0) {
     this.capUsd = capUsd;
+    this.spentUsd = spentBeforeUsd;
   }
 
   reserve(model: string, inputText: string, maxOutputTokens: number): void {
