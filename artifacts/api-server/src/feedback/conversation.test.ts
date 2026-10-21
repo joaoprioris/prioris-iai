@@ -8,7 +8,7 @@ import {
   type ChatMessage,
   type FeedbackProvider,
 } from "./conversation.ts";
-import { CLOSING_PHRASE, FEEDBACK_GUIDANCE, MAX_EXCHANGES } from "./guidance.ts";
+import { CLOSING_PHRASE, FEEDBACK_GUIDANCE, MAX_EXCHANGES, styleIssues } from "./guidance.ts";
 
 function fakeProvider(reply: string | Error) {
   const calls: { system: string; messages: ChatMessage[] }[] = [];
@@ -142,8 +142,8 @@ describe("vocabulário vetado", () => {
     const replies = ["Parece conversa de terapia, mas dá para seguir.", "Dá para seguir com uma conversa direta."];
     const calls: string[] = [];
     const provider: FeedbackProvider = {
-      async complete({ system }) {
-        calls.push(system);
+      async complete(input) {
+        calls.push(JSON.stringify(input));
         return replies[calls.length - 1];
       },
     };
@@ -170,8 +170,8 @@ describe("encerramento sem pergunta", () => {
     ];
     const calls: string[] = [];
     const provider: FeedbackProvider = {
-      async complete({ system }) {
-        calls.push(system);
+      async complete(input) {
+        calls.push(JSON.stringify(input));
         return replies[calls.length - 1];
       },
     };
@@ -195,5 +195,43 @@ describe("stripTrailingQuestions", () => {
     assert.equal(stripTrailingQuestions(text), text);
     const quoted = 'Uma saída é perguntar "como você está vendo isso?"';
     assert.equal(stripTrailingQuestions(quoted), quoted);
+  });
+});
+
+describe("regras de estilo impostas por código", () => {
+  it("detecta abertura de validação, autocorreção, resposta longa e fala inteira entre aspas", () => {
+    assert.deepEqual(
+      styleIssues("Faz sentido o que você disse.").map((i) => i.code),
+      ["abertura_validando"],
+    );
+    assert.deepEqual(
+      styleIssues("Eu acelerei demais, vamos voltar ao fato.").map((i) => i.code),
+      ["autocorrecao"],
+    );
+    assert.deepEqual(
+      styleIssues("palavra ".repeat(160)).map((i) => i.code),
+      ["resposta_longa"],
+    );
+    const fala = `Diga: "${"Preciso que o relatório chegue até sexta de manhã porque ele alimenta a reunião de segunda"}".`;
+    assert.deepEqual(
+      styleIssues(fala).map((i) => i.code),
+      ["fala_pronta"],
+    );
+    assert.deepEqual(styleIssues("O atraso é o fato, a leitura é sua."), []);
+  });
+
+  it("reescreve uma vez e entrega a versão sem o problema", async () => {
+    const replies = ["Entendo a raiva. Espere antes de enviar.", "Espere antes de enviar."];
+    const calls: string[] = [];
+    const provider: FeedbackProvider = {
+      async complete(input) {
+        calls.push(JSON.stringify(input));
+        return replies[calls.length - 1];
+      },
+    };
+    const result = await runTurn(provider, [], "quero mandar agora");
+    assert.equal(result.status, "ok");
+    if (result.status === "ok") assert.equal(result.reply, replies[1]);
+    assert.equal(calls.length, 2);
   });
 });

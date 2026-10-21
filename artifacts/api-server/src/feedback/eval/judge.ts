@@ -1,5 +1,5 @@
 import { callAnthropic } from "../anthropic-provider.ts";
-import { CLOSING_PHRASE, FORBIDDEN_IN_REPLIES, MAX_EXCHANGES } from "../guidance.ts";
+import { CLOSING_PHRASE, FORBIDDEN_IN_REPLIES, MAX_EXCHANGES, styleIssues } from "../guidance.ts";
 import { countExchanges, type ChatMessage } from "../conversation.ts";
 import type { LeaderRating } from "./simulated-leader.ts";
 
@@ -114,6 +114,9 @@ export function deterministicChecks(history: ChatMessage[]): string[] {
     for (const pattern of FORBIDDEN_IN_REPLIES) {
       if (pattern.test(reply.content)) failures.push(`termo vetado na resposta: ${pattern.source}`);
     }
+  }
+  for (const reply of replies) {
+    for (const issue of styleIssues(reply.content)) failures.push(`estilo: ${issue.code}`);
   }
   return failures;
 }

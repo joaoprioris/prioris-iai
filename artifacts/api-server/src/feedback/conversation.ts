@@ -6,6 +6,8 @@ import {
   FORBIDDEN_RETRY_INSTRUCTION,
   LAST_EXCHANGE_INSTRUCTION,
   MAX_EXCHANGES,
+  styleIssues,
+  styleRetryInstruction,
 } from "./guidance.ts";
 
 export const MAX_USER_MESSAGE_CHARS = 4000;
@@ -55,6 +57,18 @@ export function stripTrailingQuestions(text: string): string {
   return result;
 }
 
+/** Reescrita: o modelo vê o próprio rascunho e a correção pedida, em vez de refazer a resposta do zero. */
+function rewriteRequest(system: string, messages: ChatMessage[], draft: string, instruction: string) {
+  return {
+    system,
+    messages: [
+      ...messages,
+      { role: "assistant" as const, content: draft },
+      { role: "user" as const, content: `${instruction} Responda só com a nova versão, sem comentar a correção.` },
+    ],
+  };
+}
+
 function withClosingPhrase(reply: string): string {
   const text = reply.trim();
   return text.endsWith(CLOSING_PHRASE) ? text : `${text}\n\n${CLOSING_PHRASE}`;
@@ -86,19 +100,20 @@ export async function runTurn(
     raw = await provider.complete({ system, messages });
     // Vocabulário vetado nunca chega ao líder: uma nova tentativa avisada e, se persistir, erro sem consumir troca.
     if (hasForbidden(raw ?? "")) {
-      raw = await provider.complete({
-        system: `${system}\n\n${FORBIDDEN_RETRY_INSTRUCTION}`,
-        messages,
-      });
+      raw = await provider.complete(rewriteRequest(system, messages, raw, FORBIDDEN_RETRY_INSTRUCTION));
       if (hasForbidden(raw ?? "")) return { status: "error" };
+    }
+    // Estilo: até duas reescritas avisadas; vale a nova resposta se ela tiver menos problemas e nenhum termo vetado.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const issues = styleIssues(raw);
+      if (issues.length === 0) break;
+      const again = await provider.complete(rewriteRequest(system, messages, raw, styleRetryInstruction(issues)));
+      if (again && again.trim() && !hasForbidden(again) && styleIssues(again).length < issues.length) raw = again;
     }
     // Encerrar com pergunta deixa o líder sem como responder: uma nova tentativa sem interrogação.
     const closing = isLast || raw.trimEnd().endsWith(CLOSING_PHRASE);
     if (closing && raw.replace(CLOSING_PHRASE, "").includes("?")) {
-      const again = await provider.complete({
-        system: `${system}\n\n${CLOSING_QUESTION_RETRY_INSTRUCTION}`,
-        messages,
-      });
+      const again = await provider.complete(rewriteRequest(system, messages, raw, CLOSING_QUESTION_RETRY_INSTRUCTION));
       if (again && again.trim() && !hasForbidden(again)) raw = again;
       // Se a resposta ainda terminar em pergunta, essa pergunta final sai da resposta de encerramento.
       raw = stripTrailingQuestions(raw);

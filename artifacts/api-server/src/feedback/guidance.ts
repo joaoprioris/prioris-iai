@@ -13,11 +13,56 @@ export const FORBIDDEN_IN_REPLIES = [
   /classifica/i,
 ];
 
+export const MAX_REPLY_WORDS = 150;
+
+const VALIDATING_OPENER =
+  /^\W*(entendo|entendi|faz sentido|você tem razão|você está certo|você está certa|boa pergunta|ótimo|ótima|que bom|isso é importante|essa pergunta|essa frase está|você acabou de|você já chegou|você chegou|você mesmo percebeu|agora ficou claro)/i;
+const SELF_CORRECTION =
+  /\b(eu (acelerei|saí na frente|errei|te dei|falei como se|presumi)|obrigado por apontar|me desculp)/i;
+const WHOLE_SCRIPT = /"[^"\n]{70,}"/;
+
+export interface StyleIssue {
+  code: "abertura_validando" | "autocorrecao" | "resposta_longa" | "fala_pronta";
+  instruction: string;
+}
+
+/** Regras de estilo que o modelo descumpre mesmo com a orientação: detectadas por código e reescritas uma vez. */
+export function styleIssues(reply: string): StyleIssue[] {
+  const issues: StyleIssue[] = [];
+  if (VALIDATING_OPENER.test(reply.trim()))
+    issues.push({
+      code: "abertura_validando",
+      instruction:
+        'Não abra validando ou elogiando o líder ("entendo", "faz sentido", "você tem razão"); comece pelo conteúdo.',
+    });
+  if (SELF_CORRECTION.test(reply))
+    issues.push({
+      code: "autocorrecao",
+      instruction: "Não comente seus próprios erros nem peça desculpa; apenas mude o jeito de responder.",
+    });
+  if (reply.trim().split(/\s+/).length > MAX_REPLY_WORDS)
+    issues.push({
+      code: "resposta_longa",
+      instruction: `Encurte a resposta para no máximo ${MAX_REPLY_WORDS} palavras, mantendo só o essencial.`,
+    });
+  if (WHOLE_SCRIPT.test(reply))
+    issues.push({
+      code: "fala_pronta",
+      instruction:
+        "Não escreva falas inteiras entre aspas para o líder usar; diga o que a mensagem precisa conter e deixe as palavras com ele.",
+    });
+  return issues;
+}
+
+export function styleRetryInstruction(issues: StyleIssue[]): string {
+  return `Reescreva a resposta anterior corrigindo: ${issues.map((issue) => issue.instruction).join(" ")}`;
+}
+
 export const CLOSING_QUESTION_RETRY_INSTRUCTION =
   "Sua resposta de encerramento terminou com pergunta. Reescreva sem nenhum ponto de interrogação: devolva em duas ou três frases o que o líder decidiu, com as palavras dele, e o próximo passo que ele faz fora daqui.";
 
 export const FORBIDDEN_RETRY_INSTRUCTION =
-  "Sua resposta anterior usou vocabulário proibido. Reescreva a resposta inteira sem nenhuma palavra sobre tratamento, profissional de saúde mental, método, matriz, agente ou classificação, mesmo que o líder tenha usado essas palavras.";
+  "Sua resposta anterior usou vocabulário proibido. Reescreva a resposta sem nenhuma palavra sobre tratamento, profissional de saúde mental, método, matriz, agente ou classificação, mesmo que o líder tenha usado essas palavras.";
 
 /**
  * Orientação do agente de Feedback (FBK).
