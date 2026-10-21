@@ -1138,7 +1138,7 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **T01 R01** C1: Produto / Módulo | C2: Prioris / Ecossistema completo
 
-**T01 R02** C1: Versão | C2: v1.0
+**T01 R02** C1: Versão | C2: v1.1
 
 **T01 R03** C1: Classificação | C2: Confidencial | Uso institucional e com parceiros
 
@@ -1146,7 +1146,7 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **T01 R05** C1: Criação | C2: Abril 2026
 
-**T01 R06** C1: Última revisão | C2: Abril 2026
+**T01 R06** C1: Última revisão | C2: Outubro 2026
 
 **P0005** BLOCO 0 — SOBRE ESTE DOCUMENTO
 
@@ -2688,7 +2688,7 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **T01 R01** C1: Produto / Módulo | C2: Prioris / Health Monitor / Cultural Risk Engine
 
-**T01 R02** C1: Versão | C2: v1.0
+**T01 R02** C1: Versão | C2: v1.1
 
 **T01 R03** C1: Classificação | C2: Confidencial
 
@@ -2696,7 +2696,7 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **T01 R05** C1: Criação | C2: Abril 2026
 
-**T01 R06** C1: Última revisão | C2: Abril 2026
+**T01 R06** C1: Última revisão | C2: Outubro 2026
 
 **P0005** BLOCO 0 — SOBRE ESTE DOCUMENTO
 

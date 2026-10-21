@@ -5518,7 +5518,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T01 R01** C1: Produto / Módulo | C2: Prioris / IAí / Health Monitor / IEC
 
-**T01 R02** C1: Versão | C2: v1.0
+**T01 R02** C1: Versão | C2: v1.1
 
 **T01 R03** C1: Classificação | C2: Estratégico | Confidencial
 
@@ -5526,7 +5526,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T01 R05** C1: Criação | C2: Abril 2026
 
-**T01 R06** C1: Última revisão | C2: Abril 2026
+**T01 R06** C1: Última revisão | C2: Outubro 2026
 
 **P0005** BLOCO 0 — SOBRE ESTE DOCUMENTO
 
@@ -5959,7 +5959,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **T01 R01** C1: Produto / Módulo | C2: Prioris / IAí / Health Monitor™
 
-**T01 R02** C1: Versão | C2: v1.0
+**T01 R02** C1: Versão | C2: v1.1
 
 **T01 R03** C1: Classificação | C2: Confidencial
 
@@ -5967,7 +5967,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **T01 R05** C1: Criação | C2: Abril 2026
 
-**T01 R06** C1: Última revisão | C2: Abril 2026
+**T01 R06** C1: Última revisão | C2: Outubro 2026
 
 **P0005** BLOCO 0 — SOBRE ESTE DOCUMENTO
 
@@ -6544,7 +6544,7 @@ SHA-256 do DOCX: `cb5983043a250c1ca18bd560db9b1943515d83d2beaa972d060611189f6b83
 
 **T01 R01** C1: Produto / Módulo | C2: Prioris / IAí / Cultural Risk Engine
 
-**T01 R02** C1: Versão | C2: v1.0
+**T01 R02** C1: Versão | C2: v1.1
 
 **T01 R03** C1: Classificação | C2: Confidencial
 
@@ -6552,7 +6552,7 @@ SHA-256 do DOCX: `cb5983043a250c1ca18bd560db9b1943515d83d2beaa972d060611189f6b83
 
 **T01 R05** C1: Criação | C2: Abril 2026
 
-**T01 R06** C1: Última revisão | C2: Abril 2026
+**T01 R06** C1: Última revisão | C2: Outubro 2026
 
 **P0005** BLOCO 0 — SOBRE ESTE DOCUMENTO
 
