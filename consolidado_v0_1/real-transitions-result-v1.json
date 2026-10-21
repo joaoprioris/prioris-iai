@@ -1,0 +1,668 @@
+{
+  "synthetic": true,
+  "persistence": "In-memory fixture; not PostgreSQL",
+  "inputStatus": "Explicit two-message adaptations, original cases preserved",
+  "budgetCapUSD": 0.4,
+  "estimatedUSD": 0.09129500000000002,
+  "usage": [
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1686,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 203,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002701
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1763,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002788
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 562,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 45,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002361
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1694,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 245,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002919
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1680,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002705
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 475,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 171,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.00399
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1911,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002936
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 704,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 182,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.004842
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1685,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.00271
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 495,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 158,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.003855
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1904,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002929
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 694,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 175,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.004707
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1693,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002718
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 505,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 134,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.003525
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1881,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002906
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 676,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 139,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.004113
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1689,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002714
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 484,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 308,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.006072
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 2058,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.003083
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 837,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 327,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.007416
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 1687,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 248,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.002927
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 509,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 288,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.005847
+    },
+    {
+      "model": "haiku",
+      "usage": {
+        "input_tokens": 2051,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 256,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.003331
+    },
+    {
+      "model": "sonnet",
+      "usage": {
+        "input_tokens": 840,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 312,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      },
+      "costUSD": 0.0072
+    }
+  ],
+  "cases": [
+    {
+      "id": "EVAL-T001",
+      "first": "Estou tão irritado com meu liderado que não consigo pensar com clareza agora.",
+      "second": "Agora estou calmo e pensando com clareza. Já decidi o ponto do feedback; preciso organizar como comunicar isso.",
+      "expected": {
+        "from": "CTN",
+        "to": "FBK"
+      },
+      "turns": [
+        {
+          "text": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+          "exchangeCount": 1,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": true,
+          "route": {
+            "mode": "clarify",
+            "agent": null,
+            "transition": false,
+            "reason": "own_capacity_requires_context"
+          },
+          "historyUsed": false
+        },
+        {
+          "text": "Ótimo. Isso muda tudo — podemos trabalhar na mensagem agora.\n\n**O que você quer que ele entenda ou faça após essa conversa?**",
+          "exchangeCount": 2,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "FBK",
+            "transition": false,
+            "reason": "message_preparation"
+          },
+          "historyUsed": false
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "EVAL-T002",
+      "first": "Um funcionário ameaçou agredir outro no escritório agora. Sou o líder responsável; os dois estão juntos.",
+      "second": "A segurança separou os dois e confirmou que não há mais risco imediato. Agora quero entender o impacto do episódio na confiança da equipe.",
+      "expected": {
+        "from": "CRS",
+        "to": "IMP"
+      },
+      "turns": [
+        {
+          "text": "Essa situação precisa de apoio humano imediato. Procure alguém de confiança e atendimento adequado para acompanhar você agora.",
+          "exchangeCount": 1,
+          "maxExchanges": 10,
+          "status": "closed",
+          "lowConfidence": false,
+          "route": {
+            "mode": "human_support",
+            "agent": null,
+            "transition": false,
+            "reason": "personal_emergency"
+          },
+          "historyUsed": false
+        }
+      ],
+      "pass": false,
+      "errorCode": "SESSION_CLOSED"
+    },
+    {
+      "id": "EVAL-T003",
+      "first": "Preciso comparar três opções de reorganização da equipe antes de escolher.",
+      "second": "Já comparei e escolhi uma direção. Preciso fechar com minha gerente, em conversa bilateral, responsabilidades e prazo.",
+      "expected": {
+        "from": "MNT",
+        "to": "OTO"
+      },
+      "turns": [
+        {
+          "text": "Vou ajudar você a comparar essas opções de forma estruturada.\n\nPara começar, preciso entender melhor o cenário:\n\n**Qual é o principal problema ou oportunidade que motivou pensar nessa reorganização?**\n\nPor exemplo: sobrecarga em um papel específico, dificuldade em cobrir demandas, crescimento previsto, mudança de prioridade estratégica, ou outro motivo.\n\nDepois disso, vou pedir que você descreva brevemente cada uma das três opções que está considerando — não precisa detalhar tudo agora, mas saber o que está em jogo me ajuda a orientar a comparação de forma útil para sua decisão.",
+          "exchangeCount": 1,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "MNT",
+            "transition": false,
+            "reason": "compare_paths"
+          },
+          "historyUsed": false
+        },
+        {
+          "text": "Entendi. Você já decidiu a direção da reorganização e agora precisa preparar o fechamento bilateral com sua gerente sobre responsabilidades e prazo.\n\nPara ajudar você a preparar essa conversa de forma clara, preciso saber:\n\n**Qual é a decisão que você já tomou sobre a reorganização?** \n\nPode ser algo como \"vou unificar dois times sob uma liderança\", \"vou redistribuir entregas entre as pessoas X, Y e Z\", ou outra configuração que você escolheu.\n\nIsso me ajuda a entender o que precisa ser acordado com sua gerente — se é aprovação, suporte, recursos, alinhamento de expectativa, ou outro tipo de responsabilidade específica dela nesse movimento.",
+          "exchangeCount": 2,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "OTO",
+            "transition": true,
+            "reason": "bilateral_commitment"
+          },
+          "historyUsed": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "EVAL-T004",
+      "first": "Quero entender o impacto da mudança que anunciei na confiança da equipe.",
+      "second": "Esse impacto ficou claro. Já defini a mensagem que preciso transmitir; agora quero organizar como dizer isso com respeito.",
+      "expected": {
+        "from": "IMP",
+        "to": "FBK"
+      },
+      "turns": [
+        {
+          "text": "Entendo que você quer avaliar como o anúncio afetou a confiança das pessoas.\n\nPara ajudar você a construir essa leitura, preciso conhecer um pouco do contexto:\n\n**Que tipo de mudança foi anunciada?** (pode ser genérico: reorganização, nova política, ajuste de processo, mudança de liderança, etc.)\n\nEssa informação me ajuda a explorar com você os efeitos humanos e relacionais possíveis — não para julgar a decisão, mas para mapear como ela pode ter sido recebida e onde a confiança pode ter sido tensionada ou fortalecida.",
+          "exchangeCount": 1,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "IMP",
+            "transition": false,
+            "reason": "human_impact"
+          },
+          "historyUsed": false
+        },
+        {
+          "text": "Ótimo. Você já sabe o que precisa dizer — agora vamos organizar como entregar isso de forma respeitosa e clara.\n\n**Qual é o núcleo da mensagem que você precisa transmitir?** (pode ser resumido: reconhecer um erro, reforçar uma decisão difícil, esclarecer um mal-entendido, reafirmar um compromisso, etc.)\n\nE se puder complementar: **para quem você vai falar?** (equipe inteira, pessoa específica, liderança, etc.)\n\nIsso me ajuda a estruturar uma mensagem que preserve os fatos, demonstre intenção clara e mantenha abertura para o que vier depois.",
+          "exchangeCount": 2,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "FBK",
+            "transition": true,
+            "reason": "message_preparation"
+          },
+          "historyUsed": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "EVAL-T005",
+      "first": "Repito o comportamento de centralizar entregas em várias equipes. Quero investigar meu padrão como hipótese.",
+      "second": "Entendi essa hipótese. Já decidi que vou delegar uma entrega; quero preparar uma mensagem clara para o meu liderado.",
+      "expected": {
+        "from": "PRF",
+        "to": "FBK"
+      },
+      "turns": [
+        {
+          "text": "Entendo que você quer investigar essa recorrência de centralizar entregas como uma hipótese sobre seu próprio comportamento.\n\nVamos começar pelo contexto mais recente. Você consegue descrever uma situação específica das últimas semanas onde você centralizou uma entrega? Me conte o que aconteceu, qual era a tarefa e o que te levou a assumir aquela responsabilidade naquele momento.\n\nIsso vai nos ajudar a identificar os gatilhos e padrões que podem estar se repetindo em diferentes contextos.",
+          "exchangeCount": 1,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "PRF",
+            "transition": false,
+            "reason": "user_reported_hypothesis"
+          },
+          "historyUsed": false
+        },
+        {
+          "text": "Certo, vamos preparar essa mensagem de delegação.\n\nPara torná-la clara e utilizável, preciso entender alguns elementos:\n\n**Qual é especificamente a entrega que você vai delegar, e para qual liderado?** Me conte também o que você espera que essa pessoa entregue concretamente (resultado, prazo, critérios de qualidade).\n\nIsso me ajuda a estruturar uma mensagem que contenha contexto suficiente, expectativa verificável e abertura para que a pessoa possa fazer perguntas ou sinalizar dificuldades.",
+          "exchangeCount": 2,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "FBK",
+            "transition": true,
+            "reason": "message_preparation"
+          },
+          "historyUsed": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "EVAL-T006",
+      "first": "Estou entre encerrar um projeto e investir mais um ciclo. Quero comparar os dois caminhos.",
+      "second": "Já escolhi encerrar o projeto. Preciso organizar a mensagem para comunicar essa decisão à equipe.",
+      "expected": {
+        "from": "MNT",
+        "to": "FBK"
+      },
+      "turns": [
+        {
+          "text": "Vou te ajudar a comparar essas duas possibilidades.\n\n**Se você encerrar agora:**\n- Preserva energia e orçamento para outras iniciativas\n- Evita custo de oportunidade (o que mais poderia ser feito)\n- Aceita o resultado atual como suficiente ou como aprendizado\n- Pode gerar sensação de incompletude na equipe, dependendo de como foi comunicado o objetivo original\n\n**Se investir mais um ciclo:**\n- Tem chance de alcançar o resultado que ainda falta\n- Consome recursos que poderiam ir para outro lugar\n- Aumenta exposição ao risco de esforço adicional sem retorno proporcional\n- Pode trazer clareza definitiva sobre viabilidade\n\n**O que ainda não sei e importa:**\n- Qual era a aposta inicial e o que já foi validado ou refutado?\n- Existe algum sinal concreto de que mais um ciclo muda o resultado?\n- O contexto (mercado, equipe, prioridade) é o mesmo de quando começou?\n\nQual dessas dimensões te ajudaria mais a decidir: entender melhor o quanto falta versus o quanto já foi investido, ou mapear o custo real de adiar outras coisas?",
+          "exchangeCount": 1,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "MNT",
+            "transition": false,
+            "reason": "compare_paths"
+          },
+          "historyUsed": false
+        },
+        {
+          "text": "Certo. Vou te ajudar a estruturar essa mensagem.\n\n**Elementos que tornam o comunicado utilizável:**\n\n1. **Decisão clara** — \"Decidimos encerrar o projeto [nome]\"\n2. **Razão objetiva** — Por que agora, baseado em quê (contexto, aprendizado, prioridade)\n3. **Reconhecimento do esforço** — O que a equipe entregou tem valor\n4. **O que fica** — Aprendizado, código, processo, clareza sobre o que não funciona\n5. **Próximos passos práticos** — O que acontece com tarefas abertas, repositório, responsáveis\n\n**Evite:**\n- Justificar demais (parece insegurança)\n- Culpar pessoas ou circunstâncias externas\n- Prometer compensação futura (\"mas vamos fazer algo melhor\")\n- Omitir a decisão real por trás de linguagem suave\n\n**Para eu montar uma primeira versão:**\n\nQual foi o motivo principal que te levou a encerrar? (ex: prioridade mudou, validação negativa, custo alto demais, dependência externa travou)\n\nE o que de concreto essa equipe entregou ou descobriu que tem valor — mesmo o projeto não continuando?",
+          "exchangeCount": 2,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "FBK",
+            "transition": true,
+            "reason": "message_preparation"
+          },
+          "historyUsed": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "EVAL-T007",
+      "first": "Duas pessoas da equipe estão prestes a se agredir agora, e sou o líder responsável.",
+      "second": "As pessoas já foram separadas e a segurança confirmou que o risco passou. Preciso fechar numa conversa com minha gerente quem assume cada responsabilidade.",
+      "expected": {
+        "from": "CRS",
+        "to": "OTO"
+      },
+      "turns": [
+        {
+          "text": "# Ação imediata\n\n**Separe fisicamente as pessoas agora.** Peça ajuda de outro colega se estiver sozinho. Interrompa qualquer contato direto entre elas — envie cada uma para um local diferente, com outra pessoa presente se possível.\n\n**Nenhuma conversa entre elas neste momento.** O risco de escalada é real enquanto a emoção estiver alta.\n\n**Comunique RH ou sua liderança imediatamente.** Este é um evento de segurança, não apenas conflito interpessoal. Documente o ocorrido assim que a situação estiver estabilizada: hora, local, quem presenciou, o que foi dito ou feito.\n\n---\n\n## Próximos passos seguros\n\n- **Não tente mediar sozinho enquanto houver risco físico ou emocional agudo.**\n- Aguarde orientação formal antes de reunir as pessoas novamente.\n- Ofereça suporte individual se alguém precisar (água, pausa, local reservado).\n\n---\n\n**Você tem alguém para te apoiar agora nessa separação, ou está sozinho com as duas pessoas?**",
+          "exchangeCount": 1,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "CRS",
+            "transition": false,
+            "reason": "immediate_external_risk"
+          },
+          "historyUsed": false
+        },
+        {
+          "text": "# Divisão clara de responsabilidades\n\n**Você como líder direto:**\n- Relato factual do ocorrido (quando, onde, quem viu, o que aconteceu)\n- Acompanhamento imediato da equipe que presenciou ou foi impactada\n- Garantia de que não haverá retaliação ou exposição das pessoas envolvidas\n- Execução das decisões que RH/Gerência definirem\n\n**Sua gerente:**\n- Decisão sobre afastamento, investigação ou medidas disciplinares\n- Interface com RH, Jurídico ou outras áreas se necessário\n- Comunicação institucional (o que dizer, para quem, quando)\n- Proteção do ambiente de trabalho a médio prazo\n\n**RH (deve estar envolvido):**\n- Processo formal de apuração\n- Suporte às pessoas diretamente envolvidas\n- Orientação sobre limites legais e contratuais\n\n---\n\n## Atenção\n\nVocê não decide sozinho sobre permanência, punição ou investigação. Sua função é estabilizar, relatar com precisão e executar o que for definido em conjunto.\n\n---\n\n**Você já tem reunião marcada com sua gerente, ou precisa agendar agora?**",
+          "exchangeCount": 2,
+          "maxExchanges": 10,
+          "status": "active",
+          "lowConfidence": false,
+          "route": {
+            "mode": "agent",
+            "agent": "CRS",
+            "transition": false,
+            "reason": "immediate_external_risk"
+          },
+          "historyUsed": false
+        }
+      ],
+      "pass": false
+    }
+  ],
+  "pending": [
+    {
+      "id": "EVAL-T008",
+      "reason": "Evolution requires authorized corroborated longitudinal history; not implemented."
+    }
+  ]
+}

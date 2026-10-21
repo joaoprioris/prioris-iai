@@ -1,0 +1,2265 @@
+[
+  {
+    "id": "EVAL-P001",
+    "source_id": "P001",
+    "type": "Positivo",
+    "input": "Estou entre promover alguém interno ou contratar fora e preciso comparar os efeitos de cada caminho.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": null,
+    "alternative": "Mentor Estratégico",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "MNT",
+        "reason": "compare_paths",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P002",
+    "source_id": "P002",
+    "type": "Positivo",
+    "input": "Tenho três opções para reorganizar a área e nenhuma é claramente melhor.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": null,
+    "alternative": "Mentor Estratégico",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "MNT",
+        "reason": "compare_paths",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P003",
+    "source_id": "P003",
+    "type": "Positivo",
+    "input": "Se eu acelerar agora, ganho prazo mas aumento o risco de qualidade. Como penso esse trade-off?",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": null,
+    "alternative": "Mentor Estratégico",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "MNT",
+        "reason": "compare_paths",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P004",
+    "source_id": "P004",
+    "type": "Positivo",
+    "input": "Preciso decidir se encerro um projeto ou invisto mais um ciclo para tentar recuperar.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": null,
+    "alternative": "Mentor Estratégico",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "MNT",
+        "reason": "compare_paths",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P005",
+    "source_id": "P005",
+    "type": "Positivo",
+    "input": "Quero mapear os caminhos antes de decidir como responder ao meu chefe.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": null,
+    "alternative": "Mentor Estratégico",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "MNT",
+        "reason": "compare_paths",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P006",
+    "source_id": "P006",
+    "type": "Positivo",
+    "input": "Estou muito irritado e prestes a mandar uma mensagem que pode piorar tudo.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Contenção",
+    "question": null,
+    "alternative": "Contenção",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "CTN",
+        "reason": "own_capacity_impaired",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P007",
+    "source_id": "P007",
+    "type": "Positivo",
+    "input": "Recebi uma notícia ruim e não consigo organizar o que penso antes de reagir.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Contenção",
+    "question": null,
+    "alternative": "Contenção",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "own_capacity_requires_context",
+        "question": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P008",
+    "source_id": "P008",
+    "type": "Positivo",
+    "input": "Estou com medo de perder o controle na conversa que começa em alguns minutos.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Contenção",
+    "question": null,
+    "alternative": "Contenção",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "own_capacity_requires_context",
+        "question": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P009",
+    "source_id": "P009",
+    "type": "Positivo",
+    "input": "A pressão está tão alta que quero decidir qualquer coisa só para acabar com isso.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Contenção",
+    "question": null,
+    "alternative": "Contenção",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "own_capacity_requires_context",
+        "question": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P010",
+    "source_id": "P010",
+    "type": "Positivo",
+    "input": "Preciso desacelerar antes de falar com o time.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Contenção",
+    "question": null,
+    "alternative": "Contenção",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P011",
+    "source_id": "P011",
+    "type": "Positivo",
+    "input": "Toda vez que começo num time novo, acelero demais e depois a relação desgasta.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": null,
+    "alternative": "Perfil & Padrões",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "PRF",
+        "reason": "user_reported_hypothesis",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P012",
+    "source_id": "P012",
+    "type": "Positivo",
+    "input": "Percebi que recuo sempre que alguém mais sênior questiona minha posição.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": null,
+    "alternative": "Perfil & Padrões",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P013",
+    "source_id": "P013",
+    "type": "Positivo",
+    "input": "Esse é o terceiro projeto em que centralizo tudo quando o prazo aperta.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": null,
+    "alternative": "Perfil & Padrões",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P014",
+    "source_id": "P014",
+    "type": "Positivo",
+    "input": "Meu time diz que eu mudo a prioridade com frequência, mas eu não percebo quando faço isso.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": null,
+    "alternative": "Perfil & Padrões",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "PRF",
+        "reason": "user_reported_hypothesis",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P015",
+    "source_id": "P015",
+    "type": "Positivo",
+    "input": "Quero entender por que repito o mesmo erro mesmo sabendo que ele acontece.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": null,
+    "alternative": "Perfil & Padrões",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "PRF",
+        "reason": "user_reported_hypothesis",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P016",
+    "source_id": "P016",
+    "type": "Positivo",
+    "input": "Vou mudar a estrutura e quero entender como isso pode ser lido pelas pessoas afetadas.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": null,
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "IMP",
+        "reason": "human_impact",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P017",
+    "source_id": "P017",
+    "type": "Positivo",
+    "input": "Minha decisão faz sentido para o negócio, mas pode quebrar a confiança do time.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": null,
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "IMP",
+        "reason": "human_impact",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P018",
+    "source_id": "P018",
+    "type": "Positivo",
+    "input": "Não sei que efeito meu silêncio teve na relação com essa pessoa.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": null,
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "IMP",
+        "reason": "human_impact",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P019",
+    "source_id": "P019",
+    "type": "Positivo",
+    "input": "Quero enxergar o que não estou vendo no impacto dessa mudança.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": null,
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "IMP",
+        "reason": "human_impact",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P020",
+    "source_id": "P020",
+    "type": "Positivo",
+    "input": "Uma pessoa concordou comigo, mas algo na dinâmica ficou diferente.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": null,
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P021",
+    "source_id": "P021",
+    "type": "Positivo",
+    "input": "Preciso dar um feedback duro sem suavizar o ponto principal.",
+    "source_expected": "Feedback Estruturado",
+    "initial_proposal": "Feedback Estruturado",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "FBK",
+        "reason": "message_preparation",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P022",
+    "source_id": "P022",
+    "type": "Positivo",
+    "input": "Sei o que quero dizer, mas não consigo colocar em palavras naturais.",
+    "source_expected": "Feedback Estruturado",
+    "initial_proposal": "Feedback Estruturado",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P023",
+    "source_id": "P023",
+    "type": "Positivo",
+    "input": "Quero estruturar uma cobrança clara sobre uma entrega que não aconteceu.",
+    "source_expected": "Feedback Estruturado",
+    "initial_proposal": "Feedback Estruturado",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "FBK",
+        "reason": "message_preparation",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P024",
+    "source_id": "P024",
+    "type": "Positivo",
+    "input": "Recebi um feedback injusto e quero responder com firmeza sem virar confronto.",
+    "source_expected": "Feedback Estruturado",
+    "initial_proposal": "Feedback Estruturado",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "FBK",
+        "reason": "message_preparation",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P025",
+    "source_id": "P025",
+    "type": "Positivo",
+    "input": "Como abro uma conversa sobre um comportamento recorrente de forma direta?",
+    "source_expected": "Feedback Estruturado",
+    "initial_proposal": "Feedback Estruturado",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P026",
+    "source_id": "P026",
+    "type": "Positivo",
+    "input": "No 1:1 de amanhã precisamos sair com uma decisão sobre quem assume o projeto.",
+    "source_expected": "1:1 de Decisão",
+    "initial_proposal": "1:1 de Decisão",
+    "question": null,
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "OTO",
+        "reason": "bilateral_commitment",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P027",
+    "source_id": "P027",
+    "type": "Positivo",
+    "input": "A conversa foi boa, mas ninguém definiu o que muda a partir de agora.",
+    "source_expected": "1:1 de Decisão",
+    "initial_proposal": "1:1 de Decisão",
+    "question": null,
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "OTO",
+        "reason": "bilateral_commitment",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P028",
+    "source_id": "P028",
+    "type": "Positivo",
+    "input": "Quero estruturar o 1:1 para fechar posição, responsabilidades e prazo.",
+    "source_expected": "1:1 de Decisão",
+    "initial_proposal": "1:1 de Decisão",
+    "question": null,
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "OTO",
+        "reason": "bilateral_commitment",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P029",
+    "source_id": "P029",
+    "type": "Positivo",
+    "input": "Meu gestor concorda com tudo, mas nunca assume uma decisão. Preciso mudar isso na conversa.",
+    "source_expected": "1:1 de Decisão",
+    "initial_proposal": "1:1 de Decisão",
+    "question": null,
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P030",
+    "source_id": "P030",
+    "type": "Positivo",
+    "input": "Saímos do último 1:1 com dois donos diferentes para a mesma tarefa.",
+    "source_expected": "1:1 de Decisão",
+    "initial_proposal": "1:1 de Decisão",
+    "question": null,
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P031",
+    "source_id": "P031",
+    "type": "Positivo",
+    "input": "A discussão saiu do controle e pode escalar para o cliente ainda hoje.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": null,
+    "alternative": "Análise de Crises",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "CRS",
+        "reason": "immediate_external_risk",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P032",
+    "source_id": "P032",
+    "type": "Positivo",
+    "input": "Houve um erro grave e preciso definir o próximo passo mais seguro agora.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": null,
+    "alternative": "Análise de Crises",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P033",
+    "source_id": "P033",
+    "type": "Positivo",
+    "input": "Duas áreas estão em conflito aberto e o impacto operacional já começou.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": null,
+    "alternative": "Análise de Crises",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P034",
+    "source_id": "P034",
+    "type": "Positivo",
+    "input": "A situação está se deteriorando e não dá para analisar dez opções.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": null,
+    "alternative": "Análise de Crises",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "own_capacity_requires_context",
+        "question": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P035",
+    "source_id": "P035",
+    "type": "Positivo",
+    "input": "Acabei de expor informação errada numa reunião crítica. O que contenho primeiro?",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": null,
+    "alternative": "Análise de Crises",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-P036",
+    "source_id": "P036",
+    "type": "Positivo",
+    "input": "Com base no meu histórico autorizado, ajuste a leitura futura deste padrão recorrente.",
+    "source_expected": "Evolução Contínua",
+    "initial_proposal": "Explorar necessidade atual; EVL somente em segundo plano",
+    "question": "Você quer investigar este padrão ou organizar uma situação atual?",
+    "alternative": "EVL em segundo plano, sem troca obrigatória do agente de chat",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [
+      "Histórico autorizado fornecido pelo servidor",
+      "Eventos com proveniência e recorrência corroborada",
+      "Separar efeito longitudinal da rota conversacional"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "Avaliar consolidação longitudinal; não exigir oitavo chat nem considerar relato de histórico como autorização técnica."
+  },
+  {
+    "id": "EVAL-P037",
+    "source_id": "P037",
+    "type": "Positivo",
+    "input": "Há evidência de evolução nas minhas últimas interações que deve influenciar o sistema.",
+    "source_expected": "Evolução Contínua",
+    "initial_proposal": "Explorar necessidade atual; EVL somente em segundo plano",
+    "question": "Você quer investigar este padrão ou organizar uma situação atual?",
+    "alternative": "EVL em segundo plano, sem troca obrigatória do agente de chat",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [
+      "Histórico autorizado fornecido pelo servidor",
+      "Eventos com proveniência e recorrência corroborada",
+      "Separar efeito longitudinal da rota conversacional"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "Avaliar consolidação longitudinal; não exigir oitavo chat nem considerar relato de histórico como autorização técnica."
+  },
+  {
+    "id": "EVAL-P038",
+    "source_id": "P038",
+    "type": "Positivo",
+    "input": "Quero que o sistema diferencie este episódio de um padrão já observado ao longo do tempo.",
+    "source_expected": "Evolução Contínua",
+    "initial_proposal": "Explorar necessidade atual; EVL somente em segundo plano",
+    "question": "Você quer investigar este padrão ou organizar uma situação atual?",
+    "alternative": "EVL em segundo plano, sem troca obrigatória do agente de chat",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [
+      "Histórico autorizado fornecido pelo servidor",
+      "Eventos com proveniência e recorrência corroborada",
+      "Separar efeito longitudinal da rota conversacional"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "Avaliar consolidação longitudinal; não exigir oitavo chat nem considerar relato de histórico como autorização técnica."
+  },
+  {
+    "id": "EVAL-P039",
+    "source_id": "P039",
+    "type": "Positivo",
+    "input": "O histórico mostra regressão consistente e deve recalibrar as hipóteses futuras.",
+    "source_expected": "Evolução Contínua",
+    "initial_proposal": "Explorar necessidade atual; EVL somente em segundo plano",
+    "question": "Você quer investigar este padrão ou organizar uma situação atual?",
+    "alternative": "EVL em segundo plano, sem troca obrigatória do agente de chat",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [
+      "Histórico autorizado fornecido pelo servidor",
+      "Eventos com proveniência e recorrência corroborada",
+      "Separar efeito longitudinal da rota conversacional"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "Avaliar consolidação longitudinal; não exigir oitavo chat nem considerar relato de histórico como autorização técnica."
+  },
+  {
+    "id": "EVAL-P040",
+    "source_id": "P040",
+    "type": "Positivo",
+    "input": "Use somente padrões sustentados do meu histórico para personalizar as próximas interações.",
+    "source_expected": "Evolução Contínua",
+    "initial_proposal": "Explorar necessidade atual; EVL somente em segundo plano",
+    "question": "Você quer investigar este padrão ou organizar uma situação atual?",
+    "alternative": "EVL em segundo plano, sem troca obrigatória do agente de chat",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [
+      "Histórico autorizado fornecido pelo servidor",
+      "Eventos com proveniência e recorrência corroborada",
+      "Separar efeito longitudinal da rota conversacional"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "Avaliar consolidação longitudinal; não exigir oitavo chat nem considerar relato de histórico como autorização técnica."
+  },
+  {
+    "id": "EVAL-A001",
+    "source_id": "A01",
+    "type": "Ambíguo",
+    "input": "Tenho uma conversa difícil amanhã e não sei como entrar no assunto.",
+    "source_expected": "Feedback Estruturado",
+    "initial_proposal": "Feedback Estruturado",
+    "question": "Sua dúvida principal é sobre como dizer ou sobre o que precisa ficar decidido?",
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A002",
+    "source_id": "A02",
+    "type": "Ambíguo",
+    "input": "Estou muito irritado e a conversa já começou a escalar.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": "Há risco ou dano em curso, ou o principal problema é seu estado interno?",
+    "alternative": "Contenção",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "own_capacity_requires_context",
+        "question": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A003",
+    "source_id": "A03",
+    "type": "Ambíguo",
+    "input": "Meu chefe não decide e o time está parado.",
+    "source_expected": "1:1 de Decisão",
+    "initial_proposal": "1:1 de Decisão",
+    "question": "Você quer preparar uma conversa que produza decisão ou comparar caminhos para o problema?",
+    "alternative": "Mentor Estratégico",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A004",
+    "source_id": "A04",
+    "type": "Ambíguo",
+    "input": "Isso acontece em todos os meus alinhamentos.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": "Você quer entender a recorrência ou fechar uma decisão nesta conversa específica?",
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A005",
+    "source_id": "A05",
+    "type": "Ambíguo",
+    "input": "Preciso tomar uma decisão que vai afetar bastante o time.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": "Você precisa comparar caminhos ou entender os efeitos humanos de um caminho já escolhido?",
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A006",
+    "source_id": "A06",
+    "type": "Ambíguo",
+    "input": "Quero conversar com alguém que perdeu a confiança em mim.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": "Você precisa entender o que mudou na relação ou preparar a mensagem?",
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A007",
+    "source_id": "A07",
+    "type": "Ambíguo",
+    "input": "Estou pressionado e não sei o que decidir.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Contenção",
+    "question": "A pressão impede clareza agora ou você já consegue comparar alternativas?",
+    "alternative": "Mentor Estratégico",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "own_capacity_requires_context",
+        "question": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A008",
+    "source_id": "A08",
+    "type": "Ambíguo",
+    "input": "A conversa acabou mal e não sei o que fazer.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": "Existe risco de piora imediata ou você precisa compreender o impacto ocorrido?",
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "own_capacity_requires_context",
+        "question": "Sua reação está impedindo você de pensar com clareza agora, ou falta entender melhor a situação?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A009",
+    "source_id": "A09",
+    "type": "Ambíguo",
+    "input": "Meu feedback sempre gera defesa.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": "Você quer investigar a recorrência ou preparar a próxima mensagem?",
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A010",
+    "source_id": "A10",
+    "type": "Ambíguo",
+    "input": "Tenho opções, mas a reunião precisa terminar com uma posição.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": "Os caminhos ainda estão abertos ou a necessidade agora é fechar compromisso?",
+    "alternative": "1:1 de Decisão",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "OTO",
+        "reason": "bilateral_commitment",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A011",
+    "source_id": "A11",
+    "type": "Ambíguo",
+    "input": "Meu liderado está esgotado e preciso dar um direcionamento.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Exploração: Impacto/MIC versus Contenção do próprio usuário",
+    "question": "O estado impede a conversa ou você precisa ajustar a abordagem ao impacto provável?",
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "A fala descreve esgotamento do liderado; investigar sem presumir incapacidade do usuário."
+  },
+  {
+    "id": "EVAL-A012",
+    "source_id": "A12",
+    "type": "Ambíguo",
+    "input": "O cliente recebeu duas versões e está pressionando agora.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": "É preciso conter o dano imediato ou apenas alinhar uma mensagem clara?",
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A013",
+    "source_id": "A13",
+    "type": "Ambíguo",
+    "input": "Percebo um padrão, mas preciso agir hoje.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": "Existe risco imediato que exige ação ou há espaço para investigar a recorrência?",
+    "alternative": "Análise de Crises",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A014",
+    "source_id": "A14",
+    "type": "Ambíguo",
+    "input": "O 1:1 virou uma conversa cordial sem mudança.",
+    "source_expected": "1:1 de Decisão",
+    "initial_proposal": "1:1 de Decisão",
+    "question": "Falta compromisso verificável ou o principal problema é a confiança na relação?",
+    "alternative": "Impacto Humano & Relações",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A015",
+    "source_id": "A15",
+    "type": "Ambíguo",
+    "input": "Sei a mensagem, mas temo o impacto.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": "A formulação já está resolvida e falta avaliar o efeito, ou ainda precisa estruturar como dizer?",
+    "alternative": "Feedback Estruturado",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "agent",
+        "agent": "IMP",
+        "reason": "human_impact",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-A016",
+    "source_id": "A16",
+    "type": "Ambíguo",
+    "input": "Meu histórico mostra isso, mas o contexto atual parece diferente.",
+    "source_expected": "Evolução Contínua",
+    "initial_proposal": "Explorar necessidade atual; EVL somente em segundo plano",
+    "question": "Você quer investigar este padrão ou organizar uma situação atual?",
+    "alternative": "Perfil & Padrões",
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "clarify",
+        "agent": null,
+        "reason": "functional_need_unclear",
+        "question": "Você precisa comparar caminhos, fechar um compromisso, preparar o que dizer ou compreender o impacto?",
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [
+      "Histórico autorizado fornecido pelo servidor",
+      "Eventos com proveniência e recorrência corroborada",
+      "Separar efeito longitudinal da rota conversacional"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "Não esperar EVL como agente ativo; verificar efeito longitudinal autorizado separado da resposta."
+  },
+  {
+    "id": "EVAL-N001",
+    "source_id": "N01",
+    "type": "Negativo",
+    "input": "Qual é a capital da França?",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-N002",
+    "source_id": "N02",
+    "type": "Negativo",
+    "input": "Reescreva este parágrafo com menos palavras.",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-N003",
+    "source_id": "N03",
+    "type": "Negativo",
+    "input": "Marque uma reunião para amanhã.",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-N004",
+    "source_id": "N04",
+    "type": "Negativo",
+    "input": "Calcule 18% de 750.",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-N005",
+    "source_id": "N05",
+    "type": "Negativo",
+    "input": "Traduza esta frase para inglês.",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-N006",
+    "source_id": "N06",
+    "type": "Negativo",
+    "input": "Me dê ideias de presente.",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-N007",
+    "source_id": "N07",
+    "type": "Negativo",
+    "input": "Organize esta lista em ordem alfabética.",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-N008",
+    "source_id": "N08",
+    "type": "Negativo",
+    "input": "Qual a previsão do tempo?",
+    "source_expected": "Nenhum agente",
+    "initial_proposal": "Nenhum agente",
+    "question": null,
+    "alternative": null,
+    "status": "Classificação executada; conversa e revisão semântica pendentes",
+    "observed": {
+      "classification": {
+        "version": "0.1.0",
+        "mode": "outside_scope",
+        "agent": null,
+        "reason": "outside_scope",
+        "question": null,
+        "transition": false,
+        "previousAgent": null,
+        "background": [],
+        "memoryWriteAllowed": false,
+        "organizationalScoreAllowed": false
+      },
+      "error": null
+    },
+    "fixture_requirements": [],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-T001",
+    "source_id": "T01",
+    "type": "Transição",
+    "input": "Estou muito reativo agora. Depois quero estruturar o feedback.",
+    "source_expected": "Contenção",
+    "initial_proposal": "Contenção",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Transição adaptada executada; cenário original pendente",
+    "observed": {
+      "adapted": true,
+      "route_match": true,
+      "answer_quality_approved": false
+    },
+    "fixture_requirements": [
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-T002",
+    "source_id": "T02",
+    "type": "Transição",
+    "input": "A situação saiu do controle. Quando estabilizar, preciso reparar a relação.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "Análise de Crises",
+    "question": null,
+    "alternative": "Impacto Humano & Relações",
+    "status": "Transição adaptada executada; cenário original pendente",
+    "observed": {
+      "adapted": true,
+      "route_match": true,
+      "answer_quality_approved": false
+    },
+    "fixture_requirements": [
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-T003",
+    "source_id": "T03",
+    "type": "Transição",
+    "input": "Preciso comparar três caminhos e depois fechar a posição no 1:1.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": null,
+    "alternative": "1:1 de Decisão",
+    "status": "Transição adaptada executada; cenário original pendente",
+    "observed": {
+      "adapted": true,
+      "route_match": true,
+      "answer_quality_approved": false
+    },
+    "fixture_requirements": [
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-T004",
+    "source_id": "T04",
+    "type": "Transição",
+    "input": "Quero entender o impacto e então decidir como falar.",
+    "source_expected": "Impacto Humano & Relações",
+    "initial_proposal": "Impacto Humano & Relações",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Transição adaptada executada; cenário original pendente",
+    "observed": {
+      "adapted": true,
+      "route_match": true,
+      "answer_quality_approved": false
+    },
+    "fixture_requirements": [
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-T005",
+    "source_id": "T05",
+    "type": "Transição",
+    "input": "Percebi que isso se repete. Depois quero ajustar a próxima conversa.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Transição adaptada executada; cenário original pendente",
+    "observed": {
+      "adapted": true,
+      "route_match": true,
+      "answer_quality_approved": false
+    },
+    "fixture_requirements": [
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-T006",
+    "source_id": "T06",
+    "type": "Transição",
+    "input": "Primeiro preciso fechar a decisão; depois quero comunicá-la.",
+    "source_expected": "Mentor Estratégico",
+    "initial_proposal": "Mentor Estratégico",
+    "question": null,
+    "alternative": "Feedback Estruturado",
+    "status": "Transição adaptada executada; cenário original pendente",
+    "observed": {
+      "adapted": true,
+      "route_match": true,
+      "answer_quality_approved": false
+    },
+    "fixture_requirements": [
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": null
+  },
+  {
+    "id": "EVAL-T007",
+    "source_id": "T07",
+    "type": "Transição",
+    "input": "O risco imediato passou. Agora preciso decidir quem assume o quê.",
+    "source_expected": "Análise de Crises",
+    "initial_proposal": "1:1 de Decisão",
+    "question": null,
+    "alternative": null,
+    "status": "Transição adaptada executada; cenário original pendente",
+    "observed": {
+      "adapted": true,
+      "route_match": true,
+      "answer_quality_approved": false
+    },
+    "fixture_requirements": [
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "O risco já passou na primeira fala; para testar transição, criar duas falas distintas."
+  },
+  {
+    "id": "EVAL-T008",
+    "source_id": "T08",
+    "type": "Transição",
+    "input": "Depois de várias interações, o sistema deve consolidar a evolução.",
+    "source_expected": "Perfil & Padrões",
+    "initial_proposal": "Perfil & Padrões",
+    "question": null,
+    "alternative": "EVL em segundo plano, sem troca obrigatória do agente de chat",
+    "status": "Não executado",
+    "observed": null,
+    "fixture_requirements": [
+      "Histórico autorizado fornecido pelo servidor",
+      "Eventos com proveniência e recorrência corroborada",
+      "Separar efeito longitudinal da rota conversacional",
+      "Sequência de pelo menos duas mensagens com contexto preservado"
+    ],
+    "source": {
+      "file": "AGENTES\\PRIORIS_Base_de_Testes_do_Orquestrador_v0.1.xlsx",
+      "sheet": "Casos de Teste"
+    },
+    "review_note": "Avaliar consolidação longitudinal; não exigir oitavo chat nem considerar relato de histórico como autorização técnica."
+  }
+]

@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-12",
+  "contract_version": "0.2.0",
+  "stage": "Desenvolvimento; testes isolados; publicação e piloto pendentes",
+  "replit_checks": {
+    "typecheck": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "postgres": {
+      "exit_code": 0
+    }
+  },
+  "unit_and_adapter_tests": {
+    "executed": 82,
+    "location": "Replit",
+    "external_calls": false
+  },
+  "isolated_postgresql_http": {
+    "executed": 22,
+    "models": "synthetic fixtures"
+  },
+  "real_classifier_adversarial": {
+    "executed": 40,
+    "matching": 40,
+    "version": "earlier classifier baseline"
+  },
+  "real_expertise_adversarial": {
+    "executed": 15,
+    "control_matches_without_generic_recovery": 15,
+    "not_semantic_approval": true,
+    "source_hashes": {
+      "agent_contract.json": "160842ec35e7dbf4c42ce8c30154ea663bfd7613e14b330e12324c7db1975991",
+      "functional-orchestrator.ts": "5f02d9335722fd5634e68bf9ebe2e3d3701f8d1a439b05354ffce8603b5f0bb2",
+      "conversation-guidance.cjs": "3af4dcf6a53acfc23acfced62b80a5fc3d72c92d43abb100fc9e40ddf9305161",
+      "conversation-service.cjs": "2ba9a5c89a9c61d287216d26ae283b973ac8cfe3b7960a26fd0f17d8291f5f2f"
+    }
+  },
+  "real_transitions": {
+    "executed": 7,
+    "matching_routes": 7,
+    "adapted_two_message_inputs": true,
+    "not_semantic_approval": true,
+    "source_hash": "5f02d9335722fd5634e68bf9ebe2e3d3701f8d1a439b05354ffce8603b5f0bb2"
+  },
+  "methodology_control": {
+    "owner_rule": "PROIBIDO alterar metodologia por interpretação própria. Questionar contradições antes de qualquer escolha metodológica. Implementar regras documentadas, mantendo rastreabilidade.",
+    "agent_authority": "Documentos na pasta AGENTES, conforme confirmação explícita do proprietário",
+    "core_documents": [
+      "28",
+      "31",
+      "32",
+      "35",
+      "38",
+      "01",
+      "06"
+    ],
+    "methodology_changes_by_assistant_authorized": false,
+    "new_folder_used": false,
+    "public_routing_enabled": false,
+    "SED_enabled": false,
+    "reading_scope": "Nesta etapa: texto integral dos cinco documentos centrais e das duas definições citadas. Não afirmar leitura frase a frase de todos os arquivos da biblioteca.",
+    "evidence_limits": "Dossiê consolidado contém avaliações e interpretações; não é validação independente da tese ou do código."
+  },
+  "staged_source_status": {
+    "five_entry_contexts": "Local draft, not integrated or tested with real models",
+    "library_eval": "419 cases indexed, 24 selected; classifier/debt/SED benchmark not executed"
+  },
+  "real_continuous_dialogue": {
+    "exchanges": 9,
+    "control_pass": true,
+    "semantic_approved": false
+  },
+  "source_matrix": {
+    "classified": 64,
+    "full_conversations_approved": 0
+  },
+  "development_source_integrated": "v0.2 baseline integrated; later five-state draft is local only",
+  "new_routing_globally_enabled": false,
+  "published": false,
+  "production_data_changed": false,
+  "history_evolution_enabled": false,
+  "browser_pilot_ready": false,
+  "interpretation": "Results apply only to recorded scenarios and versions. Consult versioned failures and semantic_review.json. No production-readiness claim."
+}

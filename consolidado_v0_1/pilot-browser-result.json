@@ -1,0 +1,6 @@
+{
+  "ready": false,
+  "reason": "Preview still serves previous application; internal isolated server returned HTTP 200 with pilot notice.",
+  "privatePreviewEnabled": true,
+  "temporaryServerStopped": true
+}
