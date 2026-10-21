@@ -6,3 +6,7 @@ export function selectReferences(requested: unknown, messages: any[]): any[];
 export function referenceMessage(blocks: any[]): {role: "user"; content: string} | null;
 export function classifierAuthority(): string;
 export function canonicalExample(agent: string): string;
+export function feedbackReferenceInventory(): {
+  supportExamples: Array<{id:string;source:string;sourceSha256:string;kind:'support_example';refs:string[]}>;
+  evaluationCases: Array<{id:string;source:string;sourceSha256:string;kind:'evaluation_case';refs:string[]}>;
+};

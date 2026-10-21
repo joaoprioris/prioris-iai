@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { localHttpEnabled } from "./auth-state";
 export function mailConfiguration() {
   const password = process.env.SMTP_PASSWORD?.replace(/\s/g, "");
   if (process.env.AUTH_EMAIL_ENABLED !== "true" || !password) throw new Error("MAIL_NOT_CONFIGURED");
@@ -6,7 +7,7 @@ export function mailConfiguration() {
   const host = process.env.SMTP_HOST ?? "smtp.gmail.com";
   if (!["smtp-relay.gmail.com", "smtp.gmail.com"].includes(host)) throw new Error("MAIL_HOST_NOT_ALLOWED");
   const base = new URL(process.env.APP_BASE_URL ?? "https://leadership-support-tool--joaoprioris.replit.app");
-  if (base.protocol !== "https:" || base.username || base.password || base.search || base.hash) throw new Error("MAIL_BASE_URL_INVALID");
+  if ((base.protocol !== "https:" && !(localHttpEnabled() && base.protocol === "http:")) || base.username || base.password || base.search || base.hash) throw new Error("MAIL_BASE_URL_INVALID");
   return { user, host, password, base };
 }
 export function mailAvailable(): boolean { try { mailConfiguration(); return true; } catch { return false; } }

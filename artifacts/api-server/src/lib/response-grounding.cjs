@@ -48,6 +48,10 @@ function validateGrounding(value, messages, visibleParts, normalizations = []) {
   // Proposed dates are commitments too. Mentioning a date in a question or in
   // a statement of uncertainty is not acceptance/viability of that date.
   for (const part of visibleParts) {
+    // A separated, validated message example is the leader's proposed speech,
+    // not a claim about what the assistant said in a previous exchange.
+    const leaderExample=value.authorship?.supportMode==='optional_example' &&
+      value.delivery?.kind==='message' && part===value.delivery.text?.trim();
     for (const sentence of part.split(/(?<=[.!?\n])\s*/)) {
       // Two recent reports are not necessarily the last two reports.
       const recency = sentence.match(/(?:^|\s)últim(?:os|as)\s+(?:dois|duas|2)\s+(relatórios|entregas)\b/i);
@@ -73,7 +77,7 @@ function validateGrounding(value, messages, visibleParts, normalizations = []) {
         if (!supported) throw Error('UNSUPPORTED_FACT');
       }
       if (affirmativeHistory(sentence) && /prazo que voc[eê] assumiu|voc[eê] (?:assumiu|aceitou|confirmou|validou|executou|já alinhou)\b/i.test(sentence) && !claims.some(c => c.kind === 'execution' && sentence.includes(c.text) && users.includes(c.quote))) throw Error('UNSUPPORTED_FACT');
-      if (affirmativeHistory(sentence) && /\b(?:ofereci|apresentei|mostrei|sugeri|frases oferecidas|opções (?:oferecidas|anteriores))\b/i.test(sentence)) {
+      if (!leaderExample && affirmativeHistory(sentence) && /\b(?:ofereci|apresentei|mostrei|sugeri|frases oferecidas|opções (?:oferecidas|anteriores))\b/i.test(sentence)) {
         const supporting = claims.filter(c => c.kind === 'prior_assistant_content' && sentence.includes(c.text) && assistants.includes(c.quote));
         if (!supporting.length) throw Error('UNSUPPORTED_FACT');
         if (/\bduas\b/i.test(sentence) && new Set(supporting.map(c => c.quote)).size < 2) throw Error('UNSUPPORTED_FACT');

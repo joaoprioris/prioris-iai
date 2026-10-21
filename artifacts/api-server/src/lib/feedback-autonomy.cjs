@@ -59,19 +59,18 @@ function validateFeedbackAuthorship(value,messages,parts){
  // supplied by the existing generation, and never replaces literal provenance.
  const direct=q=>/(?:^|[.!?;]\s*|\beu\s+)(?:por favor,?\s*)?(?:voce\s+)?(?:pode(?:ria)?|consegue|seria possivel|quero|queria|gostaria|preciso|me ajude|me ajuda|me auxilie|me apoie|ajude[- ]me|ajuda[- ]me)\b/.test(normalized(q).trim().replace(/^[“"'‘\s]+/,''));
  const brief=q=>/\b(?:abertura|frase inicial|frase de inicio|inicio da conversa|comeco da conversa|exemplo|sugestao|uma fala)\b/.test(normalized(q));
- const formulation=q=>/\b(?:formul\w*|elabor\w*|escrev\w*|redig\w*|mont\w*|rascunh\w*|suger\w*|propo\w*|adapt\w*)\b/.test(normalized(q));
  const tooBroad=q=>/\b(?:discurso|roteiro)\s+(?:completo|inteiro)|\btoda a conversa\b|\bdecida por mim\b/.test(normalized(q));
- const requestVoice=q=>direct(q)||/^\s*(?:por favor,?\s*)?(?:me\s+)?(?:sugira|proponha|redija|escreva|prepare|mostre|d[eê]|d[aá]|como (?:eu )?(?:abro|come[cç]o|digo))\b/i.test(q)||(a.requestIntent==='brief_adaptable_example'&&(/\?\s*[”"'’]?\s*$/.test(q)||/\b(?:me|eu)\b/i.test(q)));
- const asks=q=>!negative(q)&&!tooBroad(q)&&requestVoice(q)&&(a.requestIntent==='brief_adaptable_example'||(direct(q)&&brief(q)&&(formulation(q)||/\b(?:quero|queria|gostaria|preciso)\b/.test(normalized(q))))||(/\b(?:pode(?:ria)?|consegue|quero|gostaria|me (?:d[eê]|d[aá]|mostre))\b[^.!?]{0,100}\b(?:exemplo|sugest[aã]o|uma fala)\b/i.test(q)||
-  /\b(?:pode(?:ria)?|consegue)\b[^.!?\n]{0,40}\b(?:sugerir|propor|mostrar|redigir|escrever|rascunhar|preparar|elaborar)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
-  /\b(?:quero|gostaria(?: de)?|me (?:sugira|proponha|mostre|d[eê]|d[aá])|sugira|proponha|redija|escreva|prepare)\s+(?:um(?:a)?\s+)?(?:abertura|exemplo|fala|sugest[aã]o)\b/i.test(q)||
-  /\bcomo (?:eu )?(?:abro|come[cç]o|digo)\b/i.test(q)));
+ const requestVoice=q=>direct(q)||/^\s*(?:por favor,?\s*)?(?:me\s+)?(?:sugira|proponha|redija|escreva|prepare|mostre|d[eê]|d[aá]|como (?:eu )?(?:abro|come[cç]o|digo))\b/i.test(q);
+ // A fala breve é identificada pelo ato de pedir e pelo objeto pedido. O
+ // modelo não precisa acertar uma palavra-senha adicional para autorizar o
+ // apoio; negativas, pedidos citados e roteiros completos seguem recusados.
+ const asks=q=>!negative(q)&&!tooBroad(q)&&!reported(q)&&requestVoice(q)&&brief(q);
  const users=messages.filter(m=>m.role==='user'),last=users.at(-1)?.content??'';
  const withdrawn=negative(last)||/\b(?:n[aã]o|nunca)\s+(?:(?:quero|preciso|gostaria|me|voc[eê]|pode|poderia|que)\s+){0,4}(?:ajude|ajudar|formule|formular|elabore|elaborar|redija|redigir|sugira|sugerir)\b|\b(?:retiro|cancelo|desisto d[oa]|deixa (?:isso )?pra l[aá]|deixe (?:isso )?para l[aá])\b/i.test(last);
  const explicit=!withdrawn&&requested.some(r=>{const q=r.evidence.quote,source=users[r.evidence.message]?.content??'',at=source.indexOf(q),prefix=source.slice(0,at).split(/[.!?\n]/).at(-1)??'';return asks(q)&&!negative(prefix+q)&&!reported(prefix+q)&&!/\b(?:n[aã]o|nunca)\b[^.!?\n]{0,35}\b(?:ajud\w*|formul\w*|elabor\w*|frase inicial)\b/i.test(prefix+q)&&!/^\s*(?:ele|ela|meu chefe|minha chefe|minh[oa] colega)\b/i.test(prefix+q);});
  const factual=grounded.some(r=>!r.evidence.quote.includes('?')&&!/^(?:quero|preciso|gostaria|tenho que)\b/i.test(r.evidence.quote.trim()));
  const requestedSupport=explicit&&factual;
- const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*)\b[\s\S]{12,}/i.test(r.evidence.quote));
+ const hasApproach=resolved.some(r=>/\b(?:pergunt\w*|dizer|diria|falaria|abord\w*|come[cç]\w*|retom\w*|explic\w*|tentaria(?=\s*:))\b[\s\S]{12,}/i.test(r.evidence.quote));
  const hasExample=Boolean(value.delivery?.text?.trim());
  if(hasExample&&withdrawn)reject('EXAMPLE_WITHDRAWN');
  if(a.supportMode==='review'&&!resolved.length)reject('REVIEW_WITHOUT_APPROACH');

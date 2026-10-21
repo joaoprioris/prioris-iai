@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { runtimeHost } from "../../scripts/local-runtime-config.cjs";
 
 const rawPort = process.env.PORT;
 
@@ -19,6 +19,7 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 const basePath = process.env.BASE_PATH;
+const host = runtimeHost();
 
 if (!basePath) {
   throw new Error(
@@ -31,10 +32,12 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
+          await import("@replit/vite-plugin-runtime-error-modal").then((m) =>
+            m.default(),
+          ),
           await import("@replit/vite-plugin-cartographer").then((m) =>
             m.cartographer({
               root: path.resolve(import.meta.dirname, ".."),
@@ -61,17 +64,27 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: "0.0.0.0",
+    host,
     allowedHosts: true,
     fs: {
       strict: true,
       // Keep the isolated pilot ledger/context outside Vite's file-serving API.
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/generated-artifacts/pilot*/**"],
     },
+    ...(process.env.IAI_API_ORIGIN
+      ? {
+          proxy: {
+            "/api": {
+              target: process.env.IAI_API_ORIGIN,
+              changeOrigin: false,
+            },
+          },
+        }
+      : {}),
   },
   preview: {
     port,
-    host: "0.0.0.0",
+    host,
     allowedHosts: true,
   },
 });

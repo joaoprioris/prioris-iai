@@ -24,8 +24,25 @@ Proteção a perigo físico permanece fora dessa restrição de exemplos do Feed
 
 ## Implementação e fidelidade técnica
 
+- O caminho real de geração carrega um único escopo operacional de Feedback,
+  derivado do contrato canônico: papel, entradas, ajuda, limites e conclusão.
+  Ele proíbe títulos mecânicos, detalhes/impactos inventados e defesa de leitura
+  corrigida; pedido de abertura não significa encerramento.
+- A biblioteca distingue o apoio canônico `S05:example:P0066-P0073` dos 90
+  momentos de avaliação `S11`. O lote focal cobre três conversas completas, com
+  origem e referência `S11:P0067-P0069`; repetição não é tratada como treino.
+- O avaliador Anthropic local recebe chave/modelo apenas pelo ambiente, não cria
+  rota, não repete uso incerto e contabiliza tokens inclusive na resposta
+  recusada. `thinking` privado é descartado; formato inesperado segue recusado.
 - Instrução autoritativa ao modelo e controle interno de autoria específico do
   Feedback: explore/review/optional_example não são roteiro exibido ao líder.
+- O pedido direto de uma abertura breve é reconhecido pelo ato de pedir e pelo
+  objeto pedido, sem palavra-senha adicional como “adaptável” ou “formular”.
+  Negativas, retirada, pedido citado de terceiro e roteiro completo continuam
+  fora dessa autorização.
+- Afirmação causal exibida exige proveniência afirmativa. Negação fiel e hipótese
+  identificada permanecem permitidas; a negação de outro sujeito em uma oração
+  anterior não muda a polaridade da causa afirmada pelo líder.
 - Delivery não é automático; exemplo exige elaboração fonte do líder e propósito
   de revisão. Sem elaboração, apoiar sua construção sem redigir por ele.
 - Mapas explícitos relacionam userMessage (índice do líder) com conversationMessage.
@@ -61,6 +78,15 @@ validação determinística feita na inspeção anterior confirmou os códigos, 
 rodada 1 e dos objetos de geração da rodada 2 também permanecem explícitas.
 
 ## Verificações executadas nesta alteração
+
+Validação local posterior, em branch separada da rodada 4: `node --test
+scripts/local-feedback-eval.test.cjs`, oito casos sintéticos aprovados. Cobertura:
+sucesso, ambiguidade, abertura solicitada, negativas/pedido citado/roteiro,
+correção causal, hipótese, encerramento sem pergunta e falha injetada do provider
+sem commit nem fallback. O guard causal novo recebe explicitamente o agente e
+fica inativo fora do Feedback. Esses candidatos
+determinísticos não são conversa real com modelo e não aprovam qualidade
+semântica.
 
 - 13 testes focados aprovados, com SDK injetado e banco negado/em memória.
 - Seis regressões locais existentes do adaptador passaram no mesmo ciclo de

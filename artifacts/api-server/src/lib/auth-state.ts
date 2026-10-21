@@ -2,7 +2,17 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 export const LOGIN_TTL_MS = 10 * 60 * 1000;
 export const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 export const SESSION_COOKIE = "iai_session";
-export const COOKIE_OPTIONS = { httpOnly: true, secure: true, sameSite: "strict" as const, path: "/api" };
+function isLoopback(url: URL): boolean {
+  return ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+}
+export function localHttpEnabled(): boolean {
+  if (process.env.NODE_ENV !== "development" || process.env.IAI_LOCAL_HTTP !== "true") return false;
+  try {
+    const base = new URL(process.env.APP_BASE_URL ?? "");
+    return base.protocol === "http:" && isLoopback(base);
+  } catch { return false; }
+}
+export const COOKIE_OPTIONS = { httpOnly: true, secure: !localHttpEnabled(), sameSite: "strict" as const, path: "/api" };
 type Credential = { hash: string; expiresAt: number };
 export type AuthState = { v: 2; pending: Credential | null; session: Credential | null };
 export const emptyAuthState = (): AuthState => ({ v: 2, pending: null, session: null });
@@ -40,7 +50,7 @@ export function issueSession(token: string, now = Date.now()): AuthState {
 }
 export function isSameOrigin(headers: Record<string, unknown>): boolean {
   if (typeof headers.origin !== "string" || typeof headers.host !== "string") return false;
-  try { const url = new URL(headers.origin); const configured = [process.env.APP_BASE_URL ?? "https://leadership-support-tool--joaoprioris.replit.app", process.env.AUTH_PREVIEW_ORIGIN].filter((value): value is string => Boolean(value)); return url.protocol === "https:" && (url.host === headers.host || configured.some(value => { try { const allowed = new URL(value); return allowed.protocol === "https:" && allowed.origin === url.origin; } catch { return false; } })); } catch { return false; }
+  try { const url = new URL(headers.origin); const local = localHttpEnabled(); const protocolAllowed = url.protocol === "https:" || (local && url.protocol === "http:" && isLoopback(url)); const configured = [process.env.APP_BASE_URL ?? "https://leadership-support-tool--joaoprioris.replit.app", process.env.AUTH_PREVIEW_ORIGIN].filter((value): value is string => Boolean(value)); return protocolAllowed && (url.host === headers.host || configured.some(value => { try { const allowed = new URL(value); return (allowed.protocol === "https:" || (local && allowed.protocol === "http:" && isLoopback(allowed))) && allowed.origin === url.origin; } catch { return false; } })); } catch { return false; }
 }
 export function requestCredential(headers: Record<string, unknown>, cookies: Record<string, unknown> | undefined): { token: string | null; cookie: boolean } {
   const bearer = typeof headers.authorization === "string" && headers.authorization.startsWith("Bearer ") ? headers.authorization.slice(7) : null;

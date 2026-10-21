@@ -19,7 +19,7 @@
         "type": "string",
         "minLength": 1,
         "maxLength": 1200,
-        "description": "Resposta curta ao líder, com observação útil ancorada no relato. Quando houver pergunta, faça UMA questão focal e use no máximo UM sinal de interrogação em todo este campo. Não faça outra pergunta antes ou depois dela, nem reúna subperguntas. No encerramento, nenhuma pergunta. Não declare certeza, bloqueio, prazo ou impacto que o relato não confirma."
+        "description": "Resposta curta ao líder, com observação útil ancorada no relato. Quando houver pergunta, faça UMA questão focal e use no máximo UM sinal de interrogação em todo este campo. Não faça outra pergunta antes ou depois dela, nem reúna subperguntas. No encerramento, nenhuma pergunta. Não declare certeza, bloqueio, prazo ou impacto que o relato não confirma. Quando delivery não for null, text contém SOMENTE uma apresentação breve ao líder: não inclua a fala do interlocutor nem copie ou cite delivery.text. A fala adaptável fica exclusivamente em delivery.text; o servidor a apresenta ao líder."
       },
       "stage": {
         "description": "Estágio da conversa com IAí. Fechar uma abertura ou fala para outra pessoa não é encerrar o atendimento. Durante ajustes use estágio de trabalho pertinente; close apenas no encerramento com clareza suficiente ou limite global, sem perguntas.",
@@ -102,14 +102,19 @@
         "required": [
           "supportMode",
           "approachEvidence",
-          "examplePurpose"
+          "examplePurpose",
+          "requestEvidence",
+          "basisEvidence"
         ],
         "properties": {
-        "requestIntent": {
-          "type": "string",
-          "enum": ["brief_adaptable_example", "not_requested"],
-          "description": "Interpretação do pedido real pelo gerador existente, independentemente da formulação literal. Nunca dispensa requestEvidence, negativas, retirada, autoria, destinatário ou base factual; não autoriza discurso completo."
-        },
+          "requestIntent": {
+            "type": "string",
+            "enum": [
+              "brief_adaptable_example",
+              "not_requested"
+            ],
+            "description": "Interpretação do pedido real pelo gerador existente, independentemente da formulação literal. Nunca dispensa requestEvidence, negativas, retirada, autoria, destinatário ou base factual; não autoriza discurso completo."
+          },
           "supportMode": {
             "type": "string",
             "description": "Forma do apoio: explore sem exemplo; review comenta elaboração própria literal com delivery null; se delivery.text contém exemplo, use SEMPRE optional_example, inclusive ao revisar abertura existente. Exemplo exige pertinência/pedido, fatos, autoria e ausência de retirada; não é discurso completo.",
@@ -173,7 +178,7 @@
                 }
               }
             },
-            "description": "Pedido explícito do líder por exemplo ou sugestão de abertura; necessário sem abordagem própria."
+            "description": "Pedido explícito do líder por exemplo ou sugestão de abertura; necessário sem abordagem própria. Sempre inclua este campo: [] quando não houver pedido; com exemplo pedido pelo líder, cite o pedido literal."
           },
           "basisEvidence": {
             "type": "array",
@@ -199,7 +204,7 @@
                 }
               }
             },
-            "description": "Fatos concretos relatados pelo líder que apoiam o exemplo solicitado; não mera intenção ou pergunta."
+            "description": "Fatos concretos relatados pelo líder que apoiam o exemplo solicitado; não mera intenção ou pergunta. Sempre inclua este campo: [] sem exemplo; com delivery, cite pelo menos um fato observável já relatado que fundamenta a fala."
           }
         }
       },
@@ -282,7 +287,8 @@
               }
             }
           }
-        ]
+        ],
+        "description": "Exemplo opcional e adaptável, separado da apresentação. Se houver uma fala do líder para outra pessoa, escreva-a somente em delivery.text, nunca também em text, closingSummary ou nextStep. Use null quando não houver novo exemplo útil."
       }
     }
   }
