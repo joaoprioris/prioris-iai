@@ -9,7 +9,7 @@ Cada parágrafo e célula tem referência local. Tabelas preservam linhas, colun
 ## Índice
 
 - [F01 — Agente 1 — Mentor Estratégico - Definição.docx](#fonte-f01)
-- [F02 — Agente 2 — Contencao  Terapia de Bolso - Definição.docx](#fonte-f02)
+- [F02 — Agente 2 — Contenção - Definição.docx](#fonte-f02)
 - [F03 — Agente 3 — Perfil & Padrões - Definição.docx](#fonte-f03)
 - [F04 — Agente 4 — Impacto Humano & Relações - Definição.docx](#fonte-f04)
 - [F05 — Agente 5 — Feedback Estruturado - Definição.docx](#fonte-f05)
@@ -170,9 +170,9 @@ SHA-256 do DOCX: `a7aaeff1c281a726b652acc6e2c630189e25345d3ee63b66028e4f0c01baaa
 
 
 <a id="fonte-f02"></a>
-## F02 — Agente 2 — Contencao  Terapia de Bolso - Definição.docx
+## F02 — Agente 2 — Contenção - Definição.docx
 
-Origem: `AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 2 — Contencao  Terapia de Bolso - Definição.docx`  
+Origem: `AGENTES/CONVERSACIONAIS/DEFINIÇÃO/Agente 2 — Contenção - Definição.docx`  
 SHA-256 do DOCX: `5ff0cf0e468c76a2cf5e14258298a579ded38c7c00f4066874cdf5a228b532ac`
 
 **P0001** Agente 2 — Contenção | Definição
