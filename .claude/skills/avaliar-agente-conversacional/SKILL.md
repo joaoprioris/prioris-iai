@@ -20,6 +20,9 @@ Aprendizado do agente de Feedback (PR 3). Custou cerca de 290 conversas simulada
 5. **Critério de aceitação com checagens determinísticas**, não só nota de modelo. Veja `deterministicChecks` e `accept` em `eval/judge.ts`.
 6. **Leitura humana da transcrição inteira.** O avaliador automático deixou passar defeitos que o dono enxerga ao ler.
 
+7. **Cansaço e repetição também por código.** Líder simulado impaciente derrubava a nota mesmo com conversa útil. Se a fala do líder mostra cansaço ("tanta pergunta", "me fala logo"), injete instrução de resposta curta e sem pergunta; detecte pergunta repetida por sobreposição de palavras com as perguntas anteriores (`LEADER_FRUSTRATION`, `similar` em `guidance.ts`).
+8. **Não ficar mais duro que a orientação do dono.** Uma regra minha ("nunca dar exemplo") era mais rígida que a original ("exemplos curtos e adaptáveis são permitidos, discurso pronto não"). O líder pedia uma abertura curta cinco vezes e saía sem nada. Permita uma única abertura curta quando pedida.
+
 ## O que não funcionou
 
 - **Remendar o prompt a cada falha.** Cada rodada parecia melhorar e a taxa ficou parada em cerca de 50%.

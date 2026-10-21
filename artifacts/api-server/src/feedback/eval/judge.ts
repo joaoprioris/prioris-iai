@@ -115,9 +115,17 @@ export function deterministicChecks(history: ChatMessage[]): string[] {
       if (pattern.test(reply.content)) failures.push(`termo vetado na resposta: ${pattern.source}`);
     }
   }
-  for (const reply of replies) {
-    for (const issue of styleIssues(reply.content)) failures.push(`estilo: ${issue.code}`);
-  }
+  history.forEach((message, index) => {
+    if (message.role !== "assistant") return;
+    const context = {
+      leaderMessage: history[index - 1]?.content,
+      previousReplies: history
+        .slice(0, index)
+        .filter((earlier) => earlier.role === "assistant")
+        .map((earlier) => earlier.content),
+    };
+    for (const issue of styleIssues(message.content, context)) failures.push(`estilo: ${issue.code}`);
+  });
   return failures;
 }
 

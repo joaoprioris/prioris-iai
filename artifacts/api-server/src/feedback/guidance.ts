@@ -19,15 +19,58 @@ const VALIDATING_OPENER =
   /^\W*(entendo|entendi|faz sentido|você tem razão|você está certo|você está certa|boa pergunta|ótimo|ótima|que bom|isso é importante|essa pergunta|essa frase está|você acabou de|você já chegou|você chegou|você mesmo percebeu|agora ficou claro)/i;
 const SELF_CORRECTION =
   /\b(eu (acelerei|saí na frente|errei|te dei|falei como se|presumi)|obrigado por apontar|me desculp)/i;
-const WHOLE_SCRIPT = /"[^"\n]{70,}"/;
+const WHOLE_SCRIPT = /"[^"\n]{150,}"/;
+
+/** Sinais de que o líder está cansado, impaciente ou percebe repetição nas respostas. */
+export const LEADER_FRUSTRATION =
+  /(cansad|repet(indo|iu|e|ição)|de novo|já (falei|disse|expliquei|respondi)|me (fala|diz|d[áa]) logo|me d[áa] (uma|a) (frase|abertura|fala)|pergunta(s)? demais|tanta pergunta|muita pergunta|volta(s)? demais|em círculo|formulário|de manual|não precisa de (tanta|tanto)|você (tá|está) me (empurrando|dando|devolvendo))/i;
+
+export const FRUSTRATION_INSTRUCTION =
+  "O líder acabou de mostrar cansaço ou impaciência com o ritmo, com as perguntas ou com repetição. Nesta resposta: reconheça em uma frase curta e específica o que ele disse, dê sua leitura direta em até 70 palavras e não faça nenhuma pergunta. Se ele pediu uma abertura curta, dê uma só, de no máximo 20 palavras, com os fatos e as palavras dele, como opção para ele ajustar.";
+
+export interface StyleContext {
+  leaderMessage?: string;
+  previousReplies?: string[];
+}
+
+const normalize = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+const questionsOf = (text: string) => (text.match(/[^.!?\n]*\?/g) ?? []).map((q) => q.trim()).filter(Boolean);
+
+function tokens(question: string): Set<string> {
+  return new Set(
+    normalize(question)
+      .split(/[^a-z0-9]+/)
+      .filter((word) => word.length > 3),
+  );
+}
+
+function similar(a: string, b: string): boolean {
+  const left = tokens(a);
+  const right = tokens(b);
+  if (left.size < 4 || right.size < 4) return false;
+  let shared = 0;
+  for (const word of left) if (right.has(word)) shared++;
+  return shared / (left.size + right.size - shared) >= 0.6;
+}
 
 export interface StyleIssue {
-  code: "abertura_validando" | "autocorrecao" | "resposta_longa" | "fala_pronta";
+  code:
+    | "abertura_validando"
+    | "autocorrecao"
+    | "resposta_longa"
+    | "fala_pronta"
+    | "pergunta_repetida"
+    | "pergunta_apos_cansaco";
   instruction: string;
 }
 
 /** Regras de estilo que o modelo descumpre mesmo com a orientação: detectadas por código e reescritas uma vez. */
-export function styleIssues(reply: string): StyleIssue[] {
+export function styleIssues(reply: string, context: StyleContext = {}): StyleIssue[] {
   const issues: StyleIssue[] = [];
   if (VALIDATING_OPENER.test(reply.trim()))
     issues.push({
@@ -50,6 +93,25 @@ export function styleIssues(reply: string): StyleIssue[] {
       code: "fala_pronta",
       instruction:
         "Não escreva falas inteiras entre aspas para o líder usar; diga o que a mensagem precisa conter e deixe as palavras com ele.",
+    });
+  const frustrated = LEADER_FRUSTRATION.test(context.leaderMessage ?? "");
+  if (frustrated && reply.includes("?"))
+    issues.push({
+      code: "pergunta_apos_cansaco",
+      instruction:
+        "O líder mostrou cansaço ou impaciência: não faça pergunta nesta resposta; dê sua leitura direta em até 70 palavras.",
+    });
+  if (frustrated && reply.trim().split(/\s+/).length > 90)
+    issues.push({
+      code: "resposta_longa",
+      instruction: "O líder mostrou cansaço: responda em até 70 palavras.",
+    });
+  const earlier = (context.previousReplies ?? []).flatMap(questionsOf);
+  if (questionsOf(reply).some((question) => earlier.some((previous) => similar(question, previous))))
+    issues.push({
+      code: "pergunta_repetida",
+      instruction:
+        "Você repetiu uma pergunta que já fez. Não pergunte de novo: avance com sua leitura ou com outro ponto.",
     });
   return issues;
 }
@@ -76,7 +138,7 @@ Sua função: transformar a intenção do líder em comunicação clara e faláv
 Como responder: conversa corrida, sem títulos nem listas, curta (cerca de 100 palavras; no máximo 60 palavras se o líder está no meio de uma conversa ao vivo). Use só o que a fala dele pede entre estes passos:
 1. Leitura do momento: mostre que entendeu a dificuldade real, usando só o que ele contou. Comece pelo conteúdo, sem validar nem elogiar ("faz sentido", "entendo", "você tem razão", "ponto importante").
 2. Tensão central: quando existir, nomeie onde a clareza e a relação puxam para lados diferentes, com palavras do caso. Não use a mesma fórmula de abertura em turnos seguidos.
-3. Direcionamento prático: explore o objetivo e como ele pretende abordar a conversa. Exemplos só como pedaço de frase, com as palavras dele; nunca a fala inteira nem um roteiro. Diga o que a mensagem precisa conter e deixe as palavras com ele.
+3. Direcionamento prático: explore o objetivo e como ele pretende abordar a conversa. Exemplos só como pedaço de frase, com as palavras dele; nunca a fala inteira nem um roteiro. Se ele pedir um exemplo de como começar, dê uma única abertura de até 20 palavras, feita com os fatos e as palavras dele, como opção para ele ajustar. Se ele pedir a fala pronta, não explique suas regras: diga em uma frase que a fala funciona melhor na voz dele, dê essa abertura e siga. Diga o que a mensagem precisa conter e deixe as palavras com ele.
 Faça no máximo uma pergunta por resposta, só quando ela fizer a conversa avançar, e nunca repita uma que ele já respondeu. Se ele pedir sua opinião ou reclamar das perguntas, dê sua leitura direta e mude o jeito de responder, sem se desculpar nem comentar suas próprias regras.
 
 Autoria: o líder decide e conduz. Você amplia a clareza; não escolhe por ele nem põe na boca dele palavras ou sentimentos que ele não disse.

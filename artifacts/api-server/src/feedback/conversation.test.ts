@@ -212,7 +212,7 @@ describe("regras de estilo impostas por código", () => {
       styleIssues("palavra ".repeat(160)).map((i) => i.code),
       ["resposta_longa"],
     );
-    const fala = `Diga: "${"Preciso que o relatório chegue até sexta de manhã porque ele alimenta a reunião de segunda"}".`;
+    const fala = `Diga: "${"Preciso que o relatório chegue até sexta de manhã porque ele alimenta a reunião de segunda, e quando chega depois eu perco a janela de revisar tudo com calma antes de levar para a diretoria"}".`;
     assert.deepEqual(
       styleIssues(fala).map((i) => i.code),
       ["fala_pronta"],
@@ -233,5 +233,30 @@ describe("regras de estilo impostas por código", () => {
     assert.equal(result.status, "ok");
     if (result.status === "ok") assert.equal(result.reply, replies[1]);
     assert.equal(calls.length, 2);
+  });
+
+  it("detecta cansaço do líder com pergunta na resposta e pergunta repetida", () => {
+    const frustrado = { leaderMessage: "Você tá me devolvendo pergunta demais, me fala logo." };
+    assert.ok(styleIssues("O que você quer dizer a ela?", frustrado).some((i) => i.code === "pergunta_apos_cansaco"));
+    assert.deepEqual(styleIssues("Diga o fato e o pedido, nessa ordem.", frustrado), []);
+    const anteriores = { previousReplies: ["Qual atraso você quer trazer primeiro para essa conversa?"] };
+    assert.ok(
+      styleIssues("Então, qual atraso você quer trazer primeiro nessa conversa?", anteriores).some(
+        (i) => i.code === "pergunta_repetida",
+      ),
+    );
+    assert.deepEqual(styleIssues("Quando você consegue marcar essa conversa?", anteriores), []);
+  });
+
+  it("injeta a instrução de cansaço no sistema quando o líder reclama", async () => {
+    const calls: string[] = [];
+    const provider: FeedbackProvider = {
+      async complete(input) {
+        calls.push(input.system);
+        return "Diga o fato e o pedido, nessa ordem.";
+      },
+    };
+    await runTurn(provider, [], "Você tá me devolvendo pergunta demais, me fala logo.");
+    assert.ok(calls[0].includes("cansaço ou impaciência"));
   });
 });

@@ -6,6 +6,8 @@ import {
   FORBIDDEN_RETRY_INSTRUCTION,
   LAST_EXCHANGE_INSTRUCTION,
   MAX_EXCHANGES,
+  FRUSTRATION_INSTRUCTION,
+  LEADER_FRUSTRATION,
   styleIssues,
   styleRetryInstruction,
 } from "./guidance.ts";
@@ -90,7 +92,12 @@ export async function runTurn(
 
   const exchange = countExchanges(history) + 1;
   const isLast = exchange === MAX_EXCHANGES;
-  const system = isLast ? `${FEEDBACK_GUIDANCE}\n\n${LAST_EXCHANGE_INSTRUCTION}` : FEEDBACK_GUIDANCE;
+  let system = isLast ? `${FEEDBACK_GUIDANCE}\n\n${LAST_EXCHANGE_INSTRUCTION}` : FEEDBACK_GUIDANCE;
+  if (LEADER_FRUSTRATION.test(content)) system = `${system}\n\n${FRUSTRATION_INSTRUCTION}`;
+  const styleContext = {
+    leaderMessage: content,
+    previousReplies: history.filter((message) => message.role === "assistant").map((message) => message.content),
+  };
   const messages: ChatMessage[] = [...history, { role: "user", content }];
 
   const hasForbidden = (text: string) => FORBIDDEN_IN_REPLIES.some((pattern) => pattern.test(text));
@@ -105,10 +112,11 @@ export async function runTurn(
     }
     // Estilo: até duas reescritas avisadas; vale a nova resposta se ela tiver menos problemas e nenhum termo vetado.
     for (let attempt = 0; attempt < 2; attempt++) {
-      const issues = styleIssues(raw);
+      const issues = styleIssues(raw, styleContext);
       if (issues.length === 0) break;
       const again = await provider.complete(rewriteRequest(system, messages, raw, styleRetryInstruction(issues)));
-      if (again && again.trim() && !hasForbidden(again) && styleIssues(again).length < issues.length) raw = again;
+      if (again && again.trim() && !hasForbidden(again) && styleIssues(again, styleContext).length < issues.length)
+        raw = again;
     }
     // Encerrar com pergunta deixa o líder sem como responder: uma nova tentativa sem interrogação.
     const closing = isLast || raw.trimEnd().endsWith(CLOSING_PHRASE);
