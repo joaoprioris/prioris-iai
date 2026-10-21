@@ -2,6 +2,8 @@
 
 Data de corte: **18/10/2026**. Este guia registra requisitos e evidências; não aprova o código existente nem substitui a metodologia. Atualização documental, sem merge de código, deploy ou chamada a modelo.
 
+Para entender a empresa, o app, os agentes, o SED e a metodologia em um só arquivo, comece pelo [documento mestre](MESTRE.md).
+
 ## 1. Objetivo e experiência esperada
 
 O IAí apoia líderes em dilemas reais de gestão de pessoas. Deve ajudar a estruturar pensamento, ampliar leitura e qualificar decisões sob pressão, em linguagem humana e direta, preservando a decisão e a autoria do líder. A interface apresenta uma voz única; agentes e classificação metodológica ficam invisíveis.
