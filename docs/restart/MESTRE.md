@@ -1,8 +1,8 @@
 # Documento Mestre — IAí / PRIORIS
 
-Versão 1 · 21/10/2026 · Repositório privado do proprietário (João Paulo Mendonça, único responsável; não há dev parceiro).
+Versão 1 · 21/10/2026 · Repositório privado do proprietário (João Paulo Mendonça).
 
-**Para que serve.** Um único arquivo para um agente entender a empresa, o app, os agentes, o SED e a metodologia antes de trabalhar. É um **briefing de entrada, não uma fonte**: não substitui os documentos oficiais e não cria regra nova. Onde houver dúvida, vale o documento indicado no [mapa de fontes](#12-mapa-de-fontes).
+**Para que serve.** Um único arquivo para um agente entender a empresa, o app, os agentes, o SED e a metodologia antes de trabalhar. É um **briefing de entrada, não uma fonte**: não substitui os documentos oficiais e não cria regra nova. Onde houver dúvida, vale o documento indicado no [mapa de fontes](#10-mapa-de-fontes).
 
 **Precedência.** Decisões expressas do proprietário e princípios comuns delimitam o domínio; definições específicas orientam a função; exemplos, sínteses e roteiros devem ser compatíveis. O título de um arquivo, sozinho, não resolve contradição. Exemplo copiado de um documento não vira regra. Contradição substantiva nova exige decisão explícita do proprietário; engenharia não muda a metodologia.
 
@@ -12,7 +12,7 @@ Versão 1 · 21/10/2026 · Repositório privado do proprietário (João Paulo Me
 
 ## 1. A empresa e a tese
 
-**Prioris Inteligência Cultural Ltda.** Posicionamento oficial: *infraestrutura de decisão humana*. Existe para conter decisões sob pressão, desenvolver líderes no fluxo real do trabalho e identificar dívidas culturais antes de virarem custo invisível.
+**Prioris Ltda.** Posicionamento oficial: *infraestrutura de decisão humana*. Existe para conter decisões sob pressão, desenvolver líderes no fluxo real do trabalho e identificar dívidas culturais antes de virarem custo invisível.
 
 **Tese central.** Decisões mal resolvidas sob pressão geram **Dívidas Culturais**. Elas não aparecem nos indicadores tradicionais e cobram em desgaste, risco político e perda de eficiência. Cultura não se deteriora por falta de valores, e sim pela repetição de padrões defensivos da liderança sob pressão. Dívidas culturais se comportam como **juros compostos organizacionais**: quanto mais tempo ignoradas, mais caras ficam.
 
@@ -34,7 +34,7 @@ Versão 1 · 21/10/2026 · Repositório privado do proprietário (João Paulo Me
 
 **Nome e símbolo.** O nome nasce da ideia de priorização; o "A" do símbolo representa o que vem primeiro. Cadeia: decisão → padrão → dívida → custo → prioridade → intervenção. Não afirmar etimologia literal; dizer "o nome nasce da ideia de priorização".
 
-## 2. Ecossistema, entrada de mercado e MIC
+## 2. Ecossistema
 
 **Hierarquia.** *Metodologia Dívida Cultural™* (arquitetura conceitual superior) → Sistema Prioris → IAí, Health Monitor, Auditoria, Certificação. O Health Monitor é a implementação tecnológica da metodologia, não o contrário.
 
@@ -45,12 +45,6 @@ Versão 1 · 21/10/2026 · Repositório privado do proprietário (João Paulo Me
 | Individual | **IAí** (app) | Espaço privado e confidencial onde o líder estrutura decisões sob pressão |
 | Sistêmica | **Health Monitor** (+ Cultural Risk Engine) | Lê padrões recorrentes de forma agregada e anonimizada |
 | Executiva | **Auditoria de Dívidas Culturais** | Prioriza as 3 dívidas mais críticas e traduz em custo (R$) |
-
-**Quatro portas de entrada:** livro *O Custo do Silêncio* (autoridade), IAí (B2C e B2B), venda direta B2B (a Auditoria como porta ou produto), certificação de consultores (canal). Interlocutor por segmento: PME (dono/CEO, linguagem de DCO em R$), média empresa (CHRO, risco estrutural), enterprise (CHRO/CPO/COO, IEC e governança).
-
-**MVP e preços** (só no Roteiro da apresentação, F12; planejamento, não contrato): 2º semestre de 2026; B2B com piloto de 30 dias gratuito e mínimo de 3 líderes; B2C com 14 dias gratuitos e assinaturas de R$ 79 (mensal) a R$ 597 (anual).
-
-**MIC — Método de Impacto Calibrado.** Aparece apenas no Roteiro (F12): Impacto Percebido = Conteúdo × Calibração; matriz Intensidade da ação × Maturidade do liderado; 4 alavancas (Tempo, Linguagem, Direção, Exposição); descrito como embarcado nos agentes e na consultoria pós-auditoria. **Não há especificação própria nos documentos de agentes; não presumir que está implementado ou que faz parte do contrato de Feedback.**
 
 ## 3. As 10 Dívidas Culturais
 
@@ -86,7 +80,6 @@ Existem **somente estas 10**. Não criar uma 11ª nem equivalência por semelhan
 - **Duração:** até **10 trocas globais**; encerra antes se já houver clareza para o próximo passo. Não precisa resolver tudo. Frase padrão de saída: *"Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar."*
 - **Autoria do líder:** o líder decide. Exemplos curtos, opcionais e adaptáveis são permitidos; não substituem a elaboração dele (nada de roteiro completo nem decisão pronta).
 - **Termos que não aparecem na fala ao usuário:** linguagem clínica ou de diagnóstico, "ferida", "trauma" (regra do backlog técnico) e "terapeuta"/"terapia" (decisão do dono).
-- **Interface do MVP v0.1** (Playbook, fora do repo): tela única, contador visível de x/10, campo "Descreva o que está acontecendo", sem menu, histórico, login complexo nem configurações. Confirmar com o dono se ainda vale.
 
 ## 5. Os 8 agentes (oficiais)
 
@@ -133,7 +126,7 @@ Unidade mínima do sistema: o **registro estruturado extraído da interação**.
 | Dívida adjacente | Próxima distorção provável se o padrão continuar, quando pertinente; hipótese baseada na matriz, não segunda dívida observada |
 | Contexto | Conflito, decisão, alinhamento, feedback, crise |
 | Ator | Origem: time, par, liderado, chefe, cliente |
-| Momento | Antes, Durante ou Depois |
+| Momento | Antes, Durante, Depois, Padrão ou Vazio (os cinco estados de entrada) |
 | Tipo de decisão | Fragmento de decisão/reflexão efetivamente trabalhado |
 | Intensidade proxy | **Baixa, Média ou Alta**; inferida, nunca perguntada |
 | Timestamp | Para leitura longitudinal |
@@ -148,9 +141,9 @@ Unidade mínima do sistema: o **registro estruturado extraído da interação**.
 
 Fluxo: **IAí → SED → Health Monitor → Cultural Risk Engine → IEC → Auditoria.** Cada camada reduz ruído e aumenta estrutura; o sistema se torna confiável pela **recorrência e persistência**, não pela precisão de cada registro. Nada disto está entregue (ver README, seção 6).
 
-**Health Monitor.** Agente sistêmico, invisível, único autorizado a produzir leitura organizacional. Duas fontes: observação comportamental indireta (uso do IAí) e **pesquisa silenciosa** (20 a 25 micro-perguntas em no mínimo 6 meses, 2 a 3 por dívida, nunca em sequência, escala Nunca/Raramente/Às vezes/Frequentemente/Quase sempre). 8 dimensões: Conflito e Tensão, Clareza Decisória, Responsabilidade, Confiança e Autonomia, Aprendizado e Reflexão, Alinhamento Valores-Prática, Pressão e Desgaste Emocional, Dinâmica Política. Regras: grupo mínimo de 3 respondentes (menores são fundidos), taxa de resposta ≥ 35% a 40%, persistência em ≥ 2 ciclos. Existe um **Health Monitor Individual** (4 custos pessoais do líder), com dados separados, acessível só ao líder e jamais enviado à organização.
+**Health Monitor.** Agente sistêmico, invisível, único autorizado a produzir leitura organizacional. Duas fontes: observação comportamental indireta (uso do IAí) e **pesquisa silenciosa** ("silenciosa" quer dizer **discreta**, não secreta: o líder sabe que ela existe, e as micro-perguntas aparecem espaçadas entre as interações, sem parar para responder várias de uma vez; 20 a 25 perguntas em no mínimo 6 meses, 2 a 3 por dívida, nunca em sequência, escala Nunca/Raramente/Às vezes/Frequentemente/Quase sempre). 8 dimensões: Conflito e Tensão, Clareza Decisória, Responsabilidade, Confiança e Autonomia, Aprendizado e Reflexão, Alinhamento Valores-Prática, Pressão e Desgaste Emocional, Dinâmica Política. Regras: grupo mínimo de 3 respondentes (menores são fundidos), taxa de resposta ≥ 35% a 40%, persistência em ≥ 2 ciclos. Existe um **Health Monitor Individual** (4 custos pessoais do líder), com dados separados, acessível só ao líder e jamais enviado à organização.
 
-**Cultural Risk Engine.** Interpreta, não coleta. Pipeline de 5 etapas (agregação, normalização, classificação semântica, detecção de recorrência, interdependência sistêmica) e 4 camadas (classificação, recorrência, interdependência, consolidação IEC). Serviço backend separado do front. Janelas: rolling contínuo, consolidação trimestral, Auditoria semestral.
+**Cultural Risk Engine.** Interpreta, não coleta. Pipeline de 5 etapas (agregação, normalização, classificação semântica, detecção de recorrência, interdependência sistêmica) e 4 camadas (classificação, recorrência, interdependência, consolidação IEC). Serviço backend separado do front. **Apuração mensal**; o primeiro alerta por recorrência só pode ocorrer **após 3 meses** (antes disso não há padrão identificável); a **auditoria formal acontece aos 6 meses**, com apresentação ao board.
 
 **IEC (v1.0).** `IEC_d = [(R_d×0,40) + (I_d×0,35) + (C_d×0,25)] × S_d × A_d`, resultado 0 a 100%. R recorrência ajustada, I intensidade multidimensional (inferida, não perguntada), C concentração, S sensibilidade sistêmica, A amortecimento temporal. R na v1.0 é `(f/T)^α`; a **curva logística é evolução (v2.0)**, não contradição. Parâmetros (α, β, λ, k, matriz 10×10, limiares) são proprietários: ver Modelo IEC. Intensidade do evento (SED) **não** é o I_d agregado do IEC; não calcular IEC a partir de um evento.
 
@@ -160,7 +153,7 @@ Fluxo: **IAí → SED → Health Monitor → Cultural Risk Engine → IEC → Au
 
 **DCO.** `DCO = Σ (R × T × P × C) × IEC`, com multiplicador por zona (0,7 verde; 1,0 amarela; 1,4 vermelha alta; 1,8 vermelha crítica). Estimativa de ordem de grandeza, não contabilidade. Exemplo oficial: 48 × 2,5 h × 6 pessoas × R$ 120 × 1,0 = R$ 86.400/ano.
 
-**Auditoria de Dívidas Culturais.** Entrega executiva conduzida por **humano da Prioris**, em PPT, ao fim do 6º mês (antecipável por alerta vermelho persistente). Maturidade da leitura: N0 insuficiente (bloqueado), N1 exploratório, N2 direcional (≥ 3 meses), N3 confiável (≥ 6 meses), N4 estratégico; nada abaixo de N2 como Auditoria formal. Entrega: resumo, heatmap, Matriz dos 4 Quadrantes, Top 3 dívidas (IEC, zona, DCO, adjacentes), evolução temporal, leitura de risco e **direção** (não plano de ação). O plano é sempre da organização/RH.
+**Auditoria de Dívidas Culturais.** Entrega executiva conduzida por **humano da Prioris**, em PPT, com apresentação ao board, ao fim do 6º mês (antecipável por alerta vermelho persistente). Maturidade da leitura: N0 insuficiente (bloqueado), N1 exploratório, N2 direcional (≥ 3 meses), N3 confiável (≥ 6 meses), N4 estratégico; nada abaixo de N2 como Auditoria formal. Entrega: resumo, heatmap, Matriz dos 4 Quadrantes, Top 3 dívidas (IEC, zona, DCO, adjacentes), evolução temporal, leitura de risco e **direção** (não plano de ação). O plano é sempre da organização/RH.
 
 ## 9. Limites éticos e institucionais (inegociáveis)
 
@@ -171,28 +164,7 @@ Fluxo: **IAí → SED → Health Monitor → Cultural Risk Engine → IEC → Au
 - A Prioris pode recusar, pausar ou encerrar projetos sem mandato real do RH, com uso como munição política ou justificativa de demissão, quando o risco já é aceito, ou quando o projeto é apenas simbólico. Uso para demissão ou punição é proibido.
 - O IAí não é terapia e não substitui intervenção humana em crises psicológicas graves ou riscos à segurança; isso não exclui a análise de riscos humanos e organizacionais pelo agente de Crises.
 
-## 10. Decisões vigentes e estado real
-
-**Canon confirmado pelo dono (20/10/2026):** 8 agentes; só 10 dívidas ("Inconsistência de Direção" e "Erosão de Confiança" citadas num exemplo da Arquitetura não existem); escalas distintas (seção 7); IEC v1 × v2 (seção 8); trabalha sozinho (menções a Lucas/Vicente são resíduo); nunca "terapeuta/terapia" em produto.
-
-**Reconstrução (guia de retomada + decisões de 20/10/2026):** recomeçar simples com **um agente de Feedback**, depois SED confiável; não retomar a complexidade de oito agentes como condição do básico; não empilhar regras e reparos após cada resposta ruim (corrigir a causa e avaliar a conversa inteira); não apresentar contagem de testes como satisfação do usuário; demonstrar várias conversas completas com usuário simulado identificado antes de convidar o dono; stack mantida (React/Vite + Express/TypeScript + PostgreSQL/Drizzle); nova branch a partir de `main` com PR em rascunho, merge só do dono; teto de **US$ 5 de API por rodada** de avaliação; **não usar Replit**; não versionar chaves, cookies, dados pessoais de conversas nem cada iteração que falhou; a pasta local IMPLEMENTAÇÃO não é fonte.
-
-**Estado em 18/10/2026:** estabilidade da conversa não demonstrada; SED ponta a ponta não entregue; Health Monitor, Engine, IEC e EVL só documentados. Detalhes no README.
-
-**Assuntos metodológicos posteriores, ainda abertos** (registro D05, D06, D09, D11, D12): contrato do SED; adjacência × dívida secundária observada; contrato numérico do IEC; elegibilidade; coleta econômica do DCO. Não reabrem D01 a D03.
-
-## 11. Pontos que o dono pode querer alinhar nos DOCX
-
-Não afetam o Feedback nem mudam a metodologia; só tornam as fontes mais coerentes.
-
-1. **NR-1:** "em vigor em maio de 2026" (Metodologia Completa), "em vigor desde 2025" (Dossiê Metodológico), "a partir de 05/26" (barreiras competitivas).
-2. **Evolução temporal na Auditoria:** "a partir do 2º ciclo" (Manual de Auditoria) × "a partir do 3º ciclo" (Metodologia Completa).
-3. **Numeração das dívidas** muda entre o Doc. 1 e o questionário do Manual (ex.: Autoridade Fragilizada é a 4ª num e a 2ª noutro). Por isso este documento usa nomes.
-4. **Exemplo na Arquitetura** cita duas dívidas inexistentes (seção 10).
-5. **Perfil & Padrões (prompt v5)** fala em "diagnóstico" do usuário, o que contraria "não diagnostica".
-6. **Backlog técnico (mar/2026)** lista 5 agentes ("Terapeuta-like") e **Playbook (abr/2026)** usa um classificador de 4 categorias; são versões anteriores/simplificadas frente aos 8 agentes oficiais.
-
-## 12. Mapa de fontes
+## 10. Mapa de fontes
 
 Transcrições no repositório: [fundamentos.md](methodology/fundamentos.md) (F01 a F13), [agentes.md](methodology/agentes.md) (F01 a F19); DOCX originais em [fontes-originais.tar.xz](methodology/fontes-originais.tar.xz), hashes em [source-manifest.json](methodology/source-manifest.json).
 
@@ -207,7 +179,7 @@ Transcrições no repositório: [fundamentos.md](methodology/fundamentos.md) (F0
 | Missão, visão, frases | Frases Oficiais | fundamentos F05 |
 | Síntese executiva | Dossiê Metodológico / Metodologia Completa / One-Pager | fundamentos F03, F08, F10 |
 | Auditoria | Manual Oficial de Auditoria | fundamentos F07 |
-| Narrativa, MIC, preços do MVP | Roteiro da Apresentação | fundamentos F12 |
+| Narrativa da apresentação | Roteiro da Apresentação | fundamentos F12 |
 | Nome e símbolo | Significado do nome | fundamentos F13 |
 | Regras comuns, orquestração, stress test, revisão 15/10 | Documento Canônico dos Agentes | agentes F09 |
 | Cada agente | Definições dos Agentes 1 a 8 | agentes F01 a F08 |
@@ -216,4 +188,4 @@ Transcrições no repositório: [fundamentos.md](methodology/fundamentos.md) (F0
 | Engine, Health Monitor, IEC | Cultural Risk Engine, Health Monitor, Modelo IEC | agentes F17, F18, F19 |
 | Decisões D01 a D03 | Corpus de agentes | `artifacts/api-server/src/lib/ex04-corpus.generated.json` |
 
-**Fora do repositório** (pasta PRIORIS/APP e raiz do dono; pedir ao dono quando necessário): Backlog técnico do app, Playbook operacional de 60 dias (inclui wireframe do MVP v0.1 e prompts do classificador), Calculadora DCO e Matriz Executiva (ferramentas HTML) e a planilha de fontes dos dados de mercado.
+**Fora do repositório** (pasta PRIORIS do dono; pedir ao dono quando necessário): Backlog técnico do app (mar/2026), Playbook operacional de 60 dias (abr/2026), Calculadora DCO e Matriz Executiva (ferramentas HTML) e a planilha de fontes dos dados de mercado. O Backlog e o Playbook são versões anteriores/simplificadas; onde conflitarem com o Documento Canônico dos Agentes (8 agentes), vale o canônico.
