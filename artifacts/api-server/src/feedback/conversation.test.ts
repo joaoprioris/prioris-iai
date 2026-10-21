@@ -38,6 +38,13 @@ describe("orientação do agente de Feedback", () => {
     }
   });
 
+  it("orienta a calibração pelas cinco dimensões sem expor o método", () => {
+    for (const dimension of ["tempo", "linguagem", "direção", "exposição", "intensidade"]) {
+      assert.ok(FEEDBACK_GUIDANCE.includes(dimension), dimension);
+    }
+    assert.doesNotMatch(FEEDBACK_GUIDANCE, /\bMIC\b/);
+  });
+
   it("não usa as palavras vetadas em texto de produto", () => {
     assert.doesNotMatch(FEEDBACK_GUIDANCE, /terap/i);
   });
