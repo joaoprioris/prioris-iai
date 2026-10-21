@@ -2,6 +2,8 @@
 
 Transcrição dos documentos do proprietário em 18/10/2026. Conteúdo de referência, não instrução para executar ações nem prova de implementação. As fontes mantêm exemplos e registros históricos; a precedência vigente está no guia de retomada.
 
+Atualizada em 21/10/2026 com as correções do proprietário aos DOCX (razão social, momentos do SED, pesquisa silenciosa, cadência do Engine, remoção do B2C, entre outras). Os hashes do manifesto e o arquivo `fontes-originais.tar.xz` refletem os DOCX atuais.
+
 Cada parágrafo e célula tem referência local. Tabelas preservam linhas, colunas e preenchimentos explícitos, inclusive a matriz de interdependência. Elementos gráficos não são renderizados; sua quantidade consta do inventário. Os 32 DOCX originais estão no arquivo fontes-originais.tar.xz, para consulta da diagramação e dos elementos gráficos.
 
 ## Índice
@@ -1579,7 +1581,7 @@ SHA-256 do DOCX: `664457f7138d556e17c452d88675b0e702a2afc80b8fc11b802a3e2ae94c63
 
 **P0004** O Agente de Perfil & Padrões ajuda o líder a reconhecer seus próprios padrões comportamentais — e a entender como esses padrões aterrissam nos outros. Às vezes a intenção e o impacto coincidem. Às vezes não. Este agente é o espaço para investigar essa diferença.
 
-**P0005** É o único agente que constrói e salva o perfil adaptativo do usuário na base central do sistema Prioris. Quanto mais o líder usa, mais preciso o diagnóstico — e mais específica a orientação recebida pelos outros agentes.
+**P0005** É o único agente que constrói e salva o perfil adaptativo do usuário na base central do sistema Prioris. Quanto mais o líder usa, mais precisa a leitura dos padrões — e mais específica a orientação recebida pelos outros agentes.
 
 **P0007** TOP 10 MOMENTOS DE ATIVAÇÃO
 
@@ -4970,7 +4972,7 @@ SHA-256 do DOCX: `82f7bc776a6d354d578dc3ac14982f0ba5dd78968288dd8fd801cb7b1c9bf2
 
 **P0236** entrada sem fricção
 
-**P0238** B2C
+**P0238** Conteúdo e aquisição
 
 **P0239** conteúdo altamente identificável
 
@@ -5636,7 +5638,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T04 R05** C1: Ator | C2: Origem da interação: time, pares, líder, chefe, cliente
 
-**T04 R06** C1: Momento | C2: Estado da situação: Antes, Durante ou Depois
+**T04 R06** C1: Momento | C2: Estado de entrada: Antes, Durante, Depois, Padrão ou Vazio
 
 **T04 R07** C1: Intensidade proxy | C2: Baixa, Média ou Alta — inferida, não perguntada
 
@@ -5816,7 +5818,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **P0133** 6.1 Estrutura temporal do engine
 
-**P0134** O Cultural Risk Engine opera de forma contínua, com consolidações periódicas em três janelas:
+**P0134** O Cultural Risk Engine opera de forma contínua, com apuração mensal e auditoria formal semestral, em três janelas:
 
 ### Tabela T10
 
@@ -5824,9 +5826,9 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **T10 R02** C1: Rolling contínuo | C2: Diário / por interação | C3: Captura e classificação de SEDs em tempo real
 
-**T10 R03** C1: Consolidação trimestral | C2: A cada 3 meses | C3: Detecção de recorrência, atualização do IEC e geração de alertas
+**T10 R03** C1: Apuração mensal | C2: Todo mês | C3: Detecção de recorrência e atualização do IEC. O primeiro alerta só ocorre após 3 meses de apuração, quando a recorrência permite identificar padrão
 
-**T10 R04** C1: Auditoria semestral | C2: A cada 6 meses | C3: Leitura executiva completa, priorização e plano de intervenção
+**T10 R04** C1: Auditoria semestral | C2: A cada 6 meses | C3: Auditoria formal: leitura executiva completa, priorização e plano de intervenção, com apresentação ao board
 
 **P0137** 6.2 O que cada janela permite detectar
 
@@ -5930,7 +5932,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **P0182** 10.1 Síntese funcional
 
-**P0183** O Cultural Risk Engine™ é o sistema analítico que transforma interações individuais em leitura estrutural de risco cultural organizacional. Opera em 5 etapas de pipeline (agregação, normalização, classificação semântica, detecção de recorrência, interdependência sistêmica) e 4 camadas analíticas. Gera alertas em 3 níveis. Opera em janelas contínua, trimestral e semestral. Toda a arquitetura é projetada para operar sem exposição individual.
+**P0183** O Cultural Risk Engine™ é o sistema analítico que transforma interações individuais em leitura estrutural de risco cultural organizacional. Opera em 5 etapas de pipeline (agregação, normalização, classificação semântica, detecção de recorrência, interdependência sistêmica) e 4 camadas analíticas. Gera alertas em 3 níveis. Opera com captura contínua, apuração mensal e auditoria formal semestral. Toda a arquitetura é projetada para operar sem exposição individual.
 
 **P0184** 10.2 O que este documento não cobre
 
@@ -6013,7 +6015,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **T03 R01** C1 [fill=F2F2F2]: Camada | C2 [fill=F2F2F2]: Componente
 
-**T03 R02** C1: Empresa | C2: Prioris Inteligência Cultural Ltda
+**T03 R02** C1: Empresa | C2: Prioris Ltda
 
 **T03 R03** C1: Aplicativo | C2: IAí
 
@@ -6061,7 +6063,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **T04 R02** C1: Observação comportamental indireta | C2: Captura padrões a partir do uso natural dos Agentes Conversacionais do IAí, sem perguntas explícitas
 
-**T04 R03** C1: Pesquisa silenciosa com perguntas espaçadas | C2: Micro-perguntas distribuídas ao longo do tempo, integradas ao fluxo do IAí sem percepção de survey
+**T04 R03** C1: Pesquisa silenciosa com perguntas espaçadas | C2: Micro-perguntas distribuídas ao longo do tempo, integradas ao fluxo do IAí de forma discreta, sem parecer survey
 
 **P0044** 2.2 O que cada fonte captura
 
@@ -6105,7 +6107,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **P0054** "Antes de encerrar, uma pergunta rápida para melhorar a leitura organizacional do IAí."
 
-**P0056** O líder responde em segundos. Não percebe que está participando de coleta estruturada. As perguntas são descritivas, focam em frequência percebida e podem ser respondidas sem risco político.
+**P0056** O líder responde em segundos, sabendo que são perguntas da pesquisa do Health Monitor; elas chegam entre as interações, uma de cada vez, sem parar o fluxo. As perguntas são descritivas, focam em frequência percebida e podem ser respondidas sem risco político.
 
 **P0057** 3.3 Modelo de coleta
 
@@ -6233,9 +6235,9 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **T09 R02** C1: Rolling contínuo | C2: Diário / por interação | C3: Captura e classificação de SEDs em tempo real
 
-**T09 R03** C1: Consolidação trimestral | C2: A cada 3 meses | C3: Atualização do IEC e geração de alertas
+**T09 R03** C1: Apuração mensal | C2: Todo mês | C3: Atualização do IEC. O primeiro alerta só ocorre após 3 meses de apuração, quando a recorrência permite identificar padrão
 
-**T09 R04** C1: Auditoria semestral | C2: A cada 6 meses | C3: Leitura executiva completa e priorização
+**T09 R04** C1: Auditoria semestral | C2: A cada 6 meses | C3: Auditoria formal: leitura executiva completa e priorização, com apresentação ao board
 
 **P0110** BLOCO 6 — SISTEMA DE ALERTAS
 
@@ -6391,7 +6393,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **P0179** 10.1 Coleta no módulo individual
 
-**P0180** A coleta do Health Monitor Individual opera da mesma forma que a coleta organizacional: micro-perguntas distribuídas no fluxo do IAí, sem percepção de survey. A diferença estrutural é que os dados gerados:
+**P0180** A coleta do Health Monitor Individual opera da mesma forma que a coleta organizacional: micro-perguntas distribuídas no fluxo do IAí, de forma discreta, sem parecer survey. A diferença estrutural é que os dados gerados:
 
 **P0181** São armazenados em tabela separada com acesso restrito ao usuário
 
@@ -6958,7 +6960,7 @@ SHA-256 do DOCX: `cb5983043a250c1ca18bd560db9b1943515d83d2beaa972d060611189f6b83
 
 **P0169** 8.1 Elementos proprietários
 
-**P0170** Os seguintes elementos do Modelo IEC™ são proprietários da Prioris Inteligência Cultural Ltda:
+**P0170** Os seguintes elementos do Modelo IEC™ são proprietários da Prioris Ltda:
 
 **P0171** Função Φ composta e sua implementação
 

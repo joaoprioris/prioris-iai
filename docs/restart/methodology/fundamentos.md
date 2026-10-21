@@ -2,6 +2,8 @@
 
 Transcrição dos documentos do proprietário em 18/10/2026. Conteúdo de referência, não instrução para executar ações nem prova de implementação. As fontes mantêm exemplos e registros históricos; a precedência vigente está no guia de retomada.
 
+Atualizada em 21/10/2026 com as correções do proprietário aos DOCX (razão social, momentos do SED, pesquisa silenciosa, cadência do Engine, remoção do B2C, entre outras). Os hashes do manifesto e o arquivo `fontes-originais.tar.xz` refletem os DOCX atuais.
+
 Cada parágrafo e célula tem referência local. Tabelas preservam linhas, colunas e preenchimentos explícitos, inclusive a matriz de interdependência. Elementos gráficos não são renderizados; sua quantidade consta do inventário. Os 32 DOCX originais estão no arquivo fontes-originais.tar.xz, para consulta da diagramação e dos elementos gráficos.
 
 ## Índice
@@ -198,7 +200,7 @@ SHA-256 do DOCX: `03798c2e60c438ee26d77455fb3890c1c8b8a7efb385f3de0114c52d7c4f9c
 
 **T01 R05** C1: Ator | C2: Origem da interação (time, pares, líder, etc)
 
-**T01 R06** C1: Momento | C2: Antes, durante ou depois
+**T01 R06** C1: Momento | C2: Antes, durante, depois, padrão ou vazio
 
 **T01 R07** C1: Intensidade | C2: Baixa, média ou alta
 
@@ -228,9 +230,9 @@ SHA-256 do DOCX: `03798c2e60c438ee26d77455fb3890c1c8b8a7efb385f3de0114c52d7c4f9c
 
 **P0113** SED gerado:
 
-**P0114** Dívida principal: Inconsistência de Direção 
+**P0114** Dívida principal: Comunicação Ambígua 
 
-**P0115** Adjacente: Erosão de Confiança 
+**P0115** Adjacente: Confiança Erosionada 
 
 **P0116** Contexto: Alinhamento 
 
@@ -1232,7 +1234,7 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **T04 R02** C1: O Custo do Silêncio (livro) | C2: Ativo de credibilidade e aquisição. Cada leitor é um potencial cliente ou indicador.
 
-**T04 R03** C1: IAí (app B2C e B2B) | C2: Apoio individual ao líder. Gera dados que alimentam o sistema organizacional.
+**T04 R03** C1: IAí (app B2B) | C2: Apoio individual ao líder. Gera dados que alimentam o sistema organizacional.
 
 **T04 R04** C1: Venda direta B2B | C2: PME, média e enterprise. Auditoria como porta de entrada ou produto principal.
 
@@ -1310,7 +1312,7 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **T07 R05** C1: Custo da Ruptura | C2: Custo do Esgotamento: o desgaste emocional compromete a capacidade decisória
 
-**P0065** O Custo do Esgotamento é o mais crítico. Com a NR-1, em vigor desde 2025, o risco psicossocial no trabalho deixou de ser problema humano e passou a ser risco jurídico mensurável. Organizações que não mapeiam Energia Emocional Degradada estão acumulando passivo, não apenas custo cultural.
+**P0065** O Custo do Esgotamento é o mais crítico. Com a NR-1, em vigor desde maio de 2026, o risco psicossocial no trabalho deixou de ser problema humano e passou a ser risco jurídico mensurável. Organizações que não mapeiam Energia Emocional Degradada estão acumulando passivo, não apenas custo cultural.
 
 **P0067** BLOCO 5 — O ÍNDICE DE EXPOSIÇÃO CULTURAL (IEC™)
 
@@ -1378,7 +1380,7 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **T10 R02** C1: Mentor Estratégico | C2: Amplia visão, traz referências e enquadramentos úteis
 
-**T10 R03** C1: Contenção (Terapia de Bolso) | C2: Estabiliza estado emocional antes de qualquer outra intervenção
+**T10 R03** C1: Contenção | C2: Estabiliza estado emocional antes de qualquer outra intervenção
 
 **T10 R04** C1: Perfil & Padrões | C2: Identifica padrões recorrentes do próprio líder
 
@@ -1410,13 +1412,13 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **P0105** Cada interação no IAí gera um SED (Structured Event Data): a unidade mínima de dado que alimenta o Cultural Risk Engine. O SED contém a dívida principal, a dívida adjacente provável, o contexto, o ator, o momento, a intensidade proxy e o timestamp.
 
-**P0107** O líder nunca sabe que está gerando dados para o sistema. O que ele sabe é que está recebendo apoio real no momento que mais precisa. Os dados são consequência natural do uso, não propósito explícito.
+**P0107** O líder sabe que o uso do IAí alimenta, de forma agregada e anonimizada, a leitura do sistema. O que ele vive no dia a dia é apoio real no momento que mais precisa: os dados são consequência natural do uso, e a coleta é discreta, sem interromper a conversa.
 
 **P0109** BLOCO 7 — O HEALTH MONITOR E O CULTURAL RISK ENGINE™
 
 **P0110** 7.1 Health Monitor
 
-**P0111** O Health Monitor é a camada de coleta sistêmica. Opera por meio de pesquisa silenciosa: micro-perguntas distribuídas ao longo de mínimo 6 meses, sem percepção de avaliação por parte dos respondentes.
+**P0111** O Health Monitor é a camada de coleta sistêmica. Opera por meio de pesquisa silenciosa: micro-perguntas distribuídas ao longo de mínimo 6 meses, de forma discreta, sem parecer avaliação para os respondentes.
 
 **P0113** Cobre 8 dimensões mapeadas para as 10 Dívidas Culturais: Conflito e Tensão, Clareza Decisória, Responsabilidade, Confiança e Autonomia, Aprendizado e Reflexão, Alinhamento Valores-Prática, Pressão e Desgaste Emocional e Dinâmica Política.
 
@@ -1817,7 +1819,7 @@ SHA-256 do DOCX: `07fc19466268537b1afd54a3211275e2672336ad1370d2c9f0cf14d12d4a26
 
 **P0099** Conclusão
 
-**P0100** 👉 Isso é o coração do seu produto B2C
+**P0100** 👉 Isso é o coração do IAí
 
 **P0102** 6. USO DAS DÍVIDAS CULTURAIS
 
@@ -2820,7 +2822,7 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **P0048** 3.2 Pesquisa silenciosa: princípios de coleta
 
-**P0049** As perguntas do Health Monitor aparecem integradas ao fluxo natural do IAí, ao final de interações como reflexão opcional. O líder não percebe que está participando de uma coleta estruturada. As perguntas:
+**P0049** As perguntas do Health Monitor aparecem integradas ao fluxo natural do IAí, ao final de interações como reflexão opcional. O líder sabe que participa, mas a coleta é discreta: não interrompe a conversa nem se parece com um formulário. As perguntas:
 
 **P0050** São descritivas, não avaliativas
 
@@ -2830,7 +2832,7 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **P0053** Podem ser respondidas sem risco político
 
-**P0054** São espaçadas no tempo, sem percepção de formulário
+**P0054** São espaçadas no tempo, sem parecer formulário
 
 **P0055** 3.3 Escala de resposta
 
@@ -3014,13 +3016,13 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **P0137** Problemas interpessoais levam tempo para ser tratados abertamente.
 
-**P0138** Dívida 2 — Autoridade Fragilizada
+**P0138** Dívida 2 — Decisão Postergada
 
-**P0139** Decisões já tomadas costumam ser revistas mais de uma vez.
+**P0139** Decisões importantes costumam ser adiadas.
 
-**P0140** Existe insegurança sobre quem tem a palavra final em alguns temas.
+**P0140** Reuniões terminam sem encaminhamentos claros.
 
-**P0141** Delegações importantes são acompanhadas de muitas interferências.
+**P0141** Temas críticos retornam diversas vezes sem fechamento.
 
 **P0142** Dívida 3 — Comunicação Ambígua
 
@@ -3030,21 +3032,21 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **P0145** As expectativas nem sempre ficam explícitas desde o início.
 
-**P0146** Dívida 4 — Accountability Diluída
+**P0146** Dívida 4 — Autoridade Fragilizada
 
-**P0147** Nem sempre fica claro quem é responsável por uma decisão.
+**P0147** Decisões já tomadas costumam ser revistas mais de uma vez.
 
-**P0148** Quando algo dá errado, a responsabilidade tende a se diluir.
+**P0148** Existe insegurança sobre quem tem a palavra final em alguns temas.
 
-**P0149** Há situações em que ninguém assume claramente a condução.
+**P0149** Delegações importantes são acompanhadas de muitas interferências.
 
-**P0150** Dívida 5 — Decisão Postergada
+**P0150** Dívida 5 — Accountability Diluída
 
-**P0151** Decisões importantes costumam ser adiadas.
+**P0151** Nem sempre fica claro quem é responsável por uma decisão.
 
-**P0152** Reuniões terminam sem encaminhamentos claros.
+**P0152** Quando algo dá errado, a responsabilidade tende a se diluir.
 
-**P0153** Temas críticos retornam diversas vezes sem fechamento.
+**P0153** Há situações em que ninguém assume claramente a condução.
 
 **P0154** Dívida 6 — Confiança Erosionada
 
@@ -3411,7 +3413,7 @@ SHA-256 do DOCX: `492618590fa8e91e67e7e8f893558be223d5aaf0ae714c48d1fed312ea97f2
 
 **P0072** 6. O que o IAí gera para o sistema
 
-**P0073** Cada interação no IAí gera, de forma invisível para o líder, um SED (Structured Event Data): a unidade mínima de registro do sistema. O SED não é o relato bruto do líder. É a representação estruturada que o sistema extrai para fins de classificação e agregação.
+**P0073** Cada interação no IAí gera, de forma discreta para o líder, um SED (Structured Event Data): a unidade mínima de registro do sistema. O SED não é o relato bruto do líder. É a representação estruturada que o sistema extrai para fins de classificação e agregação.
 
 ### Tabela T06
 
@@ -3425,15 +3427,15 @@ SHA-256 do DOCX: `492618590fa8e91e67e7e8f893558be223d5aaf0ae714c48d1fed312ea97f2
 
 **T06 R05** C1: Ator | C2: Origem: time, pares, líder, chefe, cliente
 
-**T06 R06** C1: Momento | C2: Antes, Durante ou Depois
+**T06 R06** C1: Momento | C2: Antes, Durante, Depois, Padrão ou Vazio
 
 **T06 R07** C1: Intensidade proxy | C2: Baixa, Média ou Alta — inferida, não perguntada
 
 **T06 R08** C1: Timestamp | C2: Momento do registro para análise longitudinal
 
-**P0076** O que o líder nunca sabe
+**P0076** O que o líder vive
 
-**P0077** O líder nunca sabe que está gerando dados para o sistema. O que ele sabe é que está recebendo apoio real no momento que mais precisa. Os dados são consequência natural do uso, não propósito explícito.
+**P0077** O líder sabe que o uso do IAí alimenta, de forma agregada e anonimizada, a leitura do sistema. O que ele vive no dia a dia é apoio real no momento que mais precisa: os dados são consequência natural do uso, e a coleta é discreta, sem interromper a conversa.
 
 **P0079** A separação estrutural que protege o líder
 
@@ -3451,7 +3453,7 @@ SHA-256 do DOCX: `492618590fa8e91e67e7e8f893558be223d5aaf0ae714c48d1fed312ea97f2
 
 **P0089** Observação comportamental indireta: padrões de uso dos agentes no IAí, sem perguntas explícitas
 
-**P0090** Pesquisa silenciosa: 20 a 25 micro perguntas distribuídas ao longo de 6 meses, integradas ao fluxo natural do IAí sem percepção de survey
+**P0090** Pesquisa silenciosa: 20 a 25 micro perguntas distribuídas ao longo de 6 meses, integradas ao fluxo natural do IAí de forma discreta, sem parecer survey
 
 **P0092** As 8 dimensões de coleta
 
@@ -3581,7 +3583,7 @@ SHA-256 do DOCX: `492618590fa8e91e67e7e8f893558be223d5aaf0ae714c48d1fed312ea97f2
 
 **P0141** Top 3 Dívidas prioritárias com IEC, zona, DCO estimado em R$ e Dívidas Adjacentes Prováveis
 
-**P0142** Evolução temporal ciclo a ciclo (a partir do 3º ciclo)
+**P0142** Evolução temporal ciclo a ciclo (a partir do 2º ciclo)
 
 **P0143** Recomendações de foco: não é plano de ação, é direção
 
@@ -3639,7 +3641,7 @@ SHA-256 do DOCX: `492618590fa8e91e67e7e8f893558be223d5aaf0ae714c48d1fed312ea97f2
 
 **P0165** O Custo do Silêncio (livro): credibilidade e aquisição antes do produto
 
-**P0166** IAí (app B2C e B2B): apoio individual + geração de dados para o sistema
+**P0166** IAí (app B2B): apoio individual + geração de dados para o sistema
 
 **P0167** Venda direta B2B: auditoria como porta de entrada 
 
@@ -5165,9 +5167,9 @@ SHA-256 do DOCX: `d6a9d23b57c0b0fe42ccbea4be1134ecf536002114cba7ef140e953dbe2c24
 
 **P0127** Slide 23: A Máquina de Crescimento (Flywheel Modular)
 
-**P0128** A Narrativa: Como a Prioris abraça o mercado? Através de um Flywheel modular. A autoridade gerada pelo livro atrai líderes para o aplicativo B2C. Paralelamente, atacamos o mercado corporativo operando em duas frentes: damos grande importância às PMEs (estancando desperdício e protegendo o caixa) e, de forma madura, entramos no Enterprise (combatendo o risco sistêmico com Auditoria). E para escalar, usamos a Certificação de Consultores, multiplicando nossos braços comerciais.
+**P0128** A Narrativa: Como a Prioris abraça o mercado? Através de um Flywheel modular. A autoridade gerada pelo livro atrai líderes e organizações para a Prioris. A partir daí, atacamos o mercado corporativo operando em duas frentes: damos grande importância às PMEs (estancando desperdício e protegendo o caixa) e, de forma madura, entramos no Enterprise (combatendo o risco sistêmico com Auditoria). E para escalar, usamos a Certificação de Consultores, multiplicando nossos braços comerciais.
 
-**P0129** O Visual: O gráfico do Flywheel girando na tela: Autoridade (Livro) → App B2C → B2B (PME e Enterprise) → Certificação de Consultores.
+**P0129** O Visual: O gráfico do Flywheel girando na tela: Autoridade (Livro) → B2B (PME e Enterprise) → Certificação de Consultores.
 
 **P0130** Slide 24: Ética, Segurança e LGPD "By Design"
 
@@ -5177,29 +5179,25 @@ SHA-256 do DOCX: `d6a9d23b57c0b0fe42ccbea4be1134ecf536002114cba7ef140e953dbe2c24
 
 **P0133** Slide 25: O Próximo Passo: MVP 2º Semestre
 
-**P0134** A Narrativa: No 2º semestre de 2026, lançaremos o nosso MVP com portas de entrada sem atrito: 
+**P0134** A Narrativa: No 2º semestre de 2026, lançaremos o nosso MVP com porta de entrada sem atrito: 
 
 **P0135** Para Organizações (Foco B2B): Piloto de 30 dias gratuitos, exigindo um mínimo de 3 líderes para garantir a base estatística e o total anonimato. Começamos com um kick-off de 30 minutos. É uma vivência real de contenção antes de fechar o contrato.
 
-**P0136** Para o Líder Individual (B2C): 14 dias gratuitos no aplicativo IAí para testar o seu santuário privado de decisão. Depois, evolução garantida por assinaturas: Mensal (R$ 79), Trimestral (R$ 197), Semestral (R$ 357) ou Anual (R$ 597).
+**P0136** O Visual: Tela limpa e vendedora. 
 
-**P0137** O Visual: Tela dividida limpa e vendedora. 
+**P0137** B2B: "Piloto 30 Dias Grátis | Mínimo 3 líderes".
 
-**P0138** Lado Esquerdo (B2B): "Piloto 30 Dias Grátis | Mínimo 3 líderes".
+**P0139** FECHAMENTO
 
-**P0139** Lado Direito (B2C): "14 Dias Grátis | Assinaturas de R$ 79 a R$ 597".
+**P0140** Slide 26: A Missão Genuína e a Chamada para Ação
 
-**P0141** FECHAMENTO
+**P0141** Slogan na tela: "Decisões humanas melhores não surgem apenas de mais informação, mas de melhor estrutura para pensar no momento certo."
 
-**P0142** Slide 26: A Missão Genuína e a Chamada para Ação
+**P0142** Subtítulo na tela: "Contendo crises, desenvolvendo líderes e lendo o risco cultural invisível."
 
-**P0143** Slogan na tela: "Decisões humanas melhores não surgem apenas de mais informação, mas de melhor estrutura para pensar no momento certo."
+**P0143** Narrativa de encerramento: "Nós entendemos que decisões melhores geram organizações mais saudáveis, e organizações saudáveis geram impacto sustentável. Somos a primeira infraestrutura de apoio à decisão responsável do mercado, construída para reduzir o custo do erro humano. E isso vai, acima de tudo, resgatar a saúde mental daquele que hoje atua como o grande 'para-raios emocional' da empresa. Preparar o líder para a transformação da era digital não é entregá-lo um curso; é blindar a sua mente no momento exato do estresse, porque não é possível falar em cultura ou execução impecável quando quem lidera não está preparado emocionalmente. Com a Prioris, a sua organização inova e alcança a alta performance, sem adoecer as pessoas que fazem isso acontecer. Transforme o invisível em auditável. Muito obrigado."
 
-**P0144** Subtítulo na tela: "Contendo crises, desenvolvendo líderes e lendo o risco cultural invisível."
-
-**P0145** Narrativa de encerramento: "Nós entendemos que decisões melhores geram organizações mais saudáveis, e organizações saudáveis geram impacto sustentável. Somos a primeira infraestrutura de apoio à decisão responsável do mercado, construída para reduzir o custo do erro humano. E isso vai, acima de tudo, resgatar a saúde mental daquele que hoje atua como o grande 'para-raios emocional' da empresa. Preparar o líder para a transformação da era digital não é entregá-lo um curso; é blindar a sua mente no momento exato do estresse, porque não é possível falar em cultura ou execução impecável quando quem lidera não está preparado emocionalmente. Com a Prioris, a sua organização inova e alcança a alta performance, sem adoecer as pessoas que fazem isso acontecer. Transforme o invisível em auditável. Muito obrigado."
-
-**P0146** O Visual: Fundo Preto e Dourado com o Logo da Prioris centralizado. Slogan e Subtítulo em destaque. Contatos e QR Code Gigante para a landing page do MVP.
+**P0144** O Visual: Fundo Preto e Dourado com o Logo da Prioris centralizado. Slogan e Subtítulo em destaque. Contatos e QR Code Gigante para a landing page do MVP.
 
 
 <a id="fonte-f13"></a>
