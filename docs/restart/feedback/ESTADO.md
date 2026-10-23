@@ -63,3 +63,10 @@ PRIORIS_FEEDBACK_MODEL=claude-haiku-5-5 node src/feedback/eval/run-eval.ts \
 4. `feedback-recebido-injusto`: o líder fica cansado de perguntas e de frases sugeridas; o agente tende a conduzir demais a escrita.
 5. Só considerar fechado quando houver conversas aprovadas e lidas desses cenários com o código atual.
 6. Decisões abertas para o dono: manter o critério duro (aprovação automática baixa, medida fiel) e decidir se mantém Haiku ou outro modelo em produção (Sonnet 5.5 aprovou o mesmo número de cenários, a cerca de 7 vezes o custo).
+
+## Atualização (leitura da pasta AGENTES do Drive)
+
+- `src/feedback/moments.ts`: os 80 momentos do Agente 5 (fase, dívida e custo). Contagem por custo e por dívida verificada por teste.
+- `src/feedback/eval/coverage.ts` e `docs/restart/feedback/COBERTURA.md`: cobertura dos 14 cenários sobre os 80 momentos (7 de 12 células e 6 de 10 dívidas) e 5 cenários propostos, não rodados, que fecham os buracos.
+- `src/agents/lenses.ts`: matriz de lentes entre agentes, conferida contra `lib/agent-contract.json`.
+- Nenhuma chamada de API foi feita nesta etapa. Gasto acumulado inalterado.

@@ -8,7 +8,7 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:feedback": "node --test src/feedback/conversation.test.ts src/feedback/eval/eval.test.ts",
+    "test:feedback": "node --test src/feedback/conversation.test.ts src/feedback/eval/eval.test.ts src/feedback/moments.test.ts src/feedback/eval/coverage.test.ts src/agents/lenses.test.ts",
     "eval:feedback": "node src/feedback/eval/run-eval.ts"
   },
   "dependencies": {
