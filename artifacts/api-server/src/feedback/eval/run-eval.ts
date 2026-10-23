@@ -6,6 +6,7 @@ import { createAnthropicProvider } from "../anthropic-provider.ts";
 import { runTurn, type ChatMessage, type FeedbackProvider } from "../conversation.ts";
 import { BudgetExceeded, BudgetGuard, DEFAULT_CAP_USD, guardClient } from "./budget.ts";
 import { accept, deterministicChecks, judgeConversation, type Acceptance, type Verdict } from "./judge.ts";
+import { PROPOSED_SCENARIOS } from "./proposed-scenarios.ts";
 import { SCENARIOS, type Scenario } from "./scenarios.ts";
 import { nextLeaderMessage, rateConversation, type LeaderRating } from "./simulated-leader.ts";
 
@@ -93,7 +94,8 @@ async function main(): Promise<void> {
   const cap = Number(option("cap") ?? DEFAULT_CAP_USD);
   const spentBefore = Number(option("spent-before") ?? 0);
   const only = option("only")?.split(",");
-  const scenarios = SCENARIOS.filter((scenario) => !only || only.includes(scenario.id));
+  const pool: Scenario[] = process.argv.includes("--proposed") ? PROPOSED_SCENARIOS : SCENARIOS;
+  const scenarios = pool.filter((scenario) => !only || only.includes(scenario.id));
 
   const models = {
     agent: requireEnv("PRIORIS_FEEDBACK_MODEL"),
