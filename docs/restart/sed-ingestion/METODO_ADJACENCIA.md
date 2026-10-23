@@ -34,9 +34,40 @@ A adjacência do SED é uma hipótese do classificador, tirada da matriz de inte
 
 `lib/review/src/engine/adjacency.ts`: `trackPairs` e `emergingPairs` (detector, sem valores padrão) e a função `adjacency_release()` no banco. O que falta é o módulo de simulação das etapas 2 a 4 e o ajuste do detector aos resultados.
 
+## Decisões registradas em 23/10/2026
+
+1. **Falso positivo aceito: 5%** (aprovado pelo proprietário). Vale para o teste global e, nos testes por par, como taxa de erro da família inteira (com correção para os 30 pares).
+2. **Mapeamento dos prazos da matriz (proposta, a aprovar):** o ciclo é mensal, então a menor unidade é 1 mês. Janelas sem sobreposição, para o pré registro ficar limpo: imediata = 0 a 1 mês; curto = 2 a 3 meses; médio = 4 a 6 meses. Razões: o Mestre manda persistência de 2 ciclos, primeiro alerta após 3 meses e auditoria formal aos 6; um prazo "médio" além de 6 meses não seria verificável dentro do primeiro contrato. Os documentos só trazem as palavras (imediata, curto, médio), sem meses.
+3. **Tamanho do piloto de validação (proposta, a aprovar):** ver a tabela de poder abaixo.
+
+## Resultado da simulação de poder (lib/review/sim)
+
+Premissas da simulação, que são hipóteses e não dados da empresa: contagens de Poisson por grupo e mês, com um pouco de heterogeneidade entre grupos; 70% dos SED trazem adjacência, sorteada entre as 3 da matriz (reproduz a circularidade); conversão injetada como aumento de RR vezes na chance de B ser a dívida principal um mês depois de pares A para B; teste com defasagem de 1 mês; aproximação normal. Cada linha abaixo usa 300 simulações.
+
+**Teste global** (um único teste: "a adjacência registrada antecipa B como principal?"), nível de 5%, efeito em todos os 30 pares. A taxa de falso positivo ficou entre 0,7% e 5,3% em todas as combinações (calibrado, levemente conservador).
+
+| Grupos | Meses | SED por grupo e mês | Poder se RR = 1,5 | Poder se RR = 2,0 |
+|---|---|---|---|---|
+| 10 | 6 | 8 | 36% | 81% |
+| 10 | 9 | 8 | 67% | 97% |
+| 10 | 12 | 8 | 83% | 100% |
+| 20 | 6 | 8 | 66% | 98% |
+| 20 | 9 | 8 | 88% | 100% |
+| 10 | 9 | 16 | 99% | 100% |
+| 20 | 9 | 4 | 46% | 86% |
+| 40 | 12 | 4 | 79% | 99% |
+
+Leitura: o que manda é a quantidade total de SED publicados (grupos x meses x SED por grupo e mês). Cerca de 1.000 a 1.500 SED publicados dão 80% a 90% de poder para detectar um aumento de 50% (RR 1,5), no teste global. Poucos grupos com muitos eventos funcionam melhor que muitos grupos com poucos eventos.
+
+**Teste por par** (30 pares x 2 defasagens, correção de Bonferroni, nível de família de 5%): o poder só passa de 80% com 80 grupos, 16 SED por grupo e mês, 12 meses e efeito RR 2,0 (89%). Com a aproximação normal, a taxa de falso positivo da família chegou a 11% a 14% nos cenários de poucos dados (5 grupos, 4 SED por grupo e mês, 9 a 12 meses), então o teste de produção precisa usar permutação em blocos.
+
+Consequências para o desenho:
+- **Teste em dois níveis:** primeiro o teste global; só se ele passar se testam os pares, e os pares só viram "confirmados" com dados de vários clientes.
+- **Defasagens:** com 6 meses de piloto, defasagem de 3 meses deixa 3 meses de resultado; só imediata e curto são testáveis. O prazo médio exige 12 meses.
+- **Medir antes de dimensionar:** o SED por grupo e mês é a premissa mais incerta. Medir nos 2 primeiros meses do piloto e só então fixar o tamanho final.
+
 ## Decisões que cabem ao proprietário
 
-1. Nível de falso positivo aceito (sugestão a avaliar: 5%).
-2. Mapeamento de imediata, curto e médio em meses (define as defasagens L).
+1. Aprovar o mapeamento de prazos proposto acima.
+2. Aprovar o tamanho do piloto de validação proposto acima.
 3. Critério de promoção a "confirmado" (quantos clientes, quantos ciclos, que ganho preditivo).
-4. Tamanho esperado do piloto (grupos, líderes, meses), para checar o poder antes de começar.
