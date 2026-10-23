@@ -214,6 +214,42 @@ describe("ciclos e publicação", { skip: skip() }, () => {
     await worker.end();
   });
 
+  it("liberação por grupo e ciclo: 3 participantes no grupo bastam, mesmo com 1 por dívida, e 2 continuam suprimidos", async () => {
+    await superuser(async (c) => {
+      await c.query("INSERT INTO prioris_review.groups VALUES ('cli_a',3,'Financeiro'),('cli_a',4,'Jurídico')");
+      await c.query("UPDATE prioris_review.cycles SET closed=false WHERE client_id='cli_a' AND cycle_start=$1", [date(closedMonth)]);
+    });
+    const debts = ["evitacao_conflito", "comunicacao_ambigua", "confianca_erosionada"];
+    for (const [i, debt] of debts.entries()) await persist(envelope(sedPayload({ event_id: `g3-${i}`, contributor_token: token(30 + i), group_id: 3, debt_principal: debt, debt_adjacent: null }, inClosed(11))), connect);
+    for (const i of [0, 1]) await persist(envelope(sedPayload({ event_id: `g4-${i}`, contributor_token: token(40 + i), group_id: 4, debt_principal: "evitacao_conflito" }, inClosed(11))), connect);
+    await closeCycle("cli_a", closedMonth);
+    assert.ok(!(await release("cli_a", "sed_release")).some((r) => r.group_id === 3), "a liberação por célula suprime o grupo 3");
+    const client = await db!.client("review_report");
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT set_config('app.tenant', $1, true)", ["cli_a"]);
+      const rows = (await client.query("SELECT * FROM prioris_review.group_cycle_release()")).rows;
+      await client.query("COMMIT");
+      assert.deepEqual(rows.filter((r) => r.group_id === 3).map((r) => r.debt_principal).sort(), [...debts].sort());
+      assert.ok(rows.filter((r) => r.group_id === 3).every((r) => Number(r.events) === 1));
+      assert.ok(!rows.some((r) => r.group_id === 4), "grupo com 2 participantes continua suprimido");
+    } finally {
+      await client.end();
+    }
+    const other = await db!.client("review_report");
+    try {
+      await other.query("BEGIN");
+      await other.query("SELECT set_config('app.tenant', $1, true)", ["cli_b"]);
+      assert.equal((await other.query("SELECT * FROM prioris_review.group_cycle_release()")).rows.length, 0);
+      await other.query("COMMIT");
+    } finally {
+      await other.end();
+    }
+    const worker = await ingest();
+    await assert.rejects(worker.query("SELECT * FROM prioris_review.group_cycle_release()"), (e: { code?: string }) => e.code === "42501");
+    await worker.end();
+  });
+
   it("resposta da pesquisa publica a média por participante só com 3 respondentes", async () => {
     await superuser((c) => c.query("UPDATE prioris_review.cycles SET closed=false WHERE client_id='cli_a' AND cycle_start=$1", [date(closedMonth)]));
     await persist(envelope(surveyPayload({ event_id: "sv3", contributor_token: token(3), group_id: 2, question_id: "decisao_postergada.1", answer: 3 }, inClosed(10))), connect);

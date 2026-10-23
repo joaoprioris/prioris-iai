@@ -186,6 +186,28 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
 $$;
 REVOKE ALL ON FUNCTION prioris_review.adjacency_release() FROM PUBLIC;
 
+-- Contagem por dívida principal, agregada por grupo e ciclo, para a análise INTERNA da adjacência (fase exploratória).
+-- A supressão vale para o grupo no ciclo: no mínimo 3 participantes distintos no total do grupo. Dentro dele as contagens
+-- por dívida saem completas, porque a análise precisa da participação de cada dívida no grupo. Só o papel do motor executa
+-- e o resultado nunca é apresentado ao cliente nem sai do motor por grupo (apenas estatísticas agregadas entre grupos).
+CREATE FUNCTION prioris_review.group_cycle_release()
+RETURNS TABLE (group_id int, cycle_start date, debt_principal text, events bigint)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
+  WITH base AS (
+    SELECT e.group_id, e.cycle_start, e.debt_principal, e.contributor_token
+    FROM prioris_review.sed_events e
+    JOIN prioris_review.cycles c ON c.client_id = e.client_id AND c.cycle_start = e.cycle_start
+    WHERE e.client_id = current_setting('app.tenant', true) AND c.closed
+  ), ok AS (
+    SELECT b.group_id, b.cycle_start FROM base b
+    GROUP BY b.group_id, b.cycle_start HAVING count(DISTINCT b.contributor_token) >= 3
+  )
+  SELECT b.group_id, b.cycle_start, b.debt_principal, count(*)
+  FROM base b JOIN ok USING (group_id, cycle_start)
+  GROUP BY b.group_id, b.cycle_start, b.debt_principal
+$$;
+REVOKE ALL ON FUNCTION prioris_review.group_cycle_release() FROM PUBLIC;
+
 CREATE FUNCTION prioris_review.survey_release()
 RETURNS TABLE (group_id int, cycle_start date, question_id text, mean_answer numeric)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
