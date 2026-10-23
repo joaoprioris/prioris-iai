@@ -36,38 +36,71 @@ A adjacência do SED é uma hipótese do classificador, tirada da matriz de inte
 
 ## Decisões registradas em 23/10/2026
 
-1. **Falso positivo aceito: 5%** (aprovado pelo proprietário). Vale para o teste global e, nos testes por par, como taxa de erro da família inteira (com correção para os 30 pares).
-2. **Mapeamento dos prazos da matriz (proposta, a aprovar):** o ciclo é mensal, então a menor unidade é 1 mês. Janelas sem sobreposição, para o pré registro ficar limpo: imediata = 0 a 1 mês; curto = 2 a 3 meses; médio = 4 a 6 meses. Razões: o Mestre manda persistência de 2 ciclos, primeiro alerta após 3 meses e auditoria formal aos 6; um prazo "médio" além de 6 meses não seria verificável dentro do primeiro contrato. Os documentos só trazem as palavras (imediata, curto, médio), sem meses.
-3. **Tamanho do piloto de validação (proposta, a aprovar):** ver a tabela de poder abaixo.
+1. **Falso positivo aceito: 5%** (aprovado). Vale para o teste global e, nos testes por classe de prazo, como taxa de erro da família.
+2. **Prazos da matriz (aprovado):** imediata = 0 a 1 mês; curto = 2 a 3 meses; médio = 4 a 6 meses. No teste, o mês zero é excluído da exposição (ver a nota técnica abaixo).
+3. **Tamanho do piloto:** aprovado 10 grupos por 12 meses, mas a segunda rodada de simulação (início gradual) pede revisão, ver a tabela. 
+4. **Critério de promoção a "confirmado":** proposto abaixo, a aprovar.
 
-## Resultado da simulação de poder (lib/review/sim)
+## Como a conversão é modelada (correção do proprietário)
 
-Premissas da simulação, que são hipóteses e não dados da empresa: contagens de Poisson por grupo e mês, com um pouco de heterogeneidade entre grupos; 70% dos SED trazem adjacência, sorteada entre as 3 da matriz (reproduz a circularidade); conversão injetada como aumento de RR vezes na chance de B ser a dívida principal um mês depois de pares A para B; teste com defasagem de 1 mês; aproximação normal. Cada linha abaixo usa 300 simulações.
+A dívida adjacente **não** aparece como principal já no mês seguinte. Ela pode começar a aparecer e só se consolida depois. A simulação passou a refletir isso:
 
-**Teste global** (um único teste: "a adjacência registrada antecipa B como principal?"), nível de 5%, efeito em todos os 30 pares. A taxa de falso positivo ficou entre 0,7% e 5,3% em todas as combinações (calibrado, levemente conservador).
+- **Efeito gradual por prazo:** antes da janela do prazo, nenhum efeito; dentro da janela, o efeito sobe por degraus; depois da janela, o efeito está consolidado e permanece.
+- **Exposição acumulada:** o teste não olha só o mês anterior. Para cada par, soma os pares A para B observados desde o início da janela do prazo (nunca antes de 1 mês) até 6 meses atrás.
+- **Mês zero excluído:** pares e desfecho do mesmo mês compartilham o mesmo volume de SED e geram correlação mecânica. A exposição usa sempre meses anteriores, e o desfecho é a participação de B entre os SED do mês (isso remove o efeito do volume).
+- **Permutação correta:** o p valor vem de embaralhar a ordem dos meses de cada grupo, mantendo juntos o par e o desfecho do mesmo mês. Um primeiro desenho (deslocar só o desfecho) deu 28% de falso positivo e foi descartado; o desenho atual ficou calibrado (média de 4,4% nos 27 cenários, com 120 simulações cada, erro de amostragem de cerca de 4 pontos percentuais por célula).
+- **Desfecho secundário, "consolidação":** B acima da linha de base do próprio grupo por 2 ciclos consecutivos, que é a regra de persistência já vigente no sistema. É o que mede se a conversão virou padrão, não só aumento passageiro.
 
-| Grupos | Meses | SED por grupo e mês | Poder se RR = 1,5 | Poder se RR = 2,0 |
+## Resultado da simulação de poder (lib/review/sim/power2.mjs)
+
+Premissas, que são hipóteses e não dados da empresa: contagens de Poisson por grupo e mês, com heterogeneidade entre grupos; 70% dos SED trazem adjacência, sorteada entre as 3 da matriz com os prazos do Mestre (6 imediata, 11 curto, 13 médio); conversão com início gradual e consolidação tardia; efeito de RR vezes na chance de B ser principal.
+
+Poder do **teste global** (um teste, nível de 5%, permutação) para detectar RR de 1,5 e de 2,0:
+
+| Grupos | Meses | SED por grupo e mês | RR 1,5 | RR 2,0 |
 |---|---|---|---|---|
-| 10 | 6 | 8 | 36% | 81% |
-| 10 | 9 | 8 | 67% | 97% |
-| 10 | 12 | 8 | 83% | 100% |
-| 20 | 6 | 8 | 66% | 98% |
-| 20 | 9 | 8 | 88% | 100% |
-| 10 | 9 | 16 | 99% | 100% |
-| 20 | 9 | 4 | 46% | 86% |
-| 40 | 12 | 4 | 79% | 99% |
+| 10 | 6 | 8 | 23% | 50% |
+| 10 | 9 | 8 | 48% | 80% |
+| **10** | **12** | **8** | **65%** | **97%** |
+| 20 | 9 | 8 | 74% | 98% |
+| **20** | **12** | **8** | **91%** | **100%** |
+| 10 | 12 | 16 | 75% | 97% |
+| 20 | 9 | 16 | 82% | 100% |
+| 40 | 9 | 8 | 90% | 100% |
+| 40 | 12 | 4 | 85% | 100% |
 
-Leitura: o que manda é a quantidade total de SED publicados (grupos x meses x SED por grupo e mês). Cerca de 1.000 a 1.500 SED publicados dão 80% a 90% de poder para detectar um aumento de 50% (RR 1,5), no teste global. Poucos grupos com muitos eventos funcionam melhor que muitos grupos com poucos eventos.
+Com o início gradual, o poder cai em relação à primeira simulação (que supunha efeito já no mês seguinte): 10 grupos por 12 meses com 8 SED por grupo e mês passa de 83% para 65% em RR 1,5. Para 80% ou mais em RR 1,5, a opção mais enxuta é **20 grupos por 12 meses** (91%); com 16 SED por grupo e mês bastam 20 grupos por 9 meses (82%).
 
-**Teste por par** (30 pares x 2 defasagens, correção de Bonferroni, nível de família de 5%): o poder só passa de 80% com 80 grupos, 16 SED por grupo e mês, 12 meses e efeito RR 2,0 (89%). Com a aproximação normal, a taxa de falso positivo da família chegou a 11% a 14% nos cenários de poucos dados (5 grupos, 4 SED por grupo e mês, 9 a 12 meses), então o teste de produção precisa usar permutação em blocos.
+## Proposta de critério de promoção (a aprovar)
 
-Consequências para o desenho:
-- **Teste em dois níveis:** primeiro o teste global; só se ele passar se testam os pares, e os pares só viram "confirmados" com dados de vários clientes.
-- **Defasagens:** com 6 meses de piloto, defasagem de 3 meses deixa 3 meses de resultado; só imediata e curto são testáveis. O prazo médio exige 12 meses.
-- **Medir antes de dimensionar:** o SED por grupo e mês é a premissa mais incerta. Medir nos 2 primeiros meses do piloto e só então fixar o tamanho final.
+Níveis, do mais fraco ao mais forte. Cada nível só vale se todos os critérios dele passarem, e **nenhum critério pode ser alterado depois de olhar os dados**.
+
+| Nível | Nome | O que é exigido |
+|---|---|---|
+| 0 | Hipótese | Está na matriz oficial. É o ponto de partida. |
+| 1 | Sinal interno | Em um cliente: qualidade de dados aprovada (abaixo) e teste global com p menor que 5%. |
+| 2 | Candidato | O sinal se repete em dados novos (período seguinte do mesmo cliente) e em pelo menos mais um cliente, com o mesmo sentido. |
+| 3 | Confirmado interno | Todos os critérios do bloco "Para confirmar", abaixo. |
+| 4 | Exibível ao cliente | Decisão separada do proprietário, só depois de 2 apurações semestrais consecutivas no nível 3, revisão ética e jurídica da linguagem e teste de compreensão com RH. |
+
+**Qualidade de dados (porta de entrada, vale para todos os níveis):** grupos com pelo menos 3 participantes distintos; maturidade N2 ou superior; estabilidade do classificador de SED medida por repetição (classificar a mesma situação várias vezes e com mais de um modelo), com concordância de pelo menos 0,61 (kappa, convenção de "concordância substancial"); sem deriva de base (todos os scores subindo juntos sem padrão claro).
+
+**Para confirmar (nível 3):**
+1. Pelo menos **3 clientes independentes**, nenhum com mais de 50% dos SED do conjunto.
+2. **Teste global** agregado com p menor que 5%, calculado em dados que **não** foram usados para descobrir o padrão (separar por cliente ou por tempo).
+3. **Efeito mínimo de interesse: RR de 1,5**, com limite inferior do intervalo de 95% acima de 1,0. (É o menor efeito que o piloto de 20 grupos por 12 meses detecta com 90% de poder.)
+4. **Mesmo sentido em pelo menos 2 de cada 3 clientes**, sem heterogeneidade extrema.
+5. **Ganho de previsão fora da amostra:** o erro de previsão (Brier) com a adjacência é menor que o do modelo que usa só o histórico de B, com intervalo de 95% da melhora acima de zero.
+6. **Controle negativo:** nos 60 pares fora da matriz, a taxa de "descoberta" é no máximo a esperada (5%), com tolerância de teste binomial. Acima disso o método é considerado inválido.
+7. **Placebo de tempo:** com a ordem dos meses embaralhada, o sinal desaparece.
+8. **Desfecho de consolidação (secundário):** a chance de B se consolidar (2 ciclos consecutivos acima da linha de base) é maior nos grupos expostos.
+9. **Revisão externa** por estatístico independente e **ata do Founder**, como já exige a regra de mudança de parâmetro.
+
+**Pares individuais:** em vez de 30 testes, 3 testes por **classe de prazo** (6 imediatas, 11 curtas, 13 médias), com correção para 3. Um par só ganha status próprio com dados de vários clientes. Até lá, vale o status da classe.
+
+**Rebaixamento:** se o teste de confirmação falhar em 2 apurações seguidas com dados novos, o nível cai para 2 e o motivo vai para a ata.
 
 ## Decisões que cabem ao proprietário
 
-1. Aprovar o mapeamento de prazos proposto acima.
-2. Aprovar o tamanho do piloto de validação proposto acima.
-3. Critério de promoção a "confirmado" (quantos clientes, quantos ciclos, que ganho preditivo).
+1. Aprovar o tamanho do piloto revisado (20 grupos por 12 meses, ou 10 grupos por 12 meses se o volume real passar de 16 SED por grupo e mês).
+2. Aprovar o critério de promoção proposto.
