@@ -1,6 +1,6 @@
 # Errata para os documentos do Drive (D10, decisão C, adjacência e Risk Engine)
 
-Gerada em 23/10/2026. O conector do Drive desta sessão não edita o texto de arquivos .docx (só metadados e criação de arquivos). Por isso as correções ficam aqui como pares "trecho atual" e "trecho novo", prontas para localizar e substituir. Os mesmos trechos já foram aplicados nas transcrições `docs/restart/methodology/` e em `docs/restart/MESTRE.md`.
+**Status em 23/10/2026: aplicada no Drive.** O conector não edita o texto de arquivos .docx, então cada documento foi reconstruído como Google Doc editável (texto e tabelas, sem as imagens e a diagramação originais) já com as correções, e o .docx original foi movido para a pasta `HISTORICO_ORIGINAIS_DOCX` (exceção: o Backlog, ver nota). Esta tabela fica como registro das mudanças como pares "trecho atual" e "trecho novo", prontas para localizar e substituir. Os mesmos trechos já foram aplicados nas transcrições `docs/restart/methodology/` e em `docs/restart/MESTRE.md`.
 
 Decisões aplicadas: **D10** (as dez dívidas são sempre calculadas e mostradas; o Top 3 é só recorte comercial), **decisão C** (grupo com menos de 3 participantes distintos é suprimido, sem fusão), **adjacência** (registrada em todo SED, usada internamente pelo motor, não apresentada ao cliente por ora) e **Risk Engine** (roda para todos; o contrato decide só o que o cliente vê). Política comercial (gratuidade, prazos) ficou fora, por decisão do proprietário.
 
