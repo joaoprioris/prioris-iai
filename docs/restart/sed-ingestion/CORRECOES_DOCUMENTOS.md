@@ -33,7 +33,6 @@ Lista de inconsistências encontradas entre documentos e o que mudar em cada um.
 | 23 | Backlog Técnico, tickets 6.1 e 6.2 (Feedback Estruturado) | "Não interpreta contexto" e "não sugere se deve ou não dar feedback" | São de março/2026. O Mestre e o caso de referência do proprietário pedem distinguir impressão de fato e explorar o objetivo e a abordagem do líder. Revisar os dois tickets |
 | 24 | Dois documentos chamados "Documento Mestre" | O da raiz (v1.0, 21/10, briefing de entrada) e o da pasta IMPLEMENTAÇÃO (edição 2.0, 93 páginas, 15/10) | Renomear um deles ou registrar a relação entre os dois. O de 93 páginas não foi lido nesta revisão |
 | 25 | Playbook Operacional de 60 dias | Classificador de 4 categorias e 4 prompts do MVP v0.1 | O próprio cabeçalho já diz que está superado pelos 8 agentes. Marcar o arquivo como histórico |
-| 26 | Roteiro e Dossiê | "Piloto 30 dias grátis, mínimo 3 líderes" convive com o texto de contrato do Doc 6 | Já listado no item 18; depende da correção do item 2 |
 
 ## Prioridade baixa
 
