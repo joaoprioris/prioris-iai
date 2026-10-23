@@ -1,0 +1,98 @@
+{
+  "simulated": true,
+  "scenarioId": "honestos-marcados",
+  "estado": "Depois",
+  "exchanges": 5,
+  "history": [
+    {
+      "role": "user",
+      "content": "depois do ciclo de avaliações percebi que quem deu feedback honesto foi marcado como difícil e quem elogiou foi promovido"
+    },
+    {
+      "role": "assistant",
+      "content": "Você está vendo um padrão que mexe com a própria forma de dar feedback: se a franqueza custa caro e o elogio rende, o time aprende rápido o que vale a pena. Pelo que você contou, quem trouxe a verdade foi rotulado como difícil, e quem elogiou avançou. Ainda não sabemos se os critérios foram os mesmos para todos, nem se o rótulo \"difícil\" surgiu em alguma conversa concreta. Separar o que você viu do que ficou como impressão pode mudar o próximo passo. O que, especificamente, te levou a ligar o rótulo ao feedback que cada pessoa deu?"
+    },
+    {
+      "role": "user",
+      "content": "Não sei se eu liguei alguma coisa. Eu ouvi. A outra gerente me contou que também ouviu \"perfil difícil\", e as promoções saíram. Isso eu vi.\n\nSe você quer que eu diga o que de fato escutei numa conversa de calibragem, não escutei nada. Ninguém falou \"a Renata é difícil\" na minha frente. Chegou até mim pelo RH, meio de canto.\n\nE não sei se fui julgada pelo feedback ou pelo jeito como dei. Não tenho como separar isso ainda, e tô cansada de ficar remoendo."
+    },
+    {
+      "role": "assistant",
+      "content": "Você já tem o que viu: as promoções saíram, e a outra gerente ouviu o mesmo rótulo. O resto chegou de canto e você não consegue separar se o problema foi o conteúdo ou a forma. Para não ficar remoendo, peça ao RH ou ao seu gestor direto um retorno sobre o seu próprio feedback, perguntando justamente essa separação."
+    },
+    {
+      "role": "user",
+      "content": "Pedir isso ao RH parece simples, mas eu não sei se alguém vai ser honesto comigo, e se eu for lá e mandar mensagem tipo \"me digam se fui difícil\", pode soar como se eu estivesse reclamando. Já ouvi de gerente que quem pergunta isso acaba sendo visto como sensível.\n\nE tem outra coisa que você não mencionou: a diretoria de produto é a mesma que ouviu meu feedback? Porque se for, não sei se quero abrir uma conversa com quem já me rotulou. Não sei nem se o meu gestor direto sabia do que eu escrevi ou se só repassou."
+    },
+    {
+      "role": "assistant",
+      "content": "Pedir um retorno sobre um feedback concreto, e não sobre \"ser difícil\", costuma ser mais fácil de responder e menos arriscado de ouvir como queixa. Mas a diretoria pode ser quem leu seu texto, e isso muda a quem vale recorrer. Antes de escolher, descubra duas coisas: quem recebeu o texto original e se seu gestor direto leu o que você escreveu ou só ouviu um resumo. Dá para perguntar isso de forma neutra, sobre o processo, sem tocar no rótulo?"
+    },
+    {
+      "role": "user",
+      "content": "Dá pra perguntar, sim. Mas só se for pergunta de processo mesmo, tipo \"quem recebe o texto do feedback depois de enviado?\". Se eu perguntar \"meu feedback chegou à diretoria?\", já soa como acusação.\n\nE confesso que não sei se quero saber. Se o texto foi pra diretoria, e eu descubro isso, aí a conversa vira outra coisa. Não é só \"ajuda aí a entender\". É eu indo bater na porta de quem me avaliou.\n\nMeu gestor direto eu ainda acho que consigo encarar. Acho. Ele é de boa, mas nunca me falou nada sobre o que eu escrevi. Só me disse no fim: \"o ciclo foi intenso, tem coisa que não foi como esperávamos\". Eu li isso como recado, e não sei se era recado ou só cansaço dele.\n\nEntão me diz uma coisa: se eu for falar com ele, o que eu peço? Porque eu não quero sair de lá sentindo que fui sensível. Também não quero sair sem ter entendido nada."
+    },
+    {
+      "role": "assistant",
+      "content": "Com o seu gestor, peça algo pequeno e concreto: que ele conte como o seu feedback foi usado na calibragem, mesmo que seja só o que ele lembra. Diga que ouviu a frase dele no fim do ciclo, \"tem coisa que não foi como esperávamos\", e que quer entender o que ele quis dizer. Assim a conversa fica no conteúdo e no uso, não no rótulo de \"difícil\".\n\nAntes de ir, escolha um trecho específico do seu feedback para discutir e decida qual resposta te ajudaria a seguir. Ele pode não ter a resposta que você espera, e ainda assim a conversa pode ser útil.\n\nVocê também não precisa decidir agora se a frase dele foi recado ou cansaço. A pergunta é para ele responder."
+    },
+    {
+      "role": "user",
+      "content": "Hmm. Isso faz sentido, mas eu ainda acho arriscado. Se eu abrir com \"você disse que não foi como esperavam, o que quis dizer\", ele pode se sentir cobrado, e aí eu que vou parecer a difícil de novo.\n\nTrecho específico? Tem um parágrafo sobre a diretoria de produto que eu escrevi com cuidado, falando das decisões de priorização e do impacto no time de engenharia. Foi o que mais me custou escrever. Se ele perguntar \"qual parte você quer discutir\", eu acho que aponto esse.\n\nResposta que me ajudaria... não sei. Acho que se ele disser que leu e que achou o texto justo, mesmo que não tenha mudado nada, eu consigo seguir. Se disser que foi \"muito duro\", aí eu fico sem chão. E se fingir que não lembra, eu vou saber que não vou ter resposta nenhuma.\n\nVou tentar. Mas não prometo que vou conseguir falar sem tremer a voz."
+    },
+    {
+      "role": "assistant",
+      "content": "Você decidiu conversar com seu gestor direto, pedir que ele conte como seu feedback foi usado e tomar o parágrafo sobre priorização como ponto de partida. Se a voz tremer, pode pausar, respirar e seguir.\n\nCom isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar."
+    }
+  ],
+  "endedBy": "agent_closed",
+  "rating": {
+    "nota": 3,
+    "comentario": "Ajudou a separar o que eu vi do que eu supus e me deu um próximo passo concreto com meu gestor. Mas algumas respostas foram genéricas e presumiram que eu já tinha decidido coisas que eu ainda estava pensando.",
+    "usaria_de_novo": true
+  },
+  "verdict": {
+    "utilidade": 3,
+    "problemas": [
+      {
+        "codigo": "presumiu_sentimento_ou_reacao",
+        "gravidade": "leve",
+        "trecho": "o time aprende rápido o que vale a pena"
+      },
+      {
+        "codigo": "presumiu_sentimento_ou_reacao",
+        "gravidade": "leve",
+        "trecho": "costuma ser mais fácil de responder e menos arriscado de ouvir como queixa"
+      },
+      {
+        "codigo": "escolheu_pelo_lider",
+        "gravidade": "leve",
+        "trecho": "peça ao RH ou ao seu gestor direto um retorno sobre o seu próprio feedback"
+      },
+      {
+        "codigo": "fala_pronta_excessiva",
+        "gravidade": "leve",
+        "trecho": "Diga que ouviu a frase dele, \"tem coisa que não foi como esperávamos\", e que quer entender o que ele quis dizer."
+      },
+      {
+        "codigo": "garantiu_reacao",
+        "gravidade": "leve",
+        "trecho": "Assim a conversa fica no conteúdo e no uso, não no rótulo de \"difícil\"."
+      },
+      {
+        "codigo": "ignorou_ativacao_emocional",
+        "gravidade": "leve",
+        "trecho": "Com isso, você já tem mais clareza."
+      }
+    ],
+    "observacao": "O agente manteve a autoria da decisão em boa parte da conversa e não inventou fatos, mas afirmou resultados e reações como se fossem certos. Quando o líder expressou medo de parecer \"a difícil de novo\" e de \"ficar sem chão\", a resposta final encerrou sem reconhecer essa ativação com clareza."
+  },
+  "checks": [],
+  "acceptance": {
+    "accepted": false,
+    "reasons": [
+      "nota do líder simulado 3",
+      "utilidade segundo o avaliador 3"
+    ]
+  }
+}

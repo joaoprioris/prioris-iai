@@ -1,0 +1,76 @@
+{
+  "simulated": true,
+  "scenarioId": "mensagem-se-perdeu",
+  "estado": "Durante",
+  "exchanges": 3,
+  "history": [
+    {
+      "role": "user",
+      "content": "estou num 1:1 de avaliação e percebo que estou falando tão cuidadosamente que a mensagem que importa se perdeu"
+    },
+    {
+      "role": "assistant",
+      "content": "Quando o cuidado vira volume, a parte importante some entre as ressalvas. Qual é a única coisa que essa pessoa precisa ouvir hoje, em uma frase? Diga essa frase primeiro e só depois o contexto."
+    },
+    {
+      "role": "user",
+      "content": "Tá, então seria algo tipo: \"Rafael, os atrasos no fechamento estão se repetindo e preciso que a gente resolva isso.\" Mas acho que eu já vou enrolar antes de chegar nessa frase. Como eu começo sem parecer que tô jogando isso do nada?"
+    },
+    {
+      "role": "assistant",
+      "content": "Você já tem a frase. O risco é a ressalva vir antes dela, então combine a transição com o fato, sem pedir licença. Uma opção, para você ajustar: \"Antes de fechar a avaliação, quero trazer uma coisa concreta: os atrasos no fechamento.\" Logo depois, vá direto para a frase que você já escreveu."
+    },
+    {
+      "role": "user",
+      "content": "Ok, mas pera. Eu tô nervoso com isso, então talvez eu fale de um jeito meio duro sem querer. Não é melhor eu puxar antes um \"você tá indo bem no geral\" pra ele não se fechar?"
+    },
+    {
+      "role": "assistant",
+      "content": "Esse elogio antes da frase é exatamente o que costuma virar a ressalva que você quer evitar: ele vai soar como preparação para a crítica, e a mensagem volta a se perder. Se você quer reconhecer algo real, faça isso com um fato específico sobre o trabalho dele, não com um \"no geral\".\n\nSobre o nervosismo: você pode dizer isso em uma frase, sem pedir desculpa. Algo como \"Estou um pouco nervoso com essa conversa, mas quero ser claro.\" Assim a tensão fica nomeada e não vaza no tom. Depois disso, a frase sobre os atrasos segue direta, com a voz mais baixa e a pausa de um segundo antes dela.\n\nVocê já tem a frase, a transição e uma forma de lidar com o nervosismo. Com isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar."
+    }
+  ],
+  "endedBy": "agent_closed",
+  "rating": {
+    "nota": 4,
+    "comentario": "Me ajudou a enxergar que eu estava enrolando e a ter uma frase clara sobre os atrasos, além de uma transição objetiva. Só achei a parte final um pouco tipo fechamento de palestra, mas dá para usar.",
+    "usaria_de_novo": true
+  },
+  "verdict": {
+    "utilidade": 4,
+    "problemas": [
+      {
+        "codigo": "garantiu_reacao",
+        "gravidade": "grave",
+        "trecho": "ele vai soar como preparação para a crítica"
+      },
+      {
+        "codigo": "ignorou_ativacao_emocional",
+        "gravidade": "leve",
+        "trecho": "Eu tô nervoso com isso, então talvez eu fale de um jeito meio duro sem querer."
+      },
+      {
+        "codigo": "escolheu_pelo_lider",
+        "gravidade": "leve",
+        "trecho": "Depois disso, a frase sobre os atrasos segue direta, com a voz mais baixa e a pausa de um segundo antes dela."
+      },
+      {
+        "codigo": "fala_pronta_excessiva",
+        "gravidade": "leve",
+        "trecho": "Estou um pouco nervoso com essa conversa, mas quero ser claro."
+      },
+      {
+        "codigo": "tom_artificial",
+        "gravidade": "leve",
+        "trecho": "IAí, posso te apoiar no próximo passo quando precisar."
+      }
+    ],
+    "observacao": "O agente deu um caminho concreto e utilizável: a frase central, uma transição opcional e uma forma de nomear o nervosismo. Porém, afirmou como certa a reação de Rafael ao elogio, tratou a ativação emocional do líder mais como tática do que como pausa, e fechou com fórmula artificial."
+  },
+  "checks": [],
+  "acceptance": {
+    "accepted": false,
+    "reasons": [
+      "problema grave: garantiu_reacao"
+    ]
+  }
+}

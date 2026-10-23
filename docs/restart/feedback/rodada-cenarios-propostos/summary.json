@@ -1,0 +1,14 @@
+{
+  "simulated": true,
+  "models": {
+    "agent": "claude-haiku-5-5",
+    "leader": "claude-haiku-5-5",
+    "judge": "claude-haiku-5-5"
+  },
+  "capUsd": 10,
+  "spentThisRunUsd": 0.03722176500000085,
+  "spentTotalUsd": 3.0672217650000007,
+  "calls": 88,
+  "run": 5,
+  "accepted": 1
+}

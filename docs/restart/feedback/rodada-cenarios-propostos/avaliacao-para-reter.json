@@ -1,0 +1,134 @@
+{
+  "simulated": true,
+  "scenarioId": "avaliacao-para-reter",
+  "estado": "Antes",
+  "exchanges": 10,
+  "history": [
+    {
+      "role": "user",
+      "content": "preciso escrever a avaliação do Caio e a empresa quer reter ele, mas minha avaliação honesta é mais complexa"
+    },
+    {
+      "role": "assistant",
+      "content": "Aqui a tensão está entre o que a empresa quer registrar (que ele fica) e o que você de fato observou, que tem nuances. Uma avaliação honesta não precisa ser sentença nem elogio que não se sustenta: dá para dizer o que ele entrega bem, o que precisa mudar e em que contexto isso acontece. Para escrever isso com clareza, o que pesa mais hoje: pontos que você consegue ilustrar com fatos concretos, ou uma sensação mais difusa sobre a forma como ele trabalha?"
+    },
+    {
+      "role": "user",
+      "content": "Tenho fatos, sim. Mas acho que o problema é outro: quando eu penso em escrever \"precisa melhorar na comunicação\", parece vago demais pra ser justo com ele. Só que também não quero que vire um texto que diz \"é ótimo, só um detalhe\". Não sei onde fica o meio."
+    },
+    {
+      "role": "assistant",
+      "content": "Você já percebeu o ponto: \"comunicação\" sozinho é vago, e \"é ótimo, só um detalhe\" esconde o que importa. O meio costuma estar em trocar o rótulo por um comportamento e um efeito observável, sem julgar a pessoa. Em vez de dizer que ele precisa melhorar a comunicação, descreva a situação em que isso falhou, o que aconteceu e o que você precisa que mude na próxima vez.\n\nPensando nos fatos que você tem: qual é o caso mais concreto, aquele que você mesmo poderia contar em uma frase, e o que ficou faltando nele?"
+    },
+    {
+      "role": "user",
+      "content": "Tem um caso que eu lembro bem. Foi numa revisão de um PR grande, eu fiz uns comentários sobre um ponto de arquitetura, e ele respondeu num tom que deixou a Júlia calada no resto da reunião. Ela me falou depois que não voltava a revisar código dele. Não sei se isso é \"o caso\" ou se é só o que mais me incomodou. E tem outro, que eu acho que foi pior, mas aí já entra coisa que eu não sei se devo colocar na avaliação.\n\nPra ser sincero, uma parte de mim quer deixar isso de fora. Ele entrega, a diretoria gosta dele, e escrever isso dói. Não sei se estou exagerando o peso ou se estou tentando me proteger."
+    },
+    {
+      "role": "assistant",
+      "content": "Você está no meio da escolha, e a dúvida entre \"é o caso ou só o que me incomodou\" é o que separa fato de impressão. Esse caso tem fatos: ele respondeu num tom, a Júlia ficou calada na reunião e depois disse que não volta a revisar o código dele. O que você não sabe é se isso se repete e o que ela sentiu além do que te contou.\n\nSobre deixar de fora: a avaliação não precisa esgotar tudo, mas se algo pesou na sua decisão, omitir deixa o texto incompleto. Vale perguntar: isso se repete e afeta o trabalho do time? Se sim, merece entrar, descrito como fato. O outro caso só entra se você tiver fatos verificáveis, não só a sua leitura.\n\nAntes de decidir o que entra, qual é o outro caso, em uma frase, e você já conversou com ele sobre o primeiro?"
+    },
+    {
+      "role": "user",
+      "content": "Ah, o outro é o de dois colegas que pediram pra sair do time dele. Não foi uma coisa só, foram dois, em períodos diferentes. Não sei exatamente o que cada um falou quando saiu, nunca perguntei direito. E não, não conversei com ele sobre o primeiro caso. Achei que ia parecer que eu tava pegando no pé, e também não queria que virasse aquela conversa de RH.\n\nAcho que é justamente isso que me incomoda. Eu sei que tem algo, mas se eu escrever \"dois colegas saíram do time\" sem saber o motivo, parece que eu tô jogando a culpa nele. E se eu não escrever, também parece que eu tô escondendo. Tô meio preso nisso."
+    },
+    {
+      "role": "assistant",
+      "content": "Você está misturando duas coisas: o que sabe (duas saídas, em períodos diferentes) e o que não sabe (o motivo de cada uma). Registrar o fato sem atribuir causa não acusa ninguém. Deixar de fora seria omitir algo que pesou na sua leitura. Antes de escrever, dá para descobrir o que ainda não sabe: perguntar aos dois, se quiserem falar, ou ao RH, o que levou à saída. E sobre o primeiro caso, a avaliação não deveria ser a primeira vez que o Caio ouve isso.\n\nVocê consegue falar com algum dos dois que saíram?"
+    },
+    {
+      "role": "user",
+      "content": "Consigo tentar, mas não sei se vão querer falar comigo. Um deles, acho que o Rafael, ainda fala comigo de vez em quando. O outro perdi o contato mais.\n\nSó que tem uma coisa que me pega. Se eu sair perguntando por aí por que os dois saíram, não vira fofoca? E se o Caio souber, ele vai achar que eu montei um processo contra ele. Não sei se isso é justo com ele. Parece que eu estou juntando coisa pelas costas.\n\nAcho que o problema é que eu tô tentando achar um jeito de falar disso sem ele ficar na defensiva, e não sei se existe."
+    },
+    {
+      "role": "assistant",
+      "content": "Você está pedindo um jeito de falar sem que ele se sinta atacado, e isso pode não existir totalmente: qualquer feedback sobre algo que pesou na sua avaliação tende a gerar defesa. O que está ao seu alcance é deixar claro o que você observou, o que ainda não sabe e por que está falando com ele.\n\nSobre \"juntar coisa pelas costas\": conversar com o Rafael, se ele topar, sobre a própria saída, é diferente de circular perguntas sobre o Caio. Perguntar ao Rafael \"o que te levou a sair?\" fala da experiência dele, não de um julgamento sobre o Caio. Já falar com o Caio antes de escrever a avaliação deixa o processo às claras.\n\nVocê consegue dizer, em uma frase, o que você quer que o Caio saiba sobre o que você viu?"
+    },
+    {
+      "role": "user",
+      "content": "Hm. Acho que... que eu vi ele responder de um jeito que travou a Júlia numa revisão, e que isso importa pra mim porque o time depende das revisões. Mas se eu falar assim, parece pouco pro que eu sinto. E tem o resto, que eu não sei direito como coloco.\n\nNão sei se isso fecha. Eu queria que ele entendesse que não tô falando por implicância. Só que aí também me pergunto se estou tentando parecer justo pra mim mesmo."
+    },
+    {
+      "role": "assistant",
+      "content": "Você já tem a frase central, e ela é concreta: viu uma resposta que travou a Júlia numa revisão, e isso importa porque o time depende das revisões. Ela pode parecer pouca para o que você sente, mas não precisa carregar tudo. O resto, como as saídas e a sua dúvida, pode vir depois, em outra conversa, com fatos.\n\nSobre não parecer implicância: isso não se garante com frase, e tentar garantir pode puxar você para explicar demais. O que ajuda é dizer por que está falando e o que ainda não sabe. A dúvida sobre estar tentando parecer justo não precisa ser resolvida antes de falar. Ela some quando você fica no que observou, sem adjetivos.\n\nA mensagem precisa conter três coisas: o que você viu, por que isso importa para o time e que você quer ouvir o lado dele. Use as suas palavras para isso.\n\nVocê consegue começar por essa parte, ou o que mais trava é o que vem depois?"
+    },
+    {
+      "role": "user",
+      "content": "Consigo começar, acho. O que trava é mais o depois. Tipo, se ele perguntar \"e as saídas?\", eu não sei o que respondo. Não quero mentir dizendo que não sei de nada, mas também não tenho nada fechado sobre isso.\n\nAinda acho que tem coisa que eu deveria saber antes de falar. Tipo, se eu não sei por que o Rafael saiu, como eu chego nessa conversa sem parecer que eu já tenho uma conclusão?"
+    },
+    {
+      "role": "assistant",
+      "content": "Você não precisa fechar a história das saídas para responder a ele. Se ele perguntar, a resposta honesta é algo como: \"Sei que duas pessoas saíram do time, mas não sei o motivo de cada uma e não quero tirar conclusão sem ouvir.\" Isso não mente, não acusa e não entrega uma conclusão que você não tem.\n\nSobre chegar sem parecer que já tem uma conclusão: a conversa pode ser só sobre a revisão. O tema das saídas fica para depois, se ele trouxer ou se você conseguir falar com o Rafael. Você não precisa saber o motivo das saídas para falar da revisão.\n\nPelo que você contou, falta decidir se quer tratar isso como um assunto só, a revisão, ou se as saídas também entram nessa primeira conversa. Qual dos dois faz mais sentido agora?"
+    },
+    {
+      "role": "user",
+      "content": "Acho que a revisão sozinha. Se eu jogar as saídas na mesma conversa, ele vai ouvir como acusação, mesmo que eu não queira. E eu ainda não sei o suficiente pra isso.\n\nMas fico pensando se é honesto deixar um assunto de fora da conversa e depois aparecer com ele na avaliação. Tipo, ele vai ler \"saíram dois do time\" e pensar \"por que ninguém me falou nada?\". Não sei se isso é pior."
+    },
+    {
+      "role": "assistant",
+      "content": "Você está no ponto em que a clareza e a relação puxam para lados diferentes: separar a revisão das saídas protege a conversa, mas corre o risco de a avaliação chegar como surpresa. A pergunta do Caio (\"por que ninguém me falou?\") é justa, e vale considerar.\n\nUma saída possível é não esconder que o assunto existe. Na conversa sobre a revisão, você pode dizer que também tem outras questões sobre a dinâmica do time que quer conversar depois, quando tiver mais clareza. Assim ele não é pego de surpresa, e você não precisa explicar nada que ainda não sabe.\n\nO que você acha que o Caio precisaria ouvir para não sentir que a avaliação é uma emboscada?"
+    },
+    {
+      "role": "user",
+      "content": "Não sei direito. Acho que ele precisaria ouvir que eu não escondi nada de propósito, que falei com ele antes de escrever. Mas isso já é meio tarde, né? Se eu falar agora, ele vai perguntar por que eu não falei antes, e aí eu tenho que explicar que fiquei com medo de parecer que eu tava pegando no pé. Que é verdade, mas soa mal.\n\nTambém fico pensando que, se eu disser \"tenho outras questões sobre o time pra conversar depois\", ele vai querer saber quais. E aí é a mesma coisa de novo.\n\nTalvez o que eu precise é aceitar que essa conversa vai ser meio desconfortável, e que o desconforto não é sinal de que eu tô errando. Mas não sei se consigo fazer isso sem parecer que tô me justificando."
+    },
+    {
+      "role": "assistant",
+      "content": "Explicar o medo de parecer que está pegando no pé soa mal quando vira defesa, mas dito em uma frase curta, como fato sobre você, é só resposta honesta. Não precisa listar o que ainda não sabe. Se ele insistir, diga que ainda não tem clareza do que é e que vai trazer quando tiver algo concreto."
+    },
+    {
+      "role": "user",
+      "content": "Pode ser. Acho que vou só falar isso mesmo, sem ensaiar muito. Tipo: \"Eu devia ter conversado com você antes. Fiquei com medo de parecer que estava pegando no pé, e isso não foi justo com você.\"\n\nMas e se ele disser que quer saber agora quais são essas outras questões? Eu não tenho nada fechado e não quero inventar. Mesmo assim parece que vou sair dessa conversa devendo algo."
+    },
+    {
+      "role": "assistant",
+      "content": "Você não precisa sair com nada fechado para cumprir o que combinou. Se ele quiser saber agora, diga a verdade no tamanho que você tem: \"Ainda não tenho nada fechado sobre isso. Não quero te dar uma resposta pela metade. Quando eu tiver algo concreto, eu te procuro.\" Assim você não inventa e também não fica devendo uma conclusão.\n\nSobre a frase que você pensou: ela é honesta e já diz o principal. Só cuide para que, depois dela, a conversa volte para a revisão, com o que você viu e por que importa para o time.\n\nCom isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar."
+    }
+  ],
+  "endedBy": "agent_closed",
+  "rating": {
+    "nota": 4,
+    "comentario": "Me ajudou a separar o que eu vi do que eu só senti e a sair com uma frase para conversar com o Caio. Algumas respostas ficaram repetitivas e um pouco longas, mas no fim saí com um próximo passo claro.",
+    "usaria_de_novo": true
+  },
+  "verdict": {
+    "utilidade": 4,
+    "problemas": [
+      {
+        "codigo": "fala_pronta_excessiva",
+        "gravidade": "leve",
+        "trecho": "Sei que duas pessoas saíram do time, mas não sei o motivo de cada uma e não quero tirar conclusão sem ouvir."
+      },
+      {
+        "codigo": "ignorou_ativacao_emocional",
+        "gravidade": "leve",
+        "trecho": "Tô meio preso nisso."
+      },
+      {
+        "codigo": "teoria_ou_aula",
+        "gravidade": "leve",
+        "trecho": "A mensagem precisa conter três coisas: o que você viu, por que isso importa para o time e que você quer ouvir o lado dele."
+      },
+      {
+        "codigo": "escolheu_pelo_lider",
+        "gravidade": "leve",
+        "trecho": "O outro caso só entra se você tiver fatos verificáveis, não só a sua leitura."
+      },
+      {
+        "codigo": "garantiu_reacao",
+        "gravidade": "leve",
+        "trecho": "Registrar o fato sem atribuir causa não acusa ninguém."
+      }
+    ],
+    "observacao": "O agente ajudou o líder a sair com uma frase central, um caminho para a conversa sobre a revisão e uma resposta honesta para a pergunta sobre as saídas, sem inventar fatos sobre o Caio ou a Júlia. Os principais desvios são leves: scripts prontos em mais de um turno, pouca atenção ao cansaço emocional explícito do líder e algumas garantias sobre como a fala será recebida."
+  },
+  "checks": [
+    "estilo: resposta_longa"
+  ],
+  "acceptance": {
+    "accepted": false,
+    "reasons": [
+      "estilo: resposta_longa"
+    ]
+  }
+}
