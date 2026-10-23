@@ -1,0 +1,4 @@
+pares fora da matriz: 60
+{"cenario":"iid","G":20,"T":12,"lam":8,"sims":200,"media_descobertas_de_60":3.04,"var_obs":4.77,"var_binomial_indep":2.85,"P(>=7 de 60) [reprova controle]":"7.5 [4.6;12.0]","P(>=9 de 60)":"3.5 [1.7;7.0]"}
+{"cenario":"ar","G":20,"T":12,"lam":8,"sims":200,"media_descobertas_de_60":4.97,"var_obs":6.25,"var_binomial_indep":2.85,"P(>=7 de 60) [reprova controle]":"23.0 [17.7;29.3]","P(>=9 de 60)":"9.0 [5.8;13.8]"}
+{"cenario":"tend","G":20,"T":12,"lam":8,"sims":200,"media_descobertas_de_60":15.97,"var_obs":22.23,"var_binomial_indep":2.85,"P(>=7 de 60) [reprova controle]":"99.0 [96.4;99.7]","P(>=9 de 60)":"97.0 [93.6;98.6]"}

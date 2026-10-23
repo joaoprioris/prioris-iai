@@ -1,0 +1,5 @@
+{"cenario":"nulo_iid","G":20,"T":12,"lam":8,"sims":300,"rejeita_principal":"3.0 [1.6;5.6]","rejeita_placebo_antecedencia":"6.3 [4.1;9.7]","principal_e_passa_placebo":"3.0 [1.6;5.6]"}
+{"cenario":"tendencia","G":20,"T":12,"lam":8,"sims":300,"rejeita_principal":"15.7 [12.0;20.2]","rejeita_placebo_antecedencia":"17.3 [13.5;22.0]","principal_e_passa_placebo":"15.7 [12.0;20.2]"}
+{"cenario":"ar","G":20,"T":12,"lam":8,"sims":300,"rejeita_principal":"6.3 [4.1;9.7]","rejeita_placebo_antecedencia":"7.0 [4.6;10.5]","principal_e_passa_placebo":"6.3 [4.1;9.7]"}
+{"cenario":"circ_ar","G":20,"T":12,"lam":8,"sims":300,"rejeita_principal":"5.0 [3.1;8.1]","rejeita_placebo_antecedencia":"5.3 [3.3;8.5]","principal_e_passa_placebo":"5.0 [3.1;8.1]"}
+{"cenario":"efeito_real_RR1.5","G":20,"T":12,"lam":8,"sims":300,"rejeita_principal":"92.3 [88.8;94.8]","rejeita_placebo_antecedencia":"0.3 [0.1;1.9]","principal_e_passa_placebo":"92.3 [88.8;94.8]"}

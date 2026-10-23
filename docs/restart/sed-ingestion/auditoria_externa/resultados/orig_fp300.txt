@@ -1,0 +1,7 @@
+TESTE GLOBAL COM INICIO GRADUAL E CONSOLIDACAO TARDIA; exposicao acumulada desde o inicio da janela do prazo; p por permutacao da ordem dos meses (par e desfecho do mesmo mes permanecem juntos), alpha 5%
+G	T	lambda	FP perm	FP normal	poder perm RR1.5	poder perm RR2.0
+10	6	4	0.047	0.040	0.12	0.21
+10	12	4	0.060	0.047	0.41	0.72
+20	9	8	0.063	0.037	0.73	0.99
+40	12	8	0.050	0.077	1.00	1.00
+10	9	16	0.017	0.010	0.50	0.89

@@ -1,0 +1,8 @@
+G=20 T=12 lam=8; taxa de rejeição (%) [IC95 Wilson]. x = pares do classificador; A = contagem de A como principal
+{"cenario":"nulo_iid","perm_x":"3.2 [2.0;5.1]","perm_A":"4.8 [3.2;7.0]","t_demean_x":"5.6 [3.9;8.0]","t_demean_A":"6.4 [4.6;8.9]"}
+{"cenario":"ar_06","perm_x":"4.8 [3.2;7.0]","perm_A":"8.4 [6.3;11.2]","t_demean_x":"2.6 [1.5;4.4]","t_demean_A":"2.2 [1.2;3.9]"}
+{"cenario":"tendencia","perm_x":"16.0 [13.0;19.5]","perm_A":"24.2 [20.7;28.1]","t_demean_x":"4.6 [3.1;6.8]","t_demean_A":"6.6 [4.7;9.1]"}
+{"cenario":"circ_ar","perm_x":"4.8 [3.2;7.0]","perm_A":"10.0 [7.7;12.9]","t_demean_x":"76.2 [72.3;79.7]","t_demean_A":"0.2 [0.0;1.1]"}
+{"cenario":"circ_ar_fraco","perm_x":"6.8 [4.9;9.4]","perm_A":"5.4 [3.7;7.7]","t_demean_x":"17.6 [14.5;21.2]","t_demean_A":"0.6 [0.2;1.7]"}
+{"cenario":"poder_RR1.5","perm_x":"90.6 [87.7;92.9]","perm_A":"53.8 [49.4;58.1]","t_demean_x":"95.8 [93.7;97.2]","t_demean_A":"40.0 [35.8;44.4]"}
+{"cenario":"poder_RR2.0","perm_x":"100.0 [99.2;100.0]","perm_A":"89.4 [86.4;91.8]","t_demean_x":"100.0 [99.2;100.0]","t_demean_A":"76.0 [72.1;79.5]"}
