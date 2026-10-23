@@ -3,6 +3,8 @@
  * e não têm calibração estatística nem validação científica; ficam injetáveis por isso.
  * O motor recebe agregados já liberados (ciclo encerrado, n >= 3). Não calcula nada a partir de um evento.
  */
+import type { DebtCode } from "../debts.ts";
+
 export interface IecParams {
   alpha: number;
   beta: number;
@@ -65,6 +67,29 @@ export function iecSeries(series: DebtSeries, p: IecParams = DEFAULT_PARAMS): nu
   });
 }
 
+/**
+ * IEC simplificado: só R, I e C, sem S e A, em percentual. O Manual de Auditoria (4.2) o cita para a entrega
+ * executiva; o Mestre, o Doc 2, o Doc 3 e o Doc 6 usam a fórmula completa. O motor guarda os dois e a escolha
+ * do que aparece ao cliente é decisão do proprietário.
+ */
+export function iecSimplifiedSeries(series: DebtSeries, p: IecParams = DEFAULT_PARAMS): number[] {
+  return series.frequency.map((f, t) => {
+    const base =
+      recurrence(f, p) * p.wR + at(series.intensity, t) * p.wI + concentration(at(series.areas, t), p) * p.wC;
+    return Math.min(1, Math.max(0, base)) * 100;
+  });
+}
+
+/**
+ * IEC global da organização (Doc 2, 3.3): soma(IEC_d x pi_d) / 10. Recebe exatamente as 10 dívidas;
+ * pi padrão 1 (ajuste só por decisão documentada do RH ou do Conselho). Mesma escala da entrada.
+ */
+export function iecGlobal(scores: Record<DebtCode, number>, pi: Partial<Record<DebtCode, number>> = {}): number {
+  const entries = Object.entries(scores) as [DebtCode, number][];
+  if (entries.length !== 10) throw new RangeError("iecGlobal exige as 10 dívidas");
+  return entries.reduce((sum, [debt, iec]) => sum + iec * (pi[debt] ?? 1), 0) / 10;
+}
+
 export type Zone = "Verde" | "Amarela" | "Vermelha";
 
 export const zone = (iec: number): Zone => (iec < 40 ? "Verde" : iec < 70 ? "Amarela" : "Vermelha");
@@ -92,7 +117,7 @@ export interface DcoInput {
 export const dco = (item: DcoInput): number => item.R * item.T * item.P * item.C * dcoMultiplier(item.iec);
 
 export interface RankedDebt {
-  debtId: number;
+  debt: DebtCode;
   iec: number;
   /** Peso político G_d definido pelo Conselho (padrão 1). */
   weight?: number;

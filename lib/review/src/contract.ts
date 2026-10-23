@@ -1,6 +1,8 @@
+import { isDebtCode, type DebtCode } from "./debts.ts";
 import { Rejected } from "./errors.ts";
+import { QUESTION_IDS } from "./questionnaire.ts";
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 export const CONTEXTS = ["conflito", "decisao", "alinhamento", "feedback", "crise"] as const;
 export const ACTORS = ["time", "par", "liderado", "chefe", "cliente"] as const;
 export const MOMENTS = ["Antes", "Durante", "Depois", "Padrao", "Vazio"] as const;
@@ -13,8 +15,8 @@ export interface SedEvent {
   occurred: Date;
   group_id: number;
   contributor_token: string;
-  debt_principal: number;
-  debt_adjacent: number | null;
+  debt_principal: DebtCode;
+  debt_adjacent: DebtCode | null;
   context: (typeof CONTEXTS)[number];
   actor: (typeof ACTORS)[number];
   momento: (typeof MOMENTS)[number];
@@ -83,16 +85,16 @@ export function validateEvent(payload: unknown, tenant: string, now: number): Va
   const common = { event_id: eventId, occurred, group_id: body.group_id, contributor_token: token };
 
   if (kind === "survey") {
-    if (typeof body.question_id !== "string" || !/^[A-H][1-6]$/.test(body.question_id))
+    if (typeof body.question_id !== "string" || !QUESTION_IDS.has(body.question_id))
       throw new Rejected("invalid question id");
     if (!isInt(body.answer, 0, 4)) throw new Rejected("invalid answer");
     return { kind, ...common, question_id: body.question_id, answer: body.answer };
   }
 
-  if (!isInt(body.debt_principal, 1, 10)) throw new Rejected("invalid principal debt");
-  let adjacent: number | null = null;
+  if (!isDebtCode(body.debt_principal)) throw new Rejected("invalid principal debt");
+  let adjacent: DebtCode | null = null;
   if (body.debt_adjacent !== null) {
-    if (!isInt(body.debt_adjacent, 1, 10)) throw new Rejected("invalid adjacent debt");
+    if (!isDebtCode(body.debt_adjacent)) throw new Rejected("invalid adjacent debt");
     if (body.debt_adjacent === body.debt_principal) throw new Rejected("adjacent equals principal");
     adjacent = body.debt_adjacent;
   }

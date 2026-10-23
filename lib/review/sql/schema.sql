@@ -12,8 +12,46 @@ CREATE TABLE prioris_review.groups (
   group_name text NOT NULL,
   PRIMARY KEY (client_id, group_id)
 );
-CREATE TABLE prioris_review.debts (debt_id int PRIMARY KEY CHECK (debt_id BETWEEN 1 AND 10));
-INSERT INTO prioris_review.debts SELECT generate_series(1, 10);
+-- Catálogo das 10 dívidas. A referência é o código textual, nunca a posição (a numeração varia entre documentos).
+CREATE TABLE prioris_review.debts (
+  debt_code text PRIMARY KEY CHECK (debt_code ~ '^[a-z_]+$'),
+  debt_name text NOT NULL,
+  quadrant text NOT NULL CHECK (quadrant IN ('paralisia','retrabalho','cinismo','ruptura'))
+);
+INSERT INTO prioris_review.debts VALUES
+  ('evitacao_conflito','Evitação de Conflito','paralisia'),
+  ('decisao_postergada','Decisão Postergada','paralisia'),
+  ('comunicacao_ambigua','Comunicação Ambígua','retrabalho'),
+  ('autoridade_fragilizada','Autoridade Fragilizada','retrabalho'),
+  ('accountability_diluida','Accountability Diluída','retrabalho'),
+  ('confianca_erosionada','Confiança Erosionada','cinismo'),
+  ('aprendizado_bloqueado','Aprendizado Bloqueado','cinismo'),
+  ('alinhamento_simbolico','Alinhamento Simbólico','cinismo'),
+  ('energia_emocional_degradada','Energia Emocional Degradada','ruptura'),
+  ('maturidade_politica_insuficiente','Maturidade Política Insuficiente','ruptura');
+
+-- Banco de perguntas da pesquisa silenciosa: 3 itens por dívida. O peso (R, I ou I+) ainda não foi definido
+-- em nenhum documento e fica nulo. O texto da pergunta vive no código (src/questionnaire.ts).
+CREATE TABLE prioris_review.questions (
+  question_id text PRIMARY KEY CHECK (question_id ~ '^[a-z_]+\.[1-3]$'),
+  debt_code text NOT NULL REFERENCES prioris_review.debts ON DELETE RESTRICT,
+  item smallint NOT NULL CHECK (item BETWEEN 1 AND 3),
+  weight_class text CHECK (weight_class IN ('R','I','I+')),
+  UNIQUE (debt_code, item),
+  CHECK (question_id = debt_code || '.' || item)
+);
+INSERT INTO prioris_review.questions (question_id, debt_code, item)
+  SELECT d.debt_code || '.' || i, d.debt_code, i FROM prioris_review.debts d CROSS JOIN generate_series(1, 3) AS i;
+
+-- Habilitação por contrato (definida por administrador). A coleta funciona sempre; consumo pelo Risk Engine
+-- e alertas dependem destes sinalizadores. O Risk Engine fica 6 meses habilitado quando o contrato é de 12 meses.
+CREATE TABLE prioris_review.client_entitlements (
+  client_id text PRIMARY KEY REFERENCES prioris_review.clients ON DELETE RESTRICT,
+  contract_months smallint NOT NULL CHECK (contract_months IN (6, 12)),
+  cre_enabled boolean NOT NULL DEFAULT false,
+  alerts_enabled boolean NOT NULL DEFAULT false,
+  CHECK (NOT alerts_enabled OR cre_enabled)
+);
 CREATE TABLE prioris_review.cycles (
   client_id text NOT NULL REFERENCES prioris_review.clients ON DELETE RESTRICT,
   cycle_start date NOT NULL CHECK (extract(day FROM cycle_start) = 1),
@@ -30,8 +68,8 @@ CREATE TABLE prioris_review.sed_events (
   contributor_token text NOT NULL CHECK (contributor_token ~ '^[0-9a-f]{64}$'),
   occurred_at timestamptz NOT NULL,
   cycle_start date NOT NULL,
-  debt_principal int NOT NULL REFERENCES prioris_review.debts ON DELETE RESTRICT,
-  debt_adjacent int REFERENCES prioris_review.debts ON DELETE RESTRICT,
+  debt_principal text NOT NULL REFERENCES prioris_review.debts ON DELETE RESTRICT,
+  debt_adjacent text REFERENCES prioris_review.debts ON DELETE RESTRICT,
   context text NOT NULL CHECK (context IN ('conflito','decisao','alinhamento','feedback','crise')),
   actor text NOT NULL CHECK (actor IN ('time','par','liderado','chefe','cliente')),
   momento text NOT NULL CHECK (momento IN ('Antes','Durante','Depois','Padrao','Vazio')),
@@ -53,7 +91,7 @@ CREATE TABLE prioris_review.survey_answers (
   contributor_token text NOT NULL CHECK (contributor_token ~ '^[0-9a-f]{64}$'),
   occurred_at timestamptz NOT NULL,
   cycle_start date NOT NULL,
-  question_id text NOT NULL CHECK (question_id ~ '^[A-H][1-6]$'),
+  question_id text NOT NULL REFERENCES prioris_review.questions ON DELETE RESTRICT,
   answer smallint NOT NULL CHECK (answer BETWEEN 0 AND 4),
   PRIMARY KEY (client_id, event_id),
   FOREIGN KEY (client_id, group_id) REFERENCES prioris_review.groups ON DELETE RESTRICT,
@@ -117,7 +155,7 @@ CREATE POLICY survey_tenant ON prioris_review.survey_answers
 -- 3 participantes distintos na amostra exata. Supressão, não fusão. Isto não é garantia
 -- de anonimização. Contagens exatas NÃO devem chegar ao painel.
 CREATE FUNCTION prioris_review.sed_release()
-RETURNS TABLE (group_id int, cycle_start date, debt_principal int, momento text,
+RETURNS TABLE (group_id int, cycle_start date, debt_principal text, momento text,
                events bigint, low bigint, medium bigint, high bigint)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
   SELECT e.group_id, e.cycle_start, e.debt_principal, e.momento,

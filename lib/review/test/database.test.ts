@@ -131,16 +131,42 @@ describe("persistência", { skip: skip() }, () => {
 
   it("restrições do esquema rejeitam dados fora do contrato mesmo sem passar pela validação", async () => {
     const c = await superuser(async (s) => {
-      await assert.rejects(s.query("INSERT INTO prioris_review.survey_answers VALUES ('cli_a','z',repeat('a',64),1,repeat('b',64),now(),$1,'A1',9)", [date(openMonth)]), (e: { code?: string }) => e.code === "23514");
+      await assert.rejects(s.query("INSERT INTO prioris_review.survey_answers VALUES ('cli_a','z',repeat('a',64),1,repeat('b',64),now(),$1,'evitacao_conflito.1',9)", [date(openMonth)]), (e: { code?: string }) => e.code === "23514");
       return true;
     });
     assert.ok(c);
   });
 });
 
+describe("catálogo, perguntas e habilitação por contrato", { skip: skip() }, () => {
+  it("o catálogo tem 10 dívidas e 30 perguntas, e o banco rejeita pergunta ou dívida inexistente", async () => {
+    assert.equal(await count("debts"), 10);
+    assert.equal(await count("questions"), 30);
+    await superuser(async (s) => {
+      await assert.rejects(s.query("INSERT INTO prioris_review.survey_answers VALUES ('cli_a','q1',repeat('a',64),1,repeat('b',64),now(),$1,'evitacao_conflito.4',2)", [date(openMonth)]), (e: { code?: string }) => e.code === "23503" || e.code === "23514");
+      await assert.rejects(s.query("INSERT INTO prioris_review.sed_events VALUES ('cli_a','q2',repeat('a',64),1,repeat('b',64),now(),$1,'inexistente',NULL,'feedback','time','Antes','Baixa')", [date(openMonth)]), (e: { code?: string }) => e.code === "23503");
+    });
+  });
+
+  it("habilitação: contrato de 6 ou 12 meses, e alerta exige o Risk Engine", async () => {
+    const admin = await db!.client("review_admin");
+    try {
+      await admin.query("INSERT INTO prioris_review.client_entitlements VALUES ('cli_a', 12, true, true)");
+      await assert.rejects(admin.query("INSERT INTO prioris_review.client_entitlements VALUES ('cli_b', 6, false, true)"), (e: { code?: string }) => e.code === "23514");
+      await assert.rejects(admin.query("INSERT INTO prioris_review.client_entitlements VALUES ('cli_b', 9, false, false)"), (e: { code?: string }) => e.code === "23514");
+      await admin.query("INSERT INTO prioris_review.client_entitlements VALUES ('cli_b', 6, false, false)");
+    } finally {
+      await admin.end();
+    }
+    const worker = await ingest();
+    await assert.rejects(worker.query("SELECT * FROM prioris_review.client_entitlements"), (e: { code?: string }) => e.code === "42501");
+    await worker.end();
+  });
+});
+
 describe("ciclos e publicação", { skip: skip() }, () => {
   it("nada é publicado antes do encerramento do ciclo", async () => {
-    for (const n of [1, 2, 3]) await persist(envelope(sedPayload({ event_id: `r${n}`, contributor_token: token(n), group_id: 2, debt_principal: 2 }, inClosed(8))), connect);
+    for (const n of [1, 2, 3]) await persist(envelope(sedPayload({ event_id: `r${n}`, contributor_token: token(n), group_id: 2, debt_principal: "decisao_postergada" }, inClosed(8))), connect);
     assert.deepEqual(await release("cli_a", "sed_release"), []);
   });
 
@@ -150,18 +176,18 @@ describe("ciclos e publicação", { skip: skip() }, () => {
   });
 
   it("amostra com menos de 3 participantes distintos é suprimida, mesmo com muitos eventos", async () => {
-    for (let i = 0; i < 5; i++) await persist(envelope(sedPayload({ event_id: `s${i}`, contributor_token: token(i % 2 + 10), group_id: 1, debt_principal: 5 }, inClosed(9))), connect);
-    await persist(envelope(surveyPayload({ event_id: "sv1", contributor_token: token(1), group_id: 2, question_id: "B4", answer: 4 }, inClosed(9))), connect);
-    await persist(envelope(surveyPayload({ event_id: "sv2", contributor_token: token(2), group_id: 2, question_id: "B4", answer: 2 }, inClosed(9))), connect);
+    for (let i = 0; i < 5; i++) await persist(envelope(sedPayload({ event_id: `s${i}`, contributor_token: token(i % 2 + 10), group_id: 1, debt_principal: "accountability_diluida" }, inClosed(9))), connect);
+    await persist(envelope(surveyPayload({ event_id: "sv1", contributor_token: token(1), group_id: 2, question_id: "decisao_postergada.1", answer: 4 }, inClosed(9))), connect);
+    await persist(envelope(surveyPayload({ event_id: "sv2", contributor_token: token(2), group_id: 2, question_id: "decisao_postergada.1", answer: 2 }, inClosed(9))), connect);
     await closeCycle("cli_a", closedMonth);
     const rows = await release("cli_a", "sed_release");
-    assert.ok(!rows.some((r) => r.group_id === 1 && r.debt_principal === 5));
+    assert.ok(!rows.some((r) => r.group_id === 1 && r.debt_principal === "accountability_diluida"));
     assert.deepEqual(await release("cli_a", "survey_release"), []);
   });
 
   it("publica com 3 participantes distintos e conta cada evento", async () => {
     const rows = await release("cli_a", "sed_release");
-    const row = rows.find((r) => r.group_id === 2 && r.debt_principal === 2 && r.momento === "Antes");
+    const row = rows.find((r) => r.group_id === 2 && r.debt_principal === "decisao_postergada" && r.momento === "Antes");
     assert.ok(row);
     assert.equal(Number(row.events), 3);
     assert.equal(Number(row.medium), 3);
@@ -170,8 +196,8 @@ describe("ciclos e publicação", { skip: skip() }, () => {
 
   it("resposta da pesquisa publica a média por participante só com 3 respondentes", async () => {
     await superuser((c) => c.query("UPDATE prioris_review.cycles SET closed=false WHERE client_id='cli_a' AND cycle_start=$1", [date(closedMonth)]));
-    await persist(envelope(surveyPayload({ event_id: "sv3", contributor_token: token(3), group_id: 2, question_id: "B4", answer: 3 }, inClosed(10))), connect);
-    await persist(envelope(surveyPayload({ event_id: "sv4", contributor_token: token(3), group_id: 2, question_id: "B4", answer: 1 }, inClosed(10))), connect);
+    await persist(envelope(surveyPayload({ event_id: "sv3", contributor_token: token(3), group_id: 2, question_id: "decisao_postergada.1", answer: 3 }, inClosed(10))), connect);
+    await persist(envelope(surveyPayload({ event_id: "sv4", contributor_token: token(3), group_id: 2, question_id: "decisao_postergada.1", answer: 1 }, inClosed(10))), connect);
     await closeCycle("cli_a", closedMonth);
     const rows = await release("cli_a", "survey_release");
     assert.equal(rows.length, 1);

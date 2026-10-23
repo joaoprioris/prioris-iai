@@ -19,15 +19,15 @@ export const iso = (date: Date): string => date.toISOString();
 
 export function sedPayload(overrides: Record<string, unknown> = {}, at: Date = new Date(Date.now() - 60_000)) {
   return {
-    schema_version: 3,
+    schema_version: 4,
     kind: "sed",
     event_id: "evt_1",
     timestamp: iso(at),
     client_id: "cli_a",
     group_id: 1,
     contributor_token: token(1),
-    debt_principal: 1,
-    debt_adjacent: 3,
+    debt_principal: "evitacao_conflito",
+    debt_adjacent: "comunicacao_ambigua",
     context: "feedback",
     actor: "liderado",
     momento: "Antes",
@@ -38,14 +38,14 @@ export function sedPayload(overrides: Record<string, unknown> = {}, at: Date = n
 
 export function surveyPayload(overrides: Record<string, unknown> = {}, at: Date = new Date(Date.now() - 60_000)) {
   return {
-    schema_version: 3,
+    schema_version: 4,
     kind: "survey",
     event_id: "svy_1",
     timestamp: iso(at),
     client_id: "cli_a",
     group_id: 1,
     contributor_token: token(1),
-    question_id: "A1",
+    question_id: "evitacao_conflito.1",
     answer: 3,
     ...overrides,
   };

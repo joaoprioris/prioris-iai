@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { authenticate, handleIngress, validateEvent, InMemoryQueue, drain, Rejected, EventConflict } from "../src/index.ts";
 import {
-  alertFor, dco, dcoMultiplier, DEFAULT_PARAMS, iecSeries, isReportable, maturity, top3, zone,
+  alertFor, alertsMayRun, dco, dcoMultiplier, DEBTS, DEBT_CODES, debtFromName, DEFAULT_PARAMS, engineMayRun, iecGlobal,
+  iecSeries, iecSimplifiedSeries, isReportable, maturity, QUESTIONS, quadrantOf, top3, zone,
 } from "../src/index.ts";
 import { resolveKey, sedPayload, signedRequest, surveyPayload, token, SECRET_B } from "./fixtures.ts";
 
@@ -57,7 +58,7 @@ describe("validação do contrato", () => {
     assert.throws(() => validateEvent({ ...sedPayload(), extra: 1 }, "cli_a", t), Rejected);
     const { actor: _actor, ...missing } = sedPayload();
     assert.throws(() => validateEvent(missing, "cli_a", t), Rejected);
-    assert.throws(() => validateEvent(sedPayload({ schema_version: 2 }), "cli_a", t), Rejected);
+    assert.throws(() => validateEvent(sedPayload({ schema_version: 3 }), "cli_a", t), Rejected);
     assert.throws(() => validateEvent(sedPayload({ client_id: "cli_b" }), "cli_a", t), /tenant mismatch/);
     assert.throws(() => validateEvent(sedPayload({ kind: "x" }), "cli_a", t), Rejected);
   });
@@ -65,14 +66,15 @@ describe("validação do contrato", () => {
   it("rejeita enumerações, dívidas e adjacente igual à principal", () => {
     for (const bad of [
       { context: "reestruturacao" }, { actor: "x" }, { momento: "Agora" }, { intensity_proxy: "Alta " },
-      { debt_principal: 0 }, { debt_principal: 11 }, { debt_adjacent: 1 }, { debt_adjacent: 1.5 },
+      { debt_principal: 1 }, { debt_principal: "Evitação de Conflito" }, { debt_principal: "inexistente" },
+      { debt_adjacent: "evitacao_conflito" }, { debt_adjacent: 1.5 }, { debt_adjacent: "comunicacao" },
       { group_id: "1" }, { contributor_token: "ABC" }, { event_id: "" },
     ])
       assert.throws(() => validateEvent(sedPayload(bad), "cli_a", t), Rejected, JSON.stringify(bad));
   });
 
   it("rejeita resposta fora da escala, pergunta inexistente e timestamp inválido ou futuro", () => {
-    for (const bad of [{ answer: 5 }, { answer: -1 }, { answer: 2.5 }, { question_id: "I1" }, { question_id: "A7" }])
+    for (const bad of [{ answer: 5 }, { answer: -1 }, { answer: 2.5 }, { question_id: "A1" }, { question_id: "evitacao_conflito.4" }, { question_id: "inexistente.1" }, { question_id: "evitacao_conflito.0" }])
       assert.throws(() => validateEvent(surveyPayload(bad), "cli_a", t), Rejected, JSON.stringify(bad));
     assert.throws(() => validateEvent(sedPayload({ timestamp: "2026-10-07 15:30:00" }), "cli_a", t), /timestamp/);
     assert.throws(() => validateEvent(sedPayload({ timestamp: "2026-10-07T15:30:00" }), "cli_a", t), /timestamp/);
@@ -168,11 +170,12 @@ describe("zonas, DCO, top 3, alertas e maturidade", () => {
 
   it("limita a 3 dívidas em vermelho e desempata por IEC x peso político", () => {
     const debts = [
-      { debtId: 1, iec: 90 }, { debtId: 2, iec: 80 }, { debtId: 3, iec: 75, weight: 1.5 },
-      { debtId: 4, iec: 72 }, { debtId: 5, iec: 50 },
+      { debt: "evitacao_conflito", iec: 90 } as const, { debt: "decisao_postergada", iec: 80 } as const,
+      { debt: "comunicacao_ambigua", iec: 75, weight: 1.5 } as const, { debt: "autoridade_fragilizada", iec: 72 } as const,
+      { debt: "accountability_diluida", iec: 50 } as const,
     ];
-    assert.deepEqual(top3(debts).map((d) => d.debtId), [3, 1, 2]);
-    assert.deepEqual(top3([{ debtId: 5, iec: 50 }]), []);
+    assert.deepEqual(top3(debts).map((d) => d.debt), ["comunicacao_ambigua", "evitacao_conflito", "decisao_postergada"]);
+    assert.deepEqual(top3([{ debt: "accountability_diluida", iec: 50 }]), []);
   });
 
   it("alerta só após 3 ciclos e 2 ciclos consecutivos na mesma zona", () => {
@@ -183,14 +186,78 @@ describe("zonas, DCO, top 3, alertas e maturidade", () => {
     assert.equal(alertFor(["Vermelha", "Vermelha", "Verde"]), null);
   });
 
-  it("maturidade é o menor dos três vetores e abaixo de N2 não há relatório", () => {
-    assert.equal(maturity({ eventsPerMonth: 700, leaders: 200, activeLeaderShare: 0.6, stableMonths: 7 }), 2);
-    assert.equal(maturity({ eventsPerMonth: 1000, leaders: 200, activeLeaderShare: 0.6, stableMonths: 7 }), 3);
-    assert.equal(maturity({ eventsPerMonth: 1900, leaders: 200, activeLeaderShare: 0.6, stableMonths: 7 }), 4);
-    assert.equal(maturity({ eventsPerMonth: 1900, leaders: 200, activeLeaderShare: 0.6, stableMonths: 4 }), 3);
-    assert.equal(maturity({ eventsPerMonth: 1900, leaders: 200, activeLeaderShare: 0.1, stableMonths: 7 }), 0);
-    assert.equal(maturity({ eventsPerMonth: 19, leaders: 8, activeLeaderShare: 0.5, stableMonths: 3 }), 0);
+  const base = { eventsPerMonth: 1900, leaders: 200, activeLeaderShare: 0.6, stableMonths: 7, responseRate: 0.5, consecutiveCycles: 3, iecStable: true };
+
+  it("maturidade é o menor dos vetores e abaixo de N2 não há relatório", () => {
+    assert.equal(maturity({ ...base, eventsPerMonth: 700 }), 2);
+    assert.equal(maturity({ ...base, eventsPerMonth: 1000 }), 3);
+    assert.equal(maturity(base), 4);
+    assert.equal(maturity({ ...base, activeLeaderShare: 0.1 }), 0);
+    assert.equal(maturity({ ...base, eventsPerMonth: 19, leaders: 8, activeLeaderShare: 0.5, stableMonths: 3 }), 0);
     assert.equal(isReportable(1), false);
     assert.equal(isReportable(2), true);
+  });
+
+  it("tempo: N2 só com 3 meses, N3 só com 6 meses, N4 só com IEC estável", () => {
+    assert.equal(maturity({ ...base, stableMonths: 2 }), 1);
+    assert.equal(maturity({ ...base, stableMonths: 3 }), 2);
+    assert.equal(maturity({ ...base, stableMonths: 5 }), 2);
+    assert.equal(maturity({ ...base, stableMonths: 6, iecStable: false }), 3);
+    assert.equal(maturity({ ...base, stableMonths: 6 }), 4);
+  });
+
+  it("taxa de resposta abaixo de 35% ou menos de 2 ciclos consecutivos limita a N1", () => {
+    assert.equal(maturity({ ...base, responseRate: 0.34 }), 1);
+    assert.equal(maturity({ ...base, consecutiveCycles: 1 }), 1);
+    assert.equal(maturity({ ...base, responseRate: 0.35, consecutiveCycles: 2 }), 4);
+    assert.equal(maturity({ ...base, responseRate: 0.1, activeLeaderShare: 0.1 }), 0);
+  });
+});
+
+describe("catálogo de dívidas e banco de perguntas", () => {
+  it("10 dívidas, 4 quadrantes e nenhuma equivalência por semelhança", () => {
+    assert.equal(DEBTS.length, 10);
+    assert.equal(new Set(DEBT_CODES).size, 10);
+    assert.equal(quadrantOf("energia_emocional_degradada"), "ruptura");
+    assert.equal(debtFromName("Evitação de Conflito"), "evitacao_conflito");
+    assert.equal(debtFromName("evitacao de conflito"), "evitacao_conflito");
+    assert.equal(debtFromName("Energia Emocional"), "energia_emocional_degradada");
+    assert.equal(debtFromName("Maturidade Política"), "maturidade_politica_insuficiente");
+    assert.equal(debtFromName("Conflito"), null);
+    assert.equal(debtFromName("Comunicação"), null);
+    assert.equal(debtFromName("Terapia"), null);
+  });
+
+  it("30 perguntas, 3 por dívida, ids estáveis e textos sem as palavras vetadas pelo Manual", () => {
+    assert.equal(QUESTIONS.length, 30);
+    for (const code of DEBT_CODES) assert.equal(QUESTIONS.filter((q) => q.debt === code).length, 3);
+    assert.equal(new Set(QUESTIONS.map((q) => q.id)).size, 30);
+    for (const q of QUESTIONS) assert.doesNotMatch(q.text, /\b(você|problema|falha|erro)\b/i, q.id);
+  });
+});
+
+describe("IEC global, IEC simplificado e habilitação", () => {
+  it("IEC global é a média ponderada por pi sobre as 10 dívidas", () => {
+    const scores = Object.fromEntries(DEBT_CODES.map((code) => [code, 50])) as Record<(typeof DEBT_CODES)[number], number>;
+    assert.equal(iecGlobal(scores), 50);
+    assert.equal(iecGlobal(scores, { evitacao_conflito: 2 }), 55);
+    assert.throws(() => iecGlobal({ evitacao_conflito: 1 } as never), RangeError);
+  });
+
+  it("IEC simplificado ignora S e A e nunca passa do completo sem amplificação", () => {
+    const series = { frequency: [10, 10, 0], intensity: 0.5, areas: 2, adjacentSum: [0, 0, 0] };
+    const simple = iecSimplifiedSeries(series);
+    const full = iecSeries(series);
+    assert.equal(simple[0], full[0]);
+    assert.ok(simple[2] > full[2]);
+  });
+
+  it("habilitação: sem registro ou sem Risk Engine, o motor e os alertas não rodam", () => {
+    assert.equal(engineMayRun(null), false);
+    assert.equal(engineMayRun({ contractMonths: 6, creEnabled: false, alertsEnabled: false }), false);
+    assert.equal(engineMayRun({ contractMonths: 12, creEnabled: true, alertsEnabled: false }), true);
+    assert.equal(alertsMayRun({ contractMonths: 12, creEnabled: true, alertsEnabled: false }), false);
+    assert.equal(alertsMayRun({ contractMonths: 12, creEnabled: true, alertsEnabled: true }), true);
+    assert.equal(alertsMayRun({ contractMonths: 12, creEnabled: false, alertsEnabled: true }), false);
   });
 });
