@@ -18,7 +18,7 @@ Lista de inconsistências encontradas entre documentos e o que mudar em cada um.
 |---|---|---|---|
 | 6 | Doc 3 (2.1) | Expande SED como "Sinais Estruturais de Decisão" | Structured Event Data, como em todos os outros documentos |
 | 7 | Doc 3 (2.2) e Metodologia Completa | Valores de `actor`: `pares` e `líder` | Mestre: `time, par, liderado, chefe, cliente` |
-| 8 | Doc 2 (2.3) x Doc 6 (4.4) | I_d contínuo de 0 a 1 (4 dimensões) x saída categórica 1, 2 ou 3 | Escolher um. Definir também como a intensidade proxy do SED vira I_d |
+| 8 | Doc 2 (2.3) x Doc 6 (4.4) | I_d contínuo de 0 a 1 (4 dimensões) x saída categórica 1, 2 ou 3 | Resolvido por D07: são usos distintos, sem conversão direta. Registrar essa distinção nos dois documentos e especificar como as evidências alimentam cada etapa |
 | 9 | Doc 2 (2.2) x motor | T = ciclos observados no período; o ensaio de 11/10/2026 usa T = 20 | Definir a unidade de T e recalibrar o ensaio se T mudar |
 | 10 | Manual de Auditoria (4.2) x Mestre, Doc 2, Doc 3, Doc 6 | Entrega executiva com IEC simplificado (sem S e A) x IEC completo | Definir um número para o cliente |
 | 11 | Manual de Auditoria (2.2) | Cita N0 a N4 por tempo, mas não define "IEC estável" | Definir o critério numérico do N4 |
@@ -27,8 +27,13 @@ Lista de inconsistências encontradas entre documentos e o que mudar em cada um.
 | 14 | Doc 6 (3.4) | Pesos I+, I e R (1,5, 1,0 e 0,3) sem a tabela por pergunta | Atribuir o peso de cada uma das 30 perguntas |
 | 15 | Matriz Executiva (HTML) | Numeração das dívidas diferente do Manual e do Dossiê | Referir por nome ou código; ordem varia |
 | 16 | Calculadora DCO (HTML) | Multiplicadores 1,0, 1,25 e 1,5 por 3 zonas; ROI de 15% e projeção de 15 a 35% ao ano sem fonte | Alinhar aos multiplicadores oficiais (0,7, 1,0, 1,4, 1,8) e remover ou justificar ROI e projeção |
-| 17 | Biblioteca de momentos | Duas versões: "MOMENTOS DE ATIVAÇÃO CORRIGIDO" e arquivos por agente | Os arquivos por agente (80 momentos no Agente 5) são a fonte; marcar o CORRIGIDO como superado |
+| 17 | Biblioteca de momentos | Duas versões: "MOMENTOS DE ATIVAÇÃO CORRIGIDO" e arquivos por agente | Os arquivos por agente (390 unidades principais: 80 de Perfil, Impacto, Feedback e 1:1, e 70 de Crises) são o denominador. O CORRIGIDO (168 registros) e o Guia de Conversão (10) são 178 registros complementares preliminares, fora desse denominador. Deixar isso explícito nos arquivos |
 | 18 | Roteiro (slide 25) x Doc 6 (11) | Piloto de 30 dias grátis com mínimo de 3 líderes x contrato de 6 ou 12 meses | Explicitar que são ofertas distintas |
+| 22 | Mestre (bloco 8), Doc 2 (4.2), Manual de Auditoria (4.4), Doc 6 (4.5), Dossiê e Arquitetura (seção 10) | "Máximo de 3 dívidas em vermelho por ciclo" apresentado como regra do sistema | Decisão D10: o Top 3 é só recorte comercial; o motor, o banco e a matriz mostram as dez dívidas, e dado insuficiente não é zero nem verde. Corrigir a redação. O registro de divergências já lista as passagens F10:P0298, F21:P0237, F23:P0196 |
+| 23 | Backlog Técnico, tickets 6.1 e 6.2 (Feedback Estruturado) | "Não interpreta contexto" e "não sugere se deve ou não dar feedback" | São de março/2026. O Mestre e o caso de referência do proprietário pedem distinguir impressão de fato e explorar o objetivo e a abordagem do líder. Revisar os dois tickets |
+| 24 | Dois documentos chamados "Documento Mestre" | O da raiz (v1.0, 21/10, briefing de entrada) e o da pasta IMPLEMENTAÇÃO (edição 2.0, 93 páginas, 15/10) | Renomear um deles ou registrar a relação entre os dois. O de 93 páginas não foi lido nesta revisão |
+| 25 | Playbook Operacional de 60 dias | Classificador de 4 categorias e 4 prompts do MVP v0.1 | O próprio cabeçalho já diz que está superado pelos 8 agentes. Marcar o arquivo como histórico |
+| 26 | Roteiro e Dossiê | "Piloto 30 dias grátis, mínimo 3 líderes" convive com o texto de contrato do Doc 6 | Já listado no item 18; depende da correção do item 2 |
 
 ## Prioridade baixa
 

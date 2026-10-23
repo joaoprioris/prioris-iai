@@ -20,19 +20,31 @@ Fonte de verdade da definição do SED: `docs/restart/MESTRE.md`, seção 7. Os 
 | J | Glossário | O SED é **Structured Event Data** (o Doc 3 diz "Sinais Estruturais de Decisão", a corrigir). Valores de `actor` seguem o MESTRE: `time, par, liderado, chefe, cliente` (o Doc 3 e a Metodologia Completa dizem `pares` e `líder`) |
 | K | Individual x organizacional | O Health Monitor Individual (custos pessoais do líder) tem dados separados, acesso só do líder e nunca entra no pipeline organizacional. **Não está neste contrato.** Quando for implementado, exige tabelas, papéis e funções próprios; nenhuma tabela deste esquema pode ser reaproveitada |
 
+Decisões do proprietário já registradas na pasta IMPLEMENTAÇÃO (registro de divergências, D01 a D12, 15/10/2026) e que este contrato segue:
+
+- **D05:** o momento do SED tem cinco opções (Antes, Durante, Depois, Padrão e Vazio). Nada é convertido.
+- **D07:** a intensidade tem três usos distintos e **não há conversão direta entre eles**: intensidade proxy do SED (Baixa, Média, Alta), saída categórica do Health Monitor (1, 2 ou 3) e I_d do IEC (0 a 1, quatro dimensões). Cada etapa documenta como suas evidências alimentam a seguinte, sem reaproveitar o mesmo campo como se fossem a mesma grandeza. O motor recebe I_d pronto, derivado pelo Risk Engine, e nunca a intensidade proxy.
+- **D08:** IEC v1.0 é a versão atual; curva logística e pesos dinâmicos são evolução futura e não estão ativos.
+- **D10:** o motor calcula e a matriz mostra **todas as dez dívidas**. Dado insuficiente não é zero nem zona verde. Não existe limite de três vermelhas, de três cálculos ou de três itens exibidos no motor, no banco ou na visualização. O Top 3 é um recorte comercial da entrega. (`rankAll` ordena as dez; `top3` é só o recorte.)
+- **SED sem confiança:** não se registra SED enquanto não houver confiança suficiente, e candidato provisório não contorna a regra.
+
 Pendências que **não** foram decididas e portanto não estão no código:
 
-- **Tipo de decisão** (campo do MESTRE): é fragmento de decisão trabalhado. Em texto livre vazaria conteúdo da conversa. Só entra quando houver lista fechada de valores.
-- **Transformação da intensidade proxy (Baixa, Média, Alta) em I_d:** o Doc 2 define I_d contínuo de 0 a 1 (Op 0,30, Rel 0,25, Dec 0,25, Pol 0,20) e o Doc 6 (4.4) define saída categórica 1, 2 ou 3. Os dois se contradizem, e nenhum diz como chegar às dimensões. O motor recebe I_d pronto.
+- **Tipo de decisão** (campo do MESTRE e da Interação User x IAí): é fragmento de decisão trabalhado. Em texto livre vazaria conteúdo da conversa. Só entra quando houver lista fechada de valores (D05, detalhes).
+- **Obrigatoriedade e ausência dos campos do SED, e evidências para alta confiança** (D05): as listas de campos diferem entre os documentos.
+- **Adjacência** (D06): falta explicitar se uma associação secundária é um sinal observado, distinto da adjacência futura. Há também conflito de exibição: o Doc 3 veda mostrar a adjacência à organização e o Manual de Auditoria a inclui no relatório. Aqui a adjacência fica oculta da empresa.
+- **Contrato numérico do IEC** (D09): normalização de R quando f/T passa de 1 (o motor limita a 1), duração e fronteiras dos ciclos, desempate e arredondamento, cortes entre 39 e 40 e entre 69 e 70 (o motor corta o valor sem arredondar), divisor 10 do IEC global quando pi varia.
 - **T da recorrência:** o Doc 2 define T como o número de ciclos observados no período. O motor usa T = 20 (baseline que reproduz o ensaio de 11/10/2026). A troca muda os resultados do ensaio.
+- **Elegibilidade e maturidade** (D11): denominador da taxa de resposta, consolidação de grupos pequenos (este contrato suprime), saídas permitidas por nível e condições de antecipação.
+- **DCO** (D12): a proposta de coleta e estimação não foi aprovada. Insumos R, T, P, C vêm do cliente; o motor calcula o DCO por dívida e **não soma** as dívidas, porque a mesma perda não pode ser contada duas vezes e ainda não há regra de duplicata.
 - **Matriz de interdependência M (10x10):** proprietária e ausente dos documentos. O motor recebe a soma ponderada dos IEC adjacentes já calculada.
 - **Limiar de "ocorrência relevante" para o amortecimento A:** o motor usa `f > 2`, regra do ensaio sem fonte nos documentos oficiais.
 - **Alerta azul:** depende do limiar de consolidação (θ), ainda não definido.
 - **Pesos das perguntas (R, I, I+):** o Doc 6 define os fatores 1,5, 1,0 e 0,3, mas nenhum documento diz qual pergunta tem qual peso.
-- **Detecção de deriva** (Doc 6, 4.5): sem critério numérico.
-- **Critério de IEC estável** (para o N4): sem definição numérica.
-- **Insumos do DCO** (R, T, P, C): vêm do cliente ou de estimativa contratada, não do SED.
+- **Detecção de deriva** (Doc 6, 4.5) e **critério de IEC estável** (para o N4): sem definição numérica.
 - **Passivo jurídico (NR-1)** no demonstrativo: o Doc 1 (9.8) diz que não estabelece data de vigência e a Metodologia Completa diz "em vigor desde maio de 2026". Exige validação jurídica antes de aparecer em produto.
+
+Fora do escopo desta implementação e registrado para a etapa do emissor (EX11): auditoria técnica de abstenção, separada do SED, para quando a confiança for insuficiente (sem armazenar dívida conjecturada); e o risco SEG12, de que `session_id` ou vínculo de sessão em SED e survey permita reidentificar (aqui só existe o token pseudônimo por cliente e ciclo, e a supressão mínima de 3 participantes distintos).
 
 ## Mensagem 1: SED de evento (`kind = "sed"`)
 

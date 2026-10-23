@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import { authenticate, handleIngress, validateEvent, InMemoryQueue, drain, Rejected, EventConflict } from "../src/index.ts";
 import {
   alertFor, alertsMayRun, dco, dcoMultiplier, DEBTS, DEBT_CODES, debtFromName, DEFAULT_PARAMS, engineMayRun, iecGlobal,
-  iecSeries, iecSimplifiedSeries, isReportable, maturity, QUESTIONS, quadrantOf, top3, zone,
+  iecSeries, iecSimplifiedSeries, isReportable, maturity, QUESTIONS, quadrantOf, rankAll, top3, zone, zoneOf,
 } from "../src/index.ts";
 import { resolveKey, sedPayload, signedRequest, surveyPayload, token, SECRET_B } from "./fixtures.ts";
 
@@ -178,6 +178,24 @@ describe("zonas, DCO, top 3, alertas e maturidade", () => {
     assert.deepEqual(top3([{ debt: "accountability_diluida", iec: 50 }]), []);
   });
 
+  it("D10: as dez dívidas são ranqueadas, dado insuficiente não é zero nem verde, e o Top 3 é só um recorte", () => {
+    const ten = [
+      { debt: "evitacao_conflito", iec: 90 }, { debt: "decisao_postergada", iec: 80 }, { debt: "comunicacao_ambigua", iec: 75 },
+      { debt: "autoridade_fragilizada", iec: 72 }, { debt: "accountability_diluida", iec: null },
+      { debt: "confianca_erosionada", iec: 10 }, { debt: "aprendizado_bloqueado", iec: 55 },
+      { debt: "alinhamento_simbolico", iec: null }, { debt: "energia_emocional_degradada", iec: 0 },
+      { debt: "maturidade_politica_insuficiente", iec: 30 },
+    ] as const;
+    const ranked = rankAll([...ten]);
+    assert.equal(ranked.length, 10);
+    assert.deepEqual(ranked.slice(-2).map((d) => d.debt), ["accountability_diluida", "alinhamento_simbolico"]);
+    assert.equal(ranked[7].debt, "energia_emocional_degradada");
+    assert.equal(top3([...ten]).length, 3);
+    assert.equal(zoneOf(null), "Insuficiente");
+    assert.equal(zoneOf(0), "Verde");
+    assert.equal(alertFor(["Vermelha", "Vermelha", "Insuficiente"]), null);
+  });
+
   it("alerta só após 3 ciclos e 2 ciclos consecutivos na mesma zona", () => {
     assert.equal(alertFor(["Vermelha", "Vermelha"]), null);
     assert.equal(alertFor(["Verde", "Vermelha", "Vermelha"]), "vermelho");
@@ -238,10 +256,11 @@ describe("catálogo de dívidas e banco de perguntas", () => {
 
 describe("IEC global, IEC simplificado e habilitação", () => {
   it("IEC global é a média ponderada por pi sobre as 10 dívidas", () => {
-    const scores = Object.fromEntries(DEBT_CODES.map((code) => [code, 50])) as Record<(typeof DEBT_CODES)[number], number>;
+    const scores = Object.fromEntries(DEBT_CODES.map((code) => [code, 50])) as Record<(typeof DEBT_CODES)[number], number | null>;
     assert.equal(iecGlobal(scores), 50);
     assert.equal(iecGlobal(scores, { evitacao_conflito: 2 }), 55);
     assert.throws(() => iecGlobal({ evitacao_conflito: 1 } as never), RangeError);
+    assert.equal(iecGlobal({ ...scores, evitacao_conflito: null }), null);
   });
 
   it("IEC simplificado ignora S e A e nunca passa do completo sem amplificação", () => {

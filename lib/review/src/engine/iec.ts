@@ -83,16 +83,31 @@ export function iecSimplifiedSeries(series: DebtSeries, p: IecParams = DEFAULT_P
 /**
  * IEC global da organização (Doc 2, 3.3): soma(IEC_d x pi_d) / 10. Recebe exatamente as 10 dívidas;
  * pi padrão 1 (ajuste só por decisão documentada do RH ou do Conselho). Mesma escala da entrada.
+ * O divisor 10 com pi diferente de 1 está em aberto (D09).
  */
-export function iecGlobal(scores: Record<DebtCode, number>, pi: Partial<Record<DebtCode, number>> = {}): number {
-  const entries = Object.entries(scores) as [DebtCode, number][];
+export function iecGlobal(
+  scores: Record<DebtCode, number | null>,
+  pi: Partial<Record<DebtCode, number>> = {},
+): number | null {
+  const entries = Object.entries(scores) as [DebtCode, number | null][];
   if (entries.length !== 10) throw new RangeError("iecGlobal exige as 10 dívidas");
-  return entries.reduce((sum, [debt, iec]) => sum + iec * (pi[debt] ?? 1), 0) / 10;
+  // Dívida com dado insuficiente não vira zero: sem as 10 pontuações, não há IEC global.
+  if (entries.some(([, iec]) => iec === null)) return null;
+  return entries.reduce((sum, [debt, iec]) => sum + (iec as number) * (pi[debt] ?? 1), 0) / 10;
 }
 
 export type Zone = "Verde" | "Amarela" | "Vermelha";
+/** Dado insuficiente não é zero nem zona verde (D10): a dívida aparece na matriz marcada como insuficiente. */
+export type ZoneOrInsufficient = Zone | "Insuficiente";
 
+/**
+ * Cortes em 40 e 70 sobre o valor sem arredondar. O tratamento de valores entre 39 e 40 e entre 69 e 70
+ * (arredondamento antes ou depois do corte) está em aberto (D09).
+ */
 export const zone = (iec: number): Zone => (iec < 40 ? "Verde" : iec < 70 ? "Amarela" : "Vermelha");
+
+export const zoneOf = (iec: number | null | undefined): ZoneOrInsufficient =>
+  iec === null || iec === undefined || Number.isNaN(iec) ? "Insuficiente" : zone(iec);
 
 /** Multiplicador do DCO por faixa de IEC (Dossiê, Parte 9). */
 export function dcoMultiplier(iec: number): 0.7 | 1.0 | 1.4 | 1.8 {
@@ -118,23 +133,38 @@ export const dco = (item: DcoInput): number => item.R * item.T * item.P * item.C
 
 export interface RankedDebt {
   debt: DebtCode;
-  iec: number;
+  /** Nulo = dado insuficiente. */
+  iec: number | null;
   /** Peso político G_d definido pelo Conselho (padrão 1). */
   weight?: number;
 }
 
-/** No máximo 3 dívidas em vermelho por ciclo; acima disso, Ranking = IEC x G. */
+const rankScore = (debt: RankedDebt): number => (debt.iec ?? 0) * (debt.weight ?? 1);
+
+/**
+ * Ranking de todas as dívidas (IEC x G), da maior para a menor, com dado insuficiente no fim. Nada é filtrado:
+ * o motor, o banco e a matriz mostram as dez dívidas (D10). Empate mantém a ordem de entrada (regra de desempate
+ * em aberto, D09).
+ */
+export function rankAll(debts: RankedDebt[]): RankedDebt[] {
+  const known = debts.filter((debt) => debt.iec !== null);
+  const unknown = debts.filter((debt) => debt.iec === null);
+  return [...known.sort((a, b) => rankScore(b) - rankScore(a)), ...unknown];
+}
+
+/**
+ * Recorte comercial da Auditoria (D10): as dívidas em vermelho por IEC x G, no máximo 3. É um recorte de entrega,
+ * nunca um filtro do motor, do banco ou da matriz, que continuam com as dez dívidas.
+ */
 export function top3(debts: RankedDebt[]): RankedDebt[] {
-  const red = debts.filter((debt) => debt.iec >= 70);
-  const score = (debt: RankedDebt) => debt.iec * (debt.weight ?? 1);
-  return [...red].sort((a, b) => score(b) - score(a)).slice(0, 3);
+  return rankAll(debts.filter((debt) => debt.iec !== null && debt.iec >= 70)).slice(0, 3);
 }
 
 /**
  * Alerta por persistência: nenhum alerta antes de 3 ciclos com dados; amarelo ou vermelho só depois de
  * 2 ciclos consecutivos na mesma zona. O alerta azul (interno) depende do limiar da curva logística (v2.0).
  */
-export function alertFor(zones: Zone[]): "amarelo" | "vermelho" | null {
+export function alertFor(zones: ZoneOrInsufficient[]): "amarelo" | "vermelho" | null {
   if (zones.length < 3) return null;
   const last = zones[zones.length - 1];
   const previous = zones[zones.length - 2];
