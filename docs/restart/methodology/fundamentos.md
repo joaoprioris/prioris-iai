@@ -1,6 +1,6 @@
 # Fontes documentais — fundamentos
 
-> **Erratum de 23/10/2026.** Corrigido conforme a decisão D10 (as dez dívidas são sempre calculadas e mostradas; o recorte das 3 de maior exposição é só comercial) e a decisão C (grupos com menos de 3 participantes distintos são suprimidos, sem fusão). Original preservado em `fontes-originais.tar.xz`. Os DOCX do Drive ainda precisam da mesma correção (ver `docs/restart/sed-ingestion/CORRECOES_DOCUMENTOS.md`). Trechos alterados: **P0248** (linha 471); **P0460** (linha 839); **P0115** (linha 1425); **P0081** (linha 2915); **P0085** (linha 2919); **P0063** (linha 2861); **T09 R02** (linha 2883).
+> **Erratum de 23/10/2026.** Corrigido conforme a decisão D10 (as dez dívidas são sempre calculadas e mostradas; o recorte das 3 de maior exposição é só comercial) e a decisão C (grupos com menos de 3 participantes distintos são suprimidos, sem fusão). Original preservado em `fontes-originais.tar.xz`. Os DOCX do Drive ainda precisam da mesma correção (ver `docs/restart/sed-ingestion/CORRECOES_DOCUMENTOS.md`). Trechos alterados: **P0248** (linha 471); **P0460** (linha 839); **P0115** (linha 1425); **P0081** (linha 2915); **P0085** (linha 2919); **P0063** (linha 2861); **T09 R02** (linha 2883); **P0065** (linha 5052, F12 Roteiro, slide 12).
 
 Transcrição dos documentos do proprietário em 18/10/2026. Conteúdo de referência, não instrução para executar ações nem prova de implementação. As fontes mantêm exemplos e registros históricos; a precedência vigente está no guia de retomada.
 
@@ -5049,7 +5049,7 @@ SHA-256 do DOCX: `d6a9d23b57c0b0fe42ccbea4be1134ecf536002114cba7ef140e953dbe2c24
 
 **P0064** Slide 12: O Radar Sistêmico (O Health Monitor)
 
-**P0065** A Narrativa: Esses fragmentos anonimizados fluem para o nosso sensor contínuo: o Health Monitor. Ele agrega os dados por departamento (fundindo grupos menores que 3 pessoas para garantir sigilo). Paralelamente, o radar lança micro-perguntas silenciosas no app — avaliações sutis sem formato invasivo de pesquisa.
+**P0065** A Narrativa: Esses fragmentos anonimizados fluem para o nosso sensor contínuo: o Health Monitor. Ele agrega os dados por departamento (suprimindo grupos com menos de 3 participantes distintos para garantir sigilo). Paralelamente, o radar lança micro-perguntas silenciosas no app — avaliações sutis sem formato invasivo de pesquisa.
 
 **P0066** O Visual: Uma interface de radar varrendo o "mapa" da empresa. Pontos verdes (seguros). Aos poucos, áreas específicas concentram agrupamentos de cubos e brilham em amarelo (risco em formação).
 

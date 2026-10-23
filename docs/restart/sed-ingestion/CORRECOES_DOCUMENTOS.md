@@ -1,5 +1,7 @@
 # Correções necessárias nos documentos oficiais (Drive)
 
+**Atualização de 23/10/2026.** Os itens 4, 22 e 23 (e o slide 12 do Roteiro) já têm o par "trecho atual / trecho novo" em `ERRATA_DRIVE.md` e no Google Doc `ERRATA_DOCUMENTOS_D10_E_DECISAO_C` (raiz do Drive). O conector do Drive não edita o texto de arquivos .docx, então a substituição nos arquivos fica manual. Política comercial (itens 2, 3 e 18) está fora de escopo até o proprietário estruturá-la.
+
 Lista de inconsistências encontradas entre documentos e o que mudar em cada um. Nenhum arquivo do Drive foi alterado. A decisão sobre cada texto é do proprietário; a coluna "Proposta" é a leitura do engenheiro.
 
 ## Prioridade alta (contradizem decisões já tomadas)
