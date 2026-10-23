@@ -35,3 +35,14 @@ Decisões aplicadas: **D10** (as dez dívidas são sempre calculadas e mostradas
 | F19 — MODELO_IEC | 4.2 Regra de priorização | Quando mais de 3 dívidas atingem a zona vermelha, o sistema aplica o mecanismo de priorização automática: | Quando mais de 3 dívidas atingem a zona vermelha, o sistema aplica o ranking para selecionar o destaque da Auditoria: |
 | F19 — MODELO_IEC | 4.2 Regra de priorização | G_d é o peso de governança estratégica definido pelo RH ou Conselho. As 3 maiores pontuações de Ranking_d entram como prioridade da Auditoria do ciclo. | G_d é o peso de governança estratégica definido pelo RH ou Conselho. As 3 maiores pontuações de Ranking_d entram como destaque (recorte comercial) da Auditoria do ciclo. |
 | F19 — MODELO_IEC | 6.1 Pipeline de cálculo | C1: 7. Priorização \| C2: Ranking_d → seleção das 3 dívidas prioritárias para auditoria | C1: 7. Priorização \| C2: Ranking_d → seleção das 3 dívidas em destaque na Auditoria (recorte comercial; as dez permanecem calculadas e mostradas) |
+
+## Ajustes acrescentados pela auditoria adversarial (23/10/2026)
+
+| Documento | Seção | Trecho antes | Trecho depois |
+|---|---|---|---|
+| DOSSIE_METODOLOGICO | 2.2 Executiva | Prioriza as 3 dívidas mais críticas com base no IEC | Destaca as 3 dívidas de maior exposição (recorte comercial; as dez são sempre calculadas e mostradas) com base no IEC |
+| ARQUITETURA E LÓGICA DO SISTEMA IAí | 17. Consistência do Modelo | priorização limitada (top 3 dívidas) | destaque das 3 dívidas prioritárias (recorte comercial; as dez permanecem calculadas e mostradas) |
+| ARQUITETURA E LÓGICA DO SISTEMA IAí | 11.7 Regra | priorização das 3 dívidas mais críticas | destaque comercial das 3 dívidas de maior exposição (as dez permanecem calculadas e mostradas) |
+| HEALTH_MONITOR | 8.1 | O Top 3 é a regra da Auditoria, não da visualização bruta. | O Top 3 é o recorte comercial da Auditoria, não da visualização bruta. |
+| PRIORIS_DOCUMENTO_MESTRE (2.0) | 11 DCO, exemplo | (defeito da importação: o trecho "$120 por hora × 1,0 = R$" virou equação e sumiu) | Exemplo restaurado: 48 × 2,5 horas × 6 pessoas × R$120 por hora × 1,0 = R$86.400 por ano |
+| Todos | Erros de digitação dos originais | Dossê, ambiguíade, indivíuos, prescrição ação, ressão, vies, insepáveis, moment o, boto, equaliz adas, distórção, corrije, fin al, ão mais críticos, esparços, Divida, proporciona, rebaixa, autorizad o, Engine•, saía | Dossiê, ambiguidade, indivíduos, prescreve ação, recessão, viés, inseparáveis, momento, botão, equalizadas, distorção, corrige, final, são mais críticos, esparsos, Dívida, proporcionais, rebaixamento, autorizado, Engine™, saia |

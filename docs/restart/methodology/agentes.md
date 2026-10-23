@@ -6321,7 +6321,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **P0146** Cor da bolha: zona de risco (Verde, Amarela, Vermelha)
 
-**P0148** A matriz não aplica regra de Top 3: apresenta a realidade como está. O Top 3 é a regra da Auditoria, não da visualização bruta.
+**P0148** A matriz não aplica regra de Top 3: apresenta a realidade como está. O Top 3 é o recorte comercial da Auditoria, não da visualização bruta.
 
 **P0149** 8.2 O que a matriz responde
 

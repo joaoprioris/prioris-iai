@@ -626,7 +626,7 @@ SHA-256 do DOCX: `03798c2e60c438ee26d77455fb3890c1c8b8a7efb385f3de0114c52d7c4f9c
 
 **P0333** Regra
 
-**P0334** priorização das 3 dívidas mais críticas 
+**P0334** destaque comercial das 3 dívidas de maior exposição (as dez permanecem calculadas e mostradas) 
 
 **P0336** Base de priorização
 
@@ -1222,7 +1222,7 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **T03 R03** C1: Sistêmica | C2: Health Monitor + Cultural Risk Engine | C3: Transforma padrões individuais em leitura estrutural organizacional, de forma anonimizada e agregada
 
-**T03 R04** C1: Executiva | C2: Auditoria de Dívidas Culturais | C3: Prioriza as 3 dívidas mais críticas com base no IEC e traduz o risco em custo mensurável para decisão executiva
+**T03 R04** C1: Executiva | C2: Auditoria de Dívidas Culturais | C3: Destaca as 3 dívidas de maior exposição (recorte comercial; as dez são sempre calculadas e mostradas) com base no IEC e traduz o risco em custo mensurável para decisão executiva
 
 **P0040** As três camadas se reforçam mutuamente. O uso individual gera dados que alimentam a leitura organizacional. A leitura organizacional orienta a priorização executiva. A priorização executiva fecha o ciclo com intervenção estruturada.
 
