@@ -148,7 +148,7 @@ describe("catálogo, perguntas e habilitação por contrato", { skip: skip() }, 
     });
   });
 
-  it("habilitação: contrato de 6 ou 12 meses, e alerta exige o Risk Engine", async () => {
+  it("habilitação: contrato de 6 ou 12 meses, e alerta exige o módulo visível ao cliente", async () => {
     const admin = await db!.client("review_admin");
     try {
       await admin.query("INSERT INTO prioris_review.client_entitlements VALUES ('cli_a', 12, true, true)");
@@ -192,6 +192,26 @@ describe("ciclos e publicação", { skip: skip() }, () => {
     assert.equal(Number(row.events), 3);
     assert.equal(Number(row.medium), 3);
     assert.equal(rows.every((r) => r.cycle_start instanceof Date || typeof r.cycle_start === "object"), true);
+  });
+
+  it("adjacência: publicada só ao motor, com a mesma supressão, e nunca sem adjacente", async () => {
+    const client = await db!.client("review_report");
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT set_config('app.tenant', $1, true)", ["cli_a"]);
+      const rows = (await client.query("SELECT * FROM prioris_review.adjacency_release()")).rows;
+      await client.query("COMMIT");
+      const row = rows.find((r) => r.group_id === 2 && r.debt_principal === "decisao_postergada" && r.debt_adjacent === "comunicacao_ambigua");
+      assert.ok(row);
+      assert.ok(Number(row.events) >= 3);
+      assert.ok(!rows.some((r) => r.group_id === 1 && r.debt_principal === "accountability_diluida"));
+      assert.ok(rows.every((r) => r.debt_adjacent !== null));
+    } finally {
+      await client.end();
+    }
+    const worker = await ingest();
+    await assert.rejects(worker.query("SELECT * FROM prioris_review.adjacency_release()"), (e: { code?: string }) => e.code === "42501");
+    await worker.end();
   });
 
   it("resposta da pesquisa publica a média por participante só com 3 respondentes", async () => {

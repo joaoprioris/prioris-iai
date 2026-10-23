@@ -43,14 +43,14 @@ CREATE TABLE prioris_review.questions (
 INSERT INTO prioris_review.questions (question_id, debt_code, item)
   SELECT d.debt_code || '.' || i, d.debt_code, i FROM prioris_review.debts d CROSS JOIN generate_series(1, 3) AS i;
 
--- Habilitação por contrato (definida por administrador). A coleta funciona sempre; consumo pelo Risk Engine
--- e alertas dependem destes sinalizadores. O Risk Engine fica 6 meses habilitado quando o contrato é de 12 meses.
+-- Habilitação por contrato (definida por administrador). A coleta e o Risk Engine rodam sempre; o contrato
+-- controla apenas o que o cliente enxerga: o módulo (cre_client_visible) e os alertas ao RH (alerts_enabled).
 CREATE TABLE prioris_review.client_entitlements (
   client_id text PRIMARY KEY REFERENCES prioris_review.clients ON DELETE RESTRICT,
   contract_months smallint NOT NULL CHECK (contract_months IN (6, 12)),
-  cre_enabled boolean NOT NULL DEFAULT false,
+  cre_client_visible boolean NOT NULL DEFAULT false,
   alerts_enabled boolean NOT NULL DEFAULT false,
-  CHECK (NOT alerts_enabled OR cre_enabled)
+  CHECK (NOT alerts_enabled OR cre_client_visible)
 );
 CREATE TABLE prioris_review.cycles (
   client_id text NOT NULL REFERENCES prioris_review.clients ON DELETE RESTRICT,
@@ -170,6 +170,21 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
   HAVING count(DISTINCT e.contributor_token) >= 3
 $$;
 REVOKE ALL ON FUNCTION prioris_review.sed_release() FROM PUBLIC;
+
+-- Pares (dívida principal, adjacência) para análise preditiva INTERNA do motor. A adjacência é um campo do SED
+-- e nunca é apresentada ao cliente enquanto a correlação entre dívidas não for confirmada. Mesma supressão:
+-- ciclo encerrado e no mínimo 3 participantes distintos na amostra exata. Só o papel do motor executa.
+CREATE FUNCTION prioris_review.adjacency_release()
+RETURNS TABLE (group_id int, cycle_start date, debt_principal text, debt_adjacent text, events bigint)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
+  SELECT e.group_id, e.cycle_start, e.debt_principal, e.debt_adjacent, count(*)
+  FROM prioris_review.sed_events e
+  JOIN prioris_review.cycles c ON c.client_id = e.client_id AND c.cycle_start = e.cycle_start
+  WHERE e.client_id = current_setting('app.tenant', true) AND c.closed AND e.debt_adjacent IS NOT NULL
+  GROUP BY e.client_id, e.group_id, e.cycle_start, e.debt_principal, e.debt_adjacent
+  HAVING count(DISTINCT e.contributor_token) >= 3
+$$;
+REVOKE ALL ON FUNCTION prioris_review.adjacency_release() FROM PUBLIC;
 
 CREATE FUNCTION prioris_review.survey_release()
 RETURNS TABLE (group_id int, cycle_start date, question_id text, mean_answer numeric)

@@ -9,3 +9,4 @@ export * from "./queue.ts";
 export * from "./engine/iec.ts";
 export * from "./engine/maturity.ts";
 export * from "./entitlements.ts";
+export * from "./engine/adjacency.ts";

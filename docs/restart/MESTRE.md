@@ -44,7 +44,7 @@ Versão 1 · 21/10/2026 · Repositório privado do proprietário (João Paulo Me
 |---|---|---|
 | Individual | **IAí** (app) | Espaço privado e confidencial onde o líder estrutura decisões sob pressão |
 | Sistêmica | **Health Monitor** (+ Cultural Risk Engine) | Lê padrões recorrentes de forma agregada e anonimizada |
-| Executiva | **Auditoria de Dívidas Culturais** | Prioriza as 3 dívidas mais críticas e traduz em custo (R$) |
+| Executiva | **Auditoria de Dívidas Culturais** | Destaca as 3 dívidas de maior exposição (recorte comercial; as dez são sempre calculadas e mostradas) e traduz em custo (R$) |
 
 ## 3. As 10 Dívidas Culturais
 

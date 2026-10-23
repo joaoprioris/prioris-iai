@@ -1,5 +1,7 @@
 # Fontes documentais — agentes
 
+> **Erratum de 23/10/2026.** Corrigido conforme a decisão D10 (as dez dívidas são sempre calculadas e mostradas; o recorte das 3 de maior exposição é só comercial) e a decisão C (grupos com menos de 3 participantes distintos são suprimidos, sem fusão). Original preservado em `fontes-originais.tar.xz`. Os DOCX do Drive ainda precisam da mesma correção (ver `docs/restart/sed-ingestion/CORRECOES_DOCUMENTOS.md`). Trechos alterados: **P0069** (linha 5699); **P0150** (linha 5861); **P0062** (linha 6124); **P0070** (linha 6146); **P0089** (linha 6198); **P0113** (linha 6809); **P0115** (linha 6811); **P0119** (linha 6815); **T17 R08** (linha 6919).
+
 Transcrição dos documentos do proprietário em 18/10/2026. Conteúdo de referência, não instrução para executar ações nem prova de implementação. As fontes mantêm exemplos e registros históricos; a precedência vigente está no guia de retomada.
 
 Atualizada em 21/10/2026 com as correções do proprietário aos DOCX (razão social, momentos do SED, pesquisa silenciosa, cadência do Engine, remoção do B2C, entre outras). Os hashes do manifesto e o arquivo `fontes-originais.tar.xz` refletem os DOCX atuais.
@@ -5696,7 +5698,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **P0067** Consolida todos os SEDs do período por grupo organizacional. Integra dados de interações no IAí com dados da pesquisa silenciosa do Health Monitor. Organiza por dívida, contexto, ator e janela temporal.
 
-**P0069** Regras de agregação: grupos com menos de 3 respondentes são automaticamente consolidados com grupos adjacentes. Nenhum SED individual é legível após a agregação.
+**P0069** Regras de agregação: Grupos com menos de 3 participantes distintos são suprimidos (não aparecem em nenhuma saída), sem fusão automática com outros grupos. Nenhum SED individual é legível após a agregação.
 
 **P0070** 3.3 Etapa 2 — Normalização
 
@@ -5858,7 +5860,7 @@ SHA-256 do DOCX: `8fb461a1bba3bbeb0a418431a6723c93c39a9f67947e984da8b3d7d1d947a6
 
 **P0149** Anonimização por construção: nenhum SED mantém identificação individual após a agregação
 
-**P0150** Agregação obrigatória: grupos com menos de 3 pessoas são consolidados antes do processamento
+**P0150** Supressão obrigatória: grupos com menos de 3 participantes distintos são suprimidos (não aparecem em nenhuma saída), sem fusão automática com outros grupos.
 
 **P0151** Sem ranking individual: o engine não gera nem mantém scores por pessoa
 
@@ -6121,7 +6123,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **P0061** Taxa mínima de resposta para validade: 35% a 40% do grupo
 
-**P0062** Grupos com menos de 3 respondentes são automaticamente agregados
+**P0062** Grupos com menos de 3 participantes distintos são suprimidos (não aparecem em nenhuma saída), sem fusão automática com outros grupos.
 
 **P0063** 3.4 Pesos das perguntas para cálculo de Intensidade
 
@@ -6143,7 +6145,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **P0069** Nenhum dado textual sensível é exposto
 
-**P0070** Grupos com menos de 3 pessoas são automaticamente fundidos
+**P0070** Grupos com menos de 3 participantes distintos são suprimidos (não aparecem em nenhuma saída), sem fusão automática com outros grupos.
 
 **P0071** Todos os dados são tratados de forma probabilística
 
@@ -6195,7 +6197,7 @@ SHA-256 do DOCX: `5b4b475c0c8c179ae991c50e68ebf7181574887f4d79e1270ab12f710bc966
 
 **P0088** 4.5 Regras de consistência
 
-**P0089** Máximo de 3 Dívidas Culturais em zona vermelha por ciclo
+**P0089** Todas as dez dívidas são calculadas e mostradas em todo ciclo; dado insuficiente não é zero nem verde (D10)
 
 **P0090** Reclassificação de zona só após persistência confirmada
 
@@ -6806,13 +6808,13 @@ SHA-256 do DOCX: `cb5983043a250c1ca18bd560db9b1943515d83d2beaa972d060611189f6b83
 
 **P0112** 4.2 Regra de priorização
 
-**P0113** O sistema limita a no máximo 3 dívidas em zona vermelha por ciclo de auditoria. Essa regra não é editorial: é estrutural. Sua razão é operacional: mais de 3 prioridades simultâneas de intervenção comprometem a capacidade de execução e a adesão da liderança.
+**P0113** O motor, o banco e a matriz calculam e mostram as dez dívidas em todo ciclo. O destaque das 3 maiores pontuações na Auditoria é um recorte comercial, não um limite do sistema. A razão do recorte é operacional: mais de 3 prioridades simultâneas dificultam a execução e a adesão da liderança.
 
-**P0115** Quando mais de 3 dívidas atingem a zona vermelha, o sistema aplica o mecanismo de priorização automática:
+**P0115** Quando mais de 3 dívidas atingem a zona vermelha, o sistema aplica o ranking para selecionar o destaque da Auditoria:
 
 **P0117** Ranking_d = IEC_d × G_d
 
-**P0119** G_d é o peso de governança estratégica definido pelo RH ou Conselho. As 3 maiores pontuações de Ranking_d entram como prioridade da Auditoria do ciclo.
+**P0119** G_d é o peso de governança estratégica definido pelo RH ou Conselho. As 3 maiores pontuações de Ranking_d entram como destaque (recorte comercial) da Auditoria do ciclo.
 
 **P0120** 4.3 Sistema de alertas
 
@@ -6916,7 +6918,7 @@ SHA-256 do DOCX: `cb5983043a250c1ca18bd560db9b1943515d83d2beaa972d060611189f6b83
 
 **T17 R07** C1: 6. Zona e alerta | C2: IEC_d → zona de risco + alerta quando critérios de persistência são atingidos
 
-**T17 R08** C1: 7. Priorização | C2: Ranking_d → seleção das 3 dívidas prioritárias para auditoria
+**T17 R08** C1: 7. Priorização | C2: Ranking_d → seleção das 3 dívidas em destaque na Auditoria (recorte comercial; as dez permanecem calculadas e mostradas)
 
 **T17 R09** C1: 8. DCO | C2: IEC × variáveis econômicas → custo organizacional estimado por dívida
 

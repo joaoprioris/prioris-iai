@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { authenticate, handleIngress, validateEvent, InMemoryQueue, drain, Rejected, EventConflict } from "../src/index.ts";
 import {
-  alertFor, alertsMayRun, dco, dcoMultiplier, DEBTS, DEBT_CODES, debtFromName, DEFAULT_PARAMS, engineMayRun, iecGlobal,
-  iecSeries, iecSimplifiedSeries, isReportable, maturity, QUESTIONS, quadrantOf, rankAll, top3, zone, zoneOf,
+  alertFor, alertsMayRun, clientMaySeeEngine, dco, dcoMultiplier, DEBTS, DEBT_CODES, debtFromName, DEFAULT_PARAMS, engineMayRun, iecGlobal,
+  emergingPairs, iecSeries, iecSimplifiedSeries, isReportable, maturity, QUESTIONS, quadrantOf, rankAll, top3, zone, zoneOf,
 } from "../src/index.ts";
 import { resolveKey, sedPayload, signedRequest, surveyPayload, token, SECRET_B } from "./fixtures.ts";
 
@@ -168,7 +168,7 @@ describe("zonas, DCO, top 3, alertas e maturidade", () => {
     assert.equal(round(dco({ R: 12, T: 12, P: 14, C: 120, iec: 91.1 })), 435456);
   });
 
-  it("limita a 3 dívidas em vermelho e desempata por IEC x peso político", () => {
+  it("recorte comercial: até 3 vermelhas, desempate por IEC x peso político", () => {
     const debts = [
       { debt: "evitacao_conflito", iec: 90 } as const, { debt: "decisao_postergada", iec: 80 } as const,
       { debt: "comunicacao_ambigua", iec: 75, weight: 1.5 } as const, { debt: "autoridade_fragilizada", iec: 72 } as const,
@@ -271,12 +271,65 @@ describe("IEC global, IEC simplificado e habilitação", () => {
     assert.ok(simple[2] > full[2]);
   });
 
-  it("habilitação: sem registro ou sem Risk Engine, o motor e os alertas não rodam", () => {
-    assert.equal(engineMayRun(null), false);
-    assert.equal(engineMayRun({ contractMonths: 6, creEnabled: false, alertsEnabled: false }), false);
-    assert.equal(engineMayRun({ contractMonths: 12, creEnabled: true, alertsEnabled: false }), true);
-    assert.equal(alertsMayRun({ contractMonths: 12, creEnabled: true, alertsEnabled: false }), false);
-    assert.equal(alertsMayRun({ contractMonths: 12, creEnabled: true, alertsEnabled: true }), true);
-    assert.equal(alertsMayRun({ contractMonths: 12, creEnabled: false, alertsEnabled: true }), false);
+  it("habilitação: o motor roda sempre; o contrato só decide o que o cliente enxerga", () => {
+    assert.equal(engineMayRun(null), true);
+    assert.equal(engineMayRun({ contractMonths: 6, creClientVisible: false, alertsEnabled: false }), true);
+    assert.equal(clientMaySeeEngine(null), false);
+    assert.equal(clientMaySeeEngine({ contractMonths: 6, creClientVisible: false, alertsEnabled: false }), false);
+    assert.equal(clientMaySeeEngine({ contractMonths: 12, creClientVisible: true, alertsEnabled: false }), true);
+    assert.equal(alertsMayRun({ contractMonths: 12, creClientVisible: true, alertsEnabled: false }), false);
+    assert.equal(alertsMayRun({ contractMonths: 12, creClientVisible: true, alertsEnabled: true }), true);
+    assert.equal(alertsMayRun({ contractMonths: 12, creClientVisible: false, alertsEnabled: true }), false);
+  });
+});
+
+describe("adjacência: uso interno do motor", () => {
+  const row = (cycle: string, events: number, group_id = 1, principal = "evitacao_conflito", adjacent = "comunicacao_ambigua") =>
+    ({ group_id, cycle_start: cycle, debt_principal: principal, debt_adjacent: adjacent, events }) as never;
+  const params = { minConsecutiveCycles: 3, minEventsPerCycle: 2 };
+
+  it("par que se repete em ciclos consecutivos até o último vira candidato, e é marcado como interno", () => {
+    const rows = [row("2026-07-01", 2), row("2026-08-01", 3), row("2026-09-01", 2)];
+    const found = emergingPairs(rows, [], params);
+    assert.equal(found.length, 1);
+    assert.equal(found[0].consecutiveCycles, 3);
+    assert.equal(found[0].visibility, "internal");
+  });
+
+  it("lacuna de um ciclo ou poucos eventos quebram a sequência", () => {
+    assert.deepEqual(emergingPairs([row("2026-07-01", 2), row("2026-09-01", 2), row("2026-10-01", 2)], [], { ...params, minConsecutiveCycles: 3 }), []);
+    assert.deepEqual(emergingPairs([row("2026-07-01", 2), row("2026-08-01", 1), row("2026-09-01", 2)], [], params), []);
+  });
+
+  it("o último ciclo observado é o de qualquer par: par parado no passado não conta", () => {
+    const rows = [row("2026-05-01", 2), row("2026-06-01", 2), row("2026-07-01", 2), row("2026-09-01", 2, 2, "decisao_postergada", "confianca_erosionada")];
+    assert.deepEqual(emergingPairs(rows, [], params), []);
+  });
+
+  it("grupos e direções diferentes ficam separados (A para B não é B para A)", () => {
+    const rows = [
+      row("2026-08-01", 2), row("2026-09-01", 2),
+      row("2026-08-01", 2, 1, "comunicacao_ambigua", "evitacao_conflito"), row("2026-09-01", 2, 1, "comunicacao_ambigua", "evitacao_conflito"),
+      row("2026-09-01", 2, 2),
+    ];
+    const found = emergingPairs(rows, [], { minConsecutiveCycles: 2, minEventsPerCycle: 2 });
+    assert.equal(found.length, 2);
+    assert.deepEqual(found.map((f) => `${f.groupId}:${f.principal}>${f.adjacent}`).sort(), ["1:comunicacao_ambigua>evitacao_conflito", "1:evitacao_conflito>comunicacao_ambigua"]);
+  });
+
+  it("evidência bruta de conversão: a adjacente aparece depois como principal no mesmo grupo", () => {
+    const rows = [row("2026-07-01", 2), row("2026-08-01", 2), row("2026-09-01", 2)];
+    const principals = [
+      { group_id: 1, cycle_start: "2026-07-01", debt_principal: "comunicacao_ambigua", events: 5 },
+      { group_id: 1, cycle_start: "2026-09-01", debt_principal: "comunicacao_ambigua", events: 3 },
+      { group_id: 2, cycle_start: "2026-09-01", debt_principal: "comunicacao_ambigua", events: 3 },
+    ] as never;
+    const [track] = emergingPairs(rows, principals, params);
+    assert.equal(track.adjacentAsPrincipalAfter, 1);
+  });
+
+  it("não há valor padrão: parâmetro inválido é recusado", () => {
+    assert.throws(() => emergingPairs([row("2026-07-01", 2)], [], { minConsecutiveCycles: 0, minEventsPerCycle: 1 }));
+    assert.throws(() => emergingPairs([row("2026-07-01", 2)], [], { minConsecutiveCycles: 1, minEventsPerCycle: 0 }));
   });
 });

@@ -1,17 +1,23 @@
 /**
- * Habilitação por contrato. A coleta (ingestão) funciona sempre; o consumo dos agregados pelo Cultural Risk
- * Engine e a emissão de alertas dependem destes sinalizadores, definidos por administrador (nunca pelo cliente).
- * Regra comercial (proprietário): o Risk Engine fica habilitado por 6 meses quando o cliente fecha contrato
- * de 12 meses. O que acontece depois disso é decisão comercial e entra aqui como dado, não como regra de código.
+ * Habilitação por contrato. A coleta (ingestão) e o Risk Engine rodam para todo cliente, sempre: o motor calcula
+ * e acumula o histórico mesmo quando o cliente não sabe que ele existe. O que o contrato controla é o que o
+ * cliente enxerga: o módulo (`creClientVisible`) e os alertas dirigidos ao RH (`alertsEnabled`). Os sinalizadores
+ * são definidos por administrador (nunca pelo cliente). Política comercial (prazos, gratuidade, o que acontece
+ * depois dos 6 meses) fica fora deste código e entra aqui apenas como dado.
  */
 export interface Entitlement {
   contractMonths: 6 | 12;
-  creEnabled: boolean;
+  creClientVisible: boolean;
   alertsEnabled: boolean;
 }
 
-export const engineMayRun = (entitlement: Entitlement | null | undefined): boolean => entitlement?.creEnabled === true;
+/** O motor roda sempre, com ou sem registro de habilitação. */
+export const engineMayRun = (_entitlement: Entitlement | null | undefined): boolean => true;
 
-/** Alerta exige o Risk Engine habilitado. */
+/** O cliente só enxerga saídas do Risk Engine (painel, matriz, IEC) quando o contrato torna o módulo visível. */
+export const clientMaySeeEngine = (entitlement: Entitlement | null | undefined): boolean =>
+  entitlement?.creClientVisible === true;
+
+/** Alerta dirigido ao cliente exige o módulo visível e o alerta habilitado. Alerta azul é interno e não passa por aqui. */
 export const alertsMayRun = (entitlement: Entitlement | null | undefined): boolean =>
-  entitlement?.creEnabled === true && entitlement.alertsEnabled === true;
+  entitlement?.creClientVisible === true && entitlement.alertsEnabled === true;

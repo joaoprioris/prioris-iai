@@ -1,5 +1,7 @@
 # Fontes documentais — fundamentos
 
+> **Erratum de 23/10/2026.** Corrigido conforme a decisão D10 (as dez dívidas são sempre calculadas e mostradas; o recorte das 3 de maior exposição é só comercial) e a decisão C (grupos com menos de 3 participantes distintos são suprimidos, sem fusão). Original preservado em `fontes-originais.tar.xz`. Os DOCX do Drive ainda precisam da mesma correção (ver `docs/restart/sed-ingestion/CORRECOES_DOCUMENTOS.md`). Trechos alterados: **P0248** (linha 471); **P0460** (linha 839); **P0115** (linha 1425); **P0081** (linha 2915); **P0085** (linha 2919); **P0063** (linha 2861); **T09 R02** (linha 2883).
+
 Transcrição dos documentos do proprietário em 18/10/2026. Conteúdo de referência, não instrução para executar ações nem prova de implementação. As fontes mantêm exemplos e registros históricos; a precedência vigente está no guia de retomada.
 
 Atualizada em 21/10/2026 com as correções do proprietário aos DOCX (razão social, momentos do SED, pesquisa silenciosa, cadência do Engine, remoção do B2C, entre outras). Os hashes do manifesto e o arquivo `fontes-originais.tar.xz` refletem os DOCX atuais.
@@ -468,7 +470,7 @@ SHA-256 do DOCX: `03798c2e60c438ee26d77455fb3890c1c8b8a7efb385f3de0114c52d7c4f9c
 
 **P0247** Regra estrutural
 
-**P0248** Máximo de 3 dívidas em vermelho por ciclo 
+**P0248** As dez dívidas são sempre calculadas e mostradas (D10). O recorte das 3 de maior exposição é só comercial
 
 **P0250** Importante
 
@@ -836,7 +838,7 @@ SHA-256 do DOCX: `03798c2e60c438ee26d77455fb3890c1c8b8a7efb385f3de0114c52d7c4f9c
 
 **P0459** aplicação de modelo matemático (IEC) 
 
-**P0460** priorização limitada (top 3 dívidas) 
+**P0460** destaque das 3 dívidas prioritárias (recorte comercial; as dez permanecem calculadas e mostradas)
 
 **P0461** tradução de padrão em custo organizacional 
 
@@ -1422,7 +1424,7 @@ SHA-256 do DOCX: `d34ed175d787e5c97f7d0ae1178d4fe84e6886610cc9920543d69ecfeb0757
 
 **P0113** Cobre 8 dimensões mapeadas para as 10 Dívidas Culturais: Conflito e Tensão, Clareza Decisória, Responsabilidade, Confiança e Autonomia, Aprendizado e Reflexão, Alinhamento Valores-Prática, Pressão e Desgaste Emocional e Dinâmica Política.
 
-**P0115** Nenhuma resposta é lida individualmente. Grupos com menos de 3 pessoas são automaticamente agregados. Conformidade LGPD by design.
+**P0115** Nenhuma resposta é lida individualmente. Grupos com menos de 3 participantes distintos são suprimidos (não aparecem em nenhuma saída), sem fusão automática com outros grupos. Conformidade LGPD by design.
 
 **P0116** 7.2 Cultural Risk Engine
 
@@ -2858,7 +2860,7 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **P0062** Taxa mínima de resposta para validade: 35% a 40% do grupo
 
-**P0063** Grupos com menos de 3 respondentes são automaticamente agregados
+**P0063** Grupos com menos de 3 participantes distintos são suprimidos (não aparecem em nenhuma saída), sem fusão automática com outros grupos.
 
 **P0064** 3.5 Pesos por tipo de pergunta
 
@@ -2880,7 +2882,7 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **T09 R01** C1 [fill=F2F2F2]: Etapa | C2 [fill=F2F2F2]: Descrição
 
-**T09 R02** C1: 1. Agregação | C2: SEDs e dados de pesquisa são consolidados por grupo e período. Grupos < 3 respondentes são fundidos automaticamente.
+**T09 R02** C1: 1. Agregação | C2: SEDs e dados de pesquisa são consolidados por grupo e período. Grupos com menos de 3 participantes distintos são suprimidos (não aparecem em nenhuma saída), sem fusão automática com outros grupos.
 
 **T09 R03** C1: 2. Anonimização | C2: Nenhum dado mantém identificação individual após agregação. Nenhum texto sensível é exposto.
 
@@ -2912,11 +2914,11 @@ SHA-256 do DOCX: `5afbb1533e2923185b9f8617484f7bcf7706600c49e72dd4c2bdfb08012c74
 
 **P0080** 4.4 Regra de priorização
 
-**P0081** No máximo 3 Dívidas Culturais podem ser priorizadas por ciclo de Auditoria. Quando mais de 3 atingem zona vermelha, o sistema aplica o mecanismo de Ranking_d para selecionar as 3 de maior exposição combinada:
+**P0081** O motor, o banco e a matriz calculam e mostram as dez dívidas em todo ciclo. A Auditoria destaca até 3 delas como recorte comercial. Quando mais de 3 atingem zona vermelha, o Ranking_d seleciona as 3 de maior exposição combinada para esse destaque:
 
 **P0083** Ranking_d = IEC_d × G_d
 
-**P0085** G_d é o fator de governança estratégica definido pelo RH ou Conselho. Padrão G_d = 1. Essa regra é metodológica, não comercial: mais de 3 prioridades simultâneas inviabilizam execução e comprometem adesão.
+**P0085** G_d é o fator de governança estratégica definido pelo RH ou Conselho. Padrão G_d = 1. O destaque das 3 é um recorte comercial e de apresentação, não um limite do motor: as dez dívidas permanecem calculadas e mostradas, e o dado insuficiente não é zero nem verde.
 
 **P0087** BLOCO 5 — O DASHBOARD EXECUTIVO
 
