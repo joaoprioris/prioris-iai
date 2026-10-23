@@ -147,7 +147,7 @@ Fluxo: **IAí → SED → Health Monitor → Cultural Risk Engine → IEC → Au
 
 **IEC (v1.0).** `IEC_d = [(R_d×0,40) + (I_d×0,35) + (C_d×0,25)] × S_d × A_d`, resultado 0 a 100%. R recorrência ajustada, I intensidade multidimensional (inferida, não perguntada), C concentração, S sensibilidade sistêmica, A amortecimento temporal. R na v1.0 é `(f/T)^α`; a **curva logística é evolução (v2.0)**, não contradição. Parâmetros (α, β, λ, k, matriz 10×10, limiares) são proprietários: ver Modelo IEC. Intensidade do evento (SED) **não** é o I_d agregado do IEC; não calcular IEC a partir de um evento.
 
-**Zonas:** Verde 0 a 39% (sob controle), Amarela 40 a 69% (risco em formação), Vermelha 70 a 100% (dívida ativa). A zona reflete maturidade do risco, não intensidade isolada. **No máximo 3 dívidas em vermelho por ciclo**; acima disso, `Ranking_d = IEC_d × G_d` seleciona as 3.
+**Zonas:** Verde 0 a 39% (sob controle), Amarela 40 a 69% (risco em formação), Vermelha 70 a 100% (dívida ativa). A zona reflete maturidade do risco, não intensidade isolada. **As dez dívidas são sempre calculadas e mostradas** (decisão D10); dado insuficiente não é zero nem verde. O recorte das 3 de maior exposição (`Ranking_d = IEC_d × G_d`) é só um recorte comercial, nunca um limite do motor.
 
 **Alertas:** Azul (tendência emergente, interno Prioris), Amarelo (risco em formação, RH em privado), Vermelho (exposição crítica persistente, RH + liderança sênior, aciona auditoria). Só existe alerta após persistência em **2 ciclos consecutivos**; alertas não identificam culpados nem prescrevem ação.
 
