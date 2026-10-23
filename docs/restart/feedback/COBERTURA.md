@@ -1,6 +1,6 @@
 # Cobertura dos cenários de teste sobre a biblioteca de 80 momentos
 
-Fonte dos momentos: arquivo "Agente 5 — Feedback Estruturado" da pasta AGENTES do Drive (80 momentos, 20 por custo, cada um com fase e dívida). Está em `artifacts/api-server/src/feedback/moments.ts`. Esta versão é a vigente: o arquivo "MOMENTOS DE ATIVAÇÃO CORRIGIDO" é anterior e tem listas diferentes (decisão do proprietário a registrar; hipótese de trabalho: superado).
+Fonte dos momentos: arquivo "Agente 5 — Feedback Estruturado" da pasta AGENTES do Drive (80 momentos, 20 por custo, cada um com fase e dívida). Está em `artifacts/api-server/src/feedback/moments.ts`. Esta é a fonte do denominador: a pasta IMPLEMENTAÇÃO registra 390 unidades principais (80 de Perfil, Impacto, Feedback e 1:1, e 70 de Crises). O arquivo "MOMENTOS DE ATIVAÇÃO CORRIGIDO" (168 registros) e o Guia de Conversão (10) são 178 registros complementares preliminares, fora desse denominador; suas listas de Top 10 diferem.
 
 O mapeamento cenário a momento foi feito por leitura (não há marcador nos cenários). Está em `eval/coverage.ts` e é validado por `eval/coverage.test.ts`.
 
@@ -38,3 +38,7 @@ Cinco cenários em `eval/proposed-scenarios.ts` fecham todas as células e todas
 ## Matriz de lentes
 
 A matriz de lentes entre agentes está estruturada em `artifacts/api-server/src/agents/lenses.ts` e conferida por teste contra o bloco de lentes de cada agente em `lib/agent-contract.json`. Para o Feedback: Impacto moderada, Mentor leve, Contenção leve; nunca Crises nem 1:1.
+
+## Relação com a campanha anterior (Replit)
+
+A campanha documentada na pasta IMPLEMENTAÇÃO exercitou 12 das 390 unidades principais, 2 delas de Feedback, sem aprovação integral de nenhuma conversa. Não há como saber quais 2 dos 80 momentos foram essas; esta cobertura é só dos 14 cenários deste repositório e não soma com aquela. Os controles de custo daquela campanha (teto de US$ 5 do piloto Replit) são separados do teto de US$ 5 desta avaliação.

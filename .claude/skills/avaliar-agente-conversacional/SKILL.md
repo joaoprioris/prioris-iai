@@ -68,3 +68,16 @@ Registre cada aprovada como "aprovada" ou "aprovada com ressalvas" e liste as re
 - Nada de SED gravado enquanto as conversas não estiverem boas, nem SED provisório.
 - Conversas de teste são sempre marcadas como simuladas e não entram no repositório.
 - Só o dono faz merge. Não mexer em PR de outra frente.
+
+## Protocolo da campanha anterior que vale manter
+
+Registrado em IMPLEMENTAÇÃO/04_TESTES_E_COBERTURA (Drive) e conferido contra o que fizemos aqui:
+
+- O líder simulado recebe só a persona e os fatos privados da situação, nunca metodologia, agente esperado ou gabarito.
+- Quem coordena não reescreve a fala do líder simulado para facilitar a aprovação.
+- Abandono do líder simulado é resultado do teste, não aprovação nem motivo para parar tudo. Reteste com um novo líder, nunca insistindo no que desistiu.
+- O avaliador recebe a conversa entregue, sem o feedback do líder simulado e sem rótulos internos. Dimensão aprovada não aprova a conversa inteira.
+- Rodada encerrada, satisfação do líder, acerto de rota e aprovação técnica são resultados diferentes. Teste de código com simulação não aprova conversa.
+- Resultado desconhecido (chamada sem resposta registrada) não é custo zero e não autoriza repetir o envio. Reservar o gasto antes de cada chamada, inclusive reparos.
+- Mudança em lógica compartilhada invalida as aprovações afetadas para a nova revisão; o histórico fica preservado.
+- Não somar execuções sobrepostas como casos novos.
