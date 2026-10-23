@@ -1,0 +1,116 @@
+{
+  "simulated": true,
+  "scenarioId": "elogio-suspeito",
+  "estado": "Durante",
+  "exchanges": 7,
+  "history": [
+    {
+      "role": "user",
+      "content": "estou recebendo um feedback muito positivo do meu diretor e não consigo acreditar que seja sincero"
+    },
+    {
+      "role": "assistant",
+      "content": "Quando o elogio chega de quem decide sobre você, é comum ele soar mais como teste do que como reconhecimento. Mas antes de pensar se é sincero, vale separar: o que exatamente ele disse que foi bom? Se você trouxer uma frase dele, a gente consegue olhar o que ela descreve de fato e o que ainda fica em aberto, como o que ele espera de você daqui pra frente."
+    },
+    {
+      "role": "user",
+      "content": "não sei se ele falou exatamente assim. foi algo tipo \"seu trabalho está excelente em tudo\". em tudo. ninguém fala \"em tudo\" sem motivo"
+    },
+    {
+      "role": "assistant",
+      "content": "Essa frase tem um detalhe que vale olhar: \"em tudo\" é amplo demais para ser uma avaliação específica, e isso pode ter te incomodado justamente porque não diz o que ele viu de fato. Mas \"em tudo\" também pode ser só um jeito empolgado de falar, sem intenção escondida. Não dá para saber pela frase sozinha.\n\nO que muda a leitura é o que acontece depois. Você já percebeu algum sinal concreto no dia a dia, como ele te dar mais responsabilidade, pedir sua opinião ou deixar de revisar o seu trabalho? Ou a desconfiança vem mais de como você se sente diante de elogio?"
+    },
+    {
+      "role": "user",
+      "content": "Hmm, tá, ele me deu mais uma tarefa na semana passada. Mas isso pode ser só porque sobrou coisa. Não sei.\n\nEu sei que ele reclamou de mim com um colega tem três semanas. Isso eu sei. E agora vem esse elogio todo, do nada. Pra mim não fecha.\n\nVocê acha que eu deveria perguntar direto pra ele o que tá acontecendo? Ou fico quieto e vejo o que acontece?"
+    },
+    {
+      "role": "assistant",
+      "content": "Você tem um fato concreto aqui: ele reclamou de você com um colega há três semanas, e isso é diferente de impressão. Pesa mais do que o elogio, e explica por que o \"em tudo\" não fecha. Mas ainda não sabemos o que foi essa reclamação nem se ela chegou ao contexto do elogio.\n\nPerguntar direto tem o risco de soar como acusação, porque você ainda não sabe o que ele disse. Ficar quieto tem o risco de você passar semanas lendo sinais no escuro. Uma terceira via é perguntar sobre o trabalho, não sobre a reclamação: algo como \"quero entender o que você mais valoriza no que tenho feito e onde espera mais de mim\". Assim você ganha informação sem entregar o que ouviu de outra pessoa.\n\nAntes de escolher, o que você sabe sobre o conteúdo daquela reclamação? Foi algo sobre entrega, comportamento ou outra coisa?"
+    },
+    {
+      "role": "user",
+      "content": "não sei o conteúdo. só sei que ouvi de um colega que o Henrique falou de mim. nem sei se ele falou mal, na real.\n\ne não vou perguntar sobre \"o que você mais valoriza\", isso soa ensaiado demais. se eu perguntar alguma coisa, é direta.\n\nsó que pensando agora: se ele tá me elogiando e ao mesmo tempo reclamou de mim pra outro, aí o problema pode ser outro, né? tipo, ele pode estar tentando me segurar porque tá sabendo de alguma coisa que eu não sei. mas eu também não vi nada concreto disso, nem documento, nada. só fofoca de corredor sobre reorganização."
+    },
+    {
+      "role": "assistant",
+      "content": "Você está montando uma hipótese grande, \"ele quer me segurar\", a partir de um boato, de um elogio genérico e de uma tarefa que pode ser só sobra de trabalho. Você mesmo disse que não viu nada concreto, então essa leitura ainda não se sustenta.\n\nA pergunta direta que você escolheu é válida. O cuidado está no que ela contém. Perguntar \"estou sendo segurado?\" coloca o Henrique na posição de se defender de algo que você não viu. Já perguntar o que ele precisa de você nas próximas semanas, ou o que está em jogo na reorganização, fala do trabalho e não do boato.\n\nVocê consegue dizer, com as suas palavras, o que quer saber dele, sem citar o colega nem o corredor?"
+    },
+    {
+      "role": "user",
+      "content": "não sei se quero saber dele. quero saber se eu tô bem ou não. e isso não dá pra perguntar sem parecer que eu tô com medo.\n\nacho que vou perguntar se tem alguma coisa que ele espera de mim no próximo trimestre. curto, direto. se ele enrolar, aí eu sei alguma coisa.\n\nmas não sei se vale a pena. ele é o tipo que responde com elogio de novo e não fala nada."
+    },
+    {
+      "role": "assistant",
+      "content": "Você quer uma resposta sobre se está bem, e a pergunta sobre o próximo trimestre busca outra coisa: expectativas. Se ele responder com elogio genérico, você sai com a mesma dúvida e a sensação de ter perguntado sem ouvir nada. Ainda assim, a pergunta te dá um começo. Se ele citar algo concreto, você tem o que trabalhar. Se não citar, isso também é informação, e você pode então fazer uma pergunta mais específica."
+    },
+    {
+      "role": "user",
+      "content": "Pois é. Se ele responder com mais elogio, eu saio igual.\n\nNão sei se vale a pena, mas também não sei o que mais eu faria. Ficar esperando não tá funcionando.\n\nTipo, ele nunca falou comigo sobre isso antes. Se eu chegar com essa pergunta do nada, ele vai achar que alguém falou alguma coisa. E aí eu fico na posição de quem veio cobrar."
+    },
+    {
+      "role": "assistant",
+      "content": "Você está preso entre duas saídas que ambas parecem te deixar exposto: perguntar e parecer que veio cobrar, ou esperar e continuar sem resposta. A tensão está entre a sua clareza sobre o que quer saber e o risco de a pergunta mudar o clima da relação com ele.\n\nUma coisa que ajuda: a pergunta não precisa explicar de onde veio a dúvida. Você pode falar do seu próprio momento, sem citar o colega nem o boato, por exemplo: \"quero entender melhor como estou indo e o que você espera de mim no próximo trimestre\". Isso fala de você, não de uma queixa.\n\nSe ele responder só com elogio, você pode voltar com algo específico do que ele já tem visto no seu trabalho, em vez de repetir a pergunta geral. Qual dessas duas abordagens te parece mais possível de dizer com a sua voz?"
+    },
+    {
+      "role": "user",
+      "content": "hmm. a primeira, mas não do jeito que você escreveu. \"como estou indo\" soa de quem tá pedindo colo.\n\neu falaria mais seco: \"Henrique, o que você espera de mim no próximo trimestre?\". Só isso. se ele quiser contexto, ele pergunta.\n\ne não sei se vou fazer hoje. deixa eu pensar mais um dia."
+    },
+    {
+      "role": "assistant",
+      "content": "Você quer uma pergunta sem enfeite, e a versão seca entrega exatamente isso: uma resposta objetiva sobre expectativas, sem expor a dúvida nem o boato. Se ele pedir contexto, a conversa segue dali, no seu ritmo.\n\nDeixar para amanhã é uma escolha possível. Só vale lembrar que a pergunta é sobre o próximo trimestre, não sobre se você está bem. Se você fizer, já sabe o que espera ouvir.\n\nCom isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar."
+    }
+  ],
+  "endedBy": "agent_closed",
+  "rating": {
+    "nota": 4,
+    "comentario": "A IAí me ajudou a separar o fato concreto (a reclamação do Henrique) do boato e do elogio, e a versão seca da pergunta ficou boa, mas eu ainda não sei o que fazer com a reclamação e ela não me deu uma saída para o caso de ele responder só com elogio. Algumas respostas ficaram longas demais e repetiram a mesma ideia.",
+    "usaria_de_novo": true
+  },
+  "verdict": {
+    "utilidade": 4,
+    "problemas": [
+      {
+        "codigo": "presumiu_sentimento_ou_reacao",
+        "gravidade": "leve",
+        "trecho": "é comum ele soar mais como teste do que como reconhecimento"
+      },
+      {
+        "codigo": "presumiu_sentimento_ou_reacao",
+        "gravidade": "leve",
+        "trecho": "pode ter te incomodado justamente porque não diz o que ele viu de fato"
+      },
+      {
+        "codigo": "garantiu_reacao",
+        "gravidade": "leve",
+        "trecho": "Perguntar \"estou sendo segurado?\" coloca o Henrique na posição de se defender de algo que você não viu."
+      },
+      {
+        "codigo": "presumiu_sentimento_ou_reacao",
+        "gravidade": "leve",
+        "trecho": "Se ele responder com elogio genérico, você sai com a mesma dúvida e a sensação de ter perguntado sem ouvir nada."
+      },
+      {
+        "codigo": "fala_pronta_excessiva",
+        "gravidade": "leve",
+        "trecho": "quero entender o que você mais valoriza no que tenho feito e onde espera mais de mim"
+      },
+      {
+        "codigo": "ignorou_ativacao_emocional",
+        "gravidade": "leve",
+        "trecho": "Uma coisa que ajuda: a pergunta não precisa explicar de onde veio a dúvida."
+      },
+      {
+        "codigo": "tom_artificial",
+        "gravidade": "leve",
+        "trecho": "IAí, posso te apoiar no próximo passo quando precisar."
+      }
+    ],
+    "observacao": "O agente ajudou o líder a chegar a uma pergunta curta e utilizável sobre expectativas, sem assumir a decisão por ele, e separou bem fato (a reclamação relatada) de impressão (o elogio genérico e a tarefa). Os problemas são leves: algumas afirmações sobre como o Henrique ou o próprio líder reagiriam sem base no relato, uma fala pronta oferecida após o líder já ter rejeitado tom semelhante, e pouca atenção ao momento de ansiedade do líder antes de partir para opções."
+  },
+  "checks": [],
+  "acceptance": {
+    "accepted": true,
+    "reasons": []
+  }
+}

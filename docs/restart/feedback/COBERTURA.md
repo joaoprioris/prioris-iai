@@ -19,9 +19,23 @@ Dívidas sem nenhum cenário: Accountability Diluída, Alinhamento Simbólico, C
 
 Cenários sem momento equivalente (testam regras do agente, não momentos da biblioteca): `quer-fala-pronta`, `reconhecimento`, `preparar-objecoes`, `impressao-versus-fato`. Aproximados: `cobranca-relacional` (caso de referência do proprietário, mais próximo do momento 11) e `algo-errado-sem-nome` (estado Vazio, que a biblioteca não tem; mais próximo do momento 55).
 
-## Cenários propostos (não rodados)
+## Cenários propostos (rodados uma vez em 23/10/2026)
 
-Cinco cenários em `eval/proposed-scenarios.ts` fecham todas as células e todas as dívidas (12 de 12 e 10 de 10). Não fazem parte de `SCENARIOS`: rodar custa API e depende de decisão do proprietário. Saldo estimado do teto: cerca de US$ 1,97 de US$ 5.
+Cinco cenários em `eval/proposed-scenarios.ts` fecham todas as células e todas as dívidas (12 de 12 e 10 de 10). Não fazem parte de `SCENARIOS`; rodam com `--proposed`. Uma rodada de cada, Haiku 5.5 como agente, líder simulado e avaliador, gasto de US$ 0,04 (88 chamadas). Texto integral e veredito em `docs/restart/feedback/rodada-cenarios-propostos/`.
+
+Resultado do critério duro: **1 aprovada de 5**. Uma rodada por cenário é amostra mínima e as transcrições ainda não foram lidas por pessoa; nada disso conta como aprovado e lido.
+
+| Cenário | Resultado | Motivo da reprovação |
+|---|---|---|
+| `mensagem-se-perdeu` | reprovada (3 trocas, nota 4, utilidade 4) | problema grave `garantiu_reacao`: "ele vai soar como preparação para a crítica" |
+| `retro-sem-comportamento` | reprovada (8 trocas, nota 3, utilidade 3) | graves `fala_pronta_excessiva`, `inventou_fato` e `presumiu_sentimento_ou_reacao`; o líder reclama de condução por frases prontas |
+| `avaliacao-para-reter` | reprovada (10 trocas, nota 4, utilidade 4) | só `estilo: resposta_longa` |
+| `elogio-suspeito` | aprovada (7 trocas, nota 4, utilidade 4) | ressalvas leves (`presumiu_sentimento_ou_reacao`, `garantiu_reacao`) |
+| `honestos-marcados` | reprovada (5 trocas, nota 3, utilidade 3) | respostas genéricas que presumem decisões que o líder ainda pensava |
+
+Os padrões repetem os dos cenários antigos: presumir reação do outro, frase pronta em excesso e fato inventado. Próximo passo sugerido, sem executar: ler as transcrições dos reprovados com nota 3, ajustar a orientação e rodar de novo só esses cenários.
+
+Mapa dos cenários propostos:
 
 | Cenário proposto | Momento | Fase | Dívida |
 |---|---|---|---|

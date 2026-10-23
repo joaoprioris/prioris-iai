@@ -7,7 +7,7 @@ Registro para retomar sem perder contexto. Branch: `claude/funny-allen-6z18ab`. 
 - Os 80 momentos do arquivo "Agente 5 Feedback Estruturado" são do agente de Feedback. Contenção entra como lente leve. O MIC já está na orientação. Lentes de antifragilidade ficam para depois.
 - Não gravar SED enquanto as conversas não estiverem boas, nem SED provisório.
 - Nunca usar as palavras de tratamento clínico ou de profissional de saúde mental em texto de produto.
-- Teto TOTAL de US$ 5 em API. Gasto acumulado registrado pela trava: cerca de US$ 3,03.
+- Teto TOTAL de US$ 10 em API (o dono liberou mais US$ 5 em 23/10/2026, com controle rigoroso de gasto). Gasto acumulado registrado pela trava: cerca de US$ 3,07. Rodar sempre com `--cap 10 --spent-before <gasto acumulado>`.
 - Iterar com `PRIORIS_FEEDBACK_MODEL=claude-haiku-5-5`. A chave está em `PRIORIS_API_KEY`; confirmar antes com a chamada gratuita de lista de modelos.
 
 ## Resultado entregue
@@ -53,7 +53,7 @@ cd artifacts/api-server
 pnpm install --filter @workspace/api-server... --frozen-lockfile
 pnpm run test:feedback
 PRIORIS_FEEDBACK_MODEL=claude-haiku-5-5 node src/feedback/eval/run-eval.ts \
-  --out <pasta fora do repositório> --cap 5 --spent-before 3.03 \
+  --out <pasta fora do repositório> --cap 10 --spent-before 3.07 \
   --only feedback-recebido-injusto
 ```
 
@@ -69,4 +69,9 @@ PRIORIS_FEEDBACK_MODEL=claude-haiku-5-5 node src/feedback/eval/run-eval.ts \
 - `src/feedback/moments.ts`: os 80 momentos do Agente 5 (fase, dívida e custo). Contagem por custo e por dívida verificada por teste.
 - `src/feedback/eval/coverage.ts` e `docs/restart/feedback/COBERTURA.md`: cobertura dos 14 cenários sobre os 80 momentos (7 de 12 células e 6 de 10 dívidas) e 5 cenários propostos, não rodados, que fecham os buracos.
 - `src/agents/lenses.ts`: matriz de lentes entre agentes, conferida contra `lib/agent-contract.json`.
-- Nenhuma chamada de API foi feita nesta etapa. Gasto acumulado inalterado.
+- Nenhuma chamada de API foi feita nesta etapa.
+
+## Atualização de 23/10/2026 (cenários propostos)
+
+- Runner ganhou `--proposed`. Os 5 cenários propostos rodaram uma vez: 1 aprovada, 4 reprovadas (detalhes em `COBERTURA.md`; transcrições em `rodada-cenarios-propostos/`). Gasto desta rodada: US$ 0,04. Acumulado: cerca de US$ 3,07 de US$ 10.
+- Transcrições ainda não lidas por pessoa.

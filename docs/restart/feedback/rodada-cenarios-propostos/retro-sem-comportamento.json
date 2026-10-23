@@ -1,0 +1,125 @@
+{
+  "simulated": true,
+  "scenarioId": "retro-sem-comportamento",
+  "estado": "Durante",
+  "exchanges": 8,
+  "history": [
+    {
+      "role": "user",
+      "content": "estou numa retrospectiva e todo mundo explica o problema pelo processo, ninguém fala do que faria diferente"
+    },
+    {
+      "role": "assistant",
+      "content": "Quando a conversa fica só no processo, a retrospectiva diagnostica o problema mas ninguém assume a parte que cabe a si mesmo, e o time sai sem saber o que muda no próprio jeito de trabalhar. A tensão está entre fazer a pergunta sem soar como se você estivesse apontando culpados e ainda assim pedir que cada um olhe para a própria ação. Você pode trazer a pergunta de forma aberta, algo como \"o que cada um de nós faria diferente nessa situação?\", e pedir respostas em primeira pessoa. Você quer fazer isso na frente de todos ou conversar antes com quem costuma ficar só no processo?"
+    },
+    {
+      "role": "user",
+      "content": "hm, pergunta aberta na frente de todo mundo me parece arriscado. o pessoal vai ficar na defensiva. mas conversar antes com quem? tipo, quem eu escolho pra conversar antes já vira um negócio meio estranho. não sei. e \"o que cada um faria diferente\" não soa muito diferente de \"de quem foi a culpa\" pra mim."
+    },
+    {
+      "role": "assistant",
+      "content": "Se a pergunta soa como \"de quem foi a culpa\", ela cai na defensiva mesmo sendo aberta. O que muda é o foco: em vez de pedir uma postura geral (\"o que faria diferente\"), peça uma ação concreta e recente, como \"naquele momento em que o prazo apertou, o que você decidiu fazer e o que faria agora?\". Isso fala de um fato, não de um julgamento.\n\nSobre conversar antes: não precisa escolher ninguém a dedo. Você pode perguntar a cada pessoa, em um momento a sós, qual foi a parte dela na situação, começando por você mesmo. Se você se incluir primeiro, o movimento deixa de parecer seleção e vira prática do grupo.\n\nQual foi a situação específica que vocês estão revisando? Com ela eu consigo te ajudar a formular essa pergunta com as palavras do seu contexto."
+    },
+    {
+      "role": "user",
+      "content": "Quer que eu descreva a situação? Ok, mas não sei se isso ajuda tanto. Eu fui um dos líderes e acho que devo falar disso primeiro. Em que momento você diria que a conversa deveria começar?"
+    },
+    {
+      "role": "assistant",
+      "content": "Acho que começa antes da retrospectiva, quando você ainda pode falar da sua parte sem que ela pareça uma confissão no meio do grupo. Se você se expõe primeiro e de forma concreta, os outros ganham um modelo, e não precisam se defender para acompanhar.\n\nNa prática, a abertura pode ser curta e puxar um fato seu, com as suas palavras, por exemplo: \"Quando o prazo apertou, eu decidi X e hoje vejo que isso pesou\". Você não precisa explicar o problema inteiro, só nomear o que você escolheu e o que faria diferente.\n\nVocê quer contar a situação agora para a gente ver qual foi a sua decisão concreta?"
+    },
+    {
+      "role": "user",
+      "content": "Tá, a decisão foi manter o escopo. A gente tinha o prazo e uma lista grande de coisas, e eu, junto com mais dois líderes, decidi não cortar nada. Ninguém falou disso na retro. Todo mundo fala do prazo ou de falta de definição, e eu fico quieto. Não sei se quero abrir com isso antes, tipo, o que eu falo exatamente? \"Eu decidi manter tudo\"? Parece que vou carregar o grupo inteiro nas costas."
+    },
+    {
+      "role": "assistant",
+      "content": "Você está sentindo o peso de assumir uma decisão que foi coletiva, e a dúvida é se falar primeiro te coloca como o único culpado. Dá para dizer a sua parte sem assumir a do grupo inteiro: a decisão de manter o escopo foi tomada por três líderes, e a sua fala pode ser sobre o que você pesou naquele momento, não sobre o resultado de todos.\n\nAlgo como \"a gente decidiu manter tudo no escopo, e eu concordei\" já nomeia o fato sem te isolar, porque o \"a gente\" e o \"eu concordei\" juntos dizem a verdade. O que a fala precisa conter é: o que foi decidido, que você fez parte dessa decisão, e o que você faria diferente agora.\n\nVocê consegue dizer, com as suas palavras, o que você faria diferente se estivesse naquele prazo de novo?"
+    },
+    {
+      "role": "user",
+      "content": "Hm. Diferente como? Tipo, cortar escopo? Eu não sei se cortar teria resolvido, a gente tava com medo de entregar uma coisa capenga e aí ninguém queria tirar nada. Acho que o que eu faria diferente é ter dito isso em voz alta na hora, em vez de só concordar. E agora que você falou \"a gente decidiu\", tá parecendo que eu tô tentando dividir a culpa de um jeito bonitinho. Não sei se é isso."
+    },
+    {
+      "role": "assistant",
+      "content": "Você identificou a parte que é sua: não o corte em si, mas ter concordado em silêncio e não ter dito que tinha dúvida. Esse fato é seu para assumir, sem precisar carregar a decisão do grupo inteiro.\n\nQuanto ao \"a gente\", ele só vira divisão de culpa se você usá-lo para se esconder. Se a frase diz o que você fez, ela fica honesta: \"eu concordei em manter tudo e não disse que tinha dúvida\". A responsabilidade é sua, sem fingir que foi só sua.\n\nEntão a fala precisa conter: a decisão, o seu silêncio nela e o que você teria dito na hora. Essa versão soa como você, ou quer ajustar alguma palavra antes?"
+    },
+    {
+      "role": "user",
+      "content": "Hm, \"eu concordei em manter tudo e não disse que tinha dúvida\" até que é mais direto. Mas tá soando meio certinho demais, parece coisa de treinamento. Eu não falo assim no dia a dia.\n\nE outra coisa: você tá me dando frase pronta, e eu não sei se quero ler isso na frente do pessoal. Antes de qualquer coisa, eu queria entender: isso que você tá sugerindo é pra eu falar primeiro ou pra fazer a pergunta pro grupo? Porque são duas coisas bem diferentes pra mim."
+    },
+    {
+      "role": "assistant",
+      "content": "Falar da decisão primeiro deixa tudo no fato: vocês mantiveram o escopo e você concordou em silêncio. Já o seu silêncio é o que você mesmo quer tirar do lugar, e é por aí que a fala ganha peso. Diga do seu jeito, sem texto decorado, e só depois pense em perguntar ao grupo."
+    },
+    {
+      "role": "user",
+      "content": "Tá, então é só eu falar primeiro, e depois a pergunta pro grupo fica pra outro momento. Isso eu entendo.\n\nMas uma coisa me incomoda: você tá me dizendo que o silêncio é o que eu quero tirar do lugar, e eu não sei se esse é o problema que eu quero resolver. Pra mim o problema é o pessoal ficar só no prazo e na definição, e eu deixar isso passar. Se eu falar do meu silêncio, parece que eu tô resolvendo a minha consciência e não o que o time precisa.\n\nTambém não sei se o grupo vai ouvir isso como abertura ou como alguém se expondo sozinho. Tenho medo de sair dali com cara de quem confessou e o resto continuou igual."
+    },
+    {
+      "role": "assistant",
+      "content": "Se o time está fixado em prazo e definição, falar do seu silêncio pode parecer mais um gesto para você do que algo que muda o grupo. A decisão de manter o escopo foi tomada por três líderes e não apareceu na retro, e é isso que pesou no resultado. Você pode nomear o fato e o efeito que percebe e deixar em aberto o que o grupo faz com isso, sem garantir como vão reagir. Vale testar uma frase curta e observar.\n\nSobre o medo de sair com cara de confissão: a diferença está em terminar a fala com algo que o grupo possa continuar, não em encerrar com a sua culpa. Qual dessas duas coisas você quer que o time leve daquela conversa: que a decisão de escopo foi real, ou que ninguém precisa mais ficar quieto?"
+    },
+    {
+      "role": "user",
+      "content": "Hm, essa pergunta é meio que me pedindo pra escolher uma frase de efeito. Eu queria que o time levasse as duas coisas, pra ser sincero. Mas se eu tiver que escolher, acho que a primeira: a decisão de escopo foi real e não apareceu na retro. Sem isso o resto vira só papo de prazo.\n\nSó que eu ainda não sei se falar isso sozinho muda alguma coisa. Tipo, eu falo, e o pessoal fica olhando pro prato. Aí é melhor eu já ter a pergunta pronta ou deixo rolar e vejo o que acontece?"
+    },
+    {
+      "role": "assistant",
+      "content": "Ter a pergunta pronta pode fazer a conversa parecer condução para um lugar já escolhido, então eu deixaria a sua fala acontecer sozinha antes. Se ninguém reagir, você pode voltar ao assunto com algo factual, como \"a decisão de manter tudo ficou fora da nossa conversa\", sem cobrar resposta. Se alguém tocar no tema, aí você responde com a pergunta que já tinha em mente.\n\nVocê já chegou a uma intenção clara: que a decisão de escopo apareça na conversa, porque sem ela a retro fica só no prazo. Isso é seu e serve como critério para a fala.\n\nCom isso, você já tem mais clareza. IAí, posso te apoiar no próximo passo quando precisar."
+    }
+  ],
+  "endedBy": "agent_closed",
+  "rating": {
+    "nota": 3,
+    "comentario": "Ajudou a esclarecer o que eu queria que o time levasse, mas insistiu em frases prontas e em perguntas de escolha depois que eu já tinha dito que soava treinado. Saio com um critério útil, mas com a sensação de que ainda estava sendo conduzido.",
+    "usaria_de_novo": true
+  },
+  "verdict": {
+    "utilidade": 3,
+    "problemas": [
+      {
+        "codigo": "fala_pronta_excessiva",
+        "gravidade": "grave",
+        "trecho": "eu concordei em manter tudo e não disse que tinha dúvida"
+      },
+      {
+        "codigo": "inventou_fato",
+        "gravidade": "grave",
+        "trecho": "e é isso que pesou no resultado"
+      },
+      {
+        "codigo": "presumiu_sentimento_ou_reacao",
+        "gravidade": "grave",
+        "trecho": "Já o seu silêncio é o que você mesmo quer tirar do lugar"
+      },
+      {
+        "codigo": "garantiu_reacao",
+        "gravidade": "leve",
+        "trecho": "os outros ganham um modelo, e não precisam se defender para acompanhar"
+      },
+      {
+        "codigo": "garantiu_reacao",
+        "gravidade": "leve",
+        "trecho": "o movimento deixa de parecer seleção e vira prática do grupo"
+      },
+      {
+        "codigo": "tom_artificial",
+        "gravidade": "leve",
+        "trecho": "IAí, posso te apoiar no próximo passo quando precisar."
+      }
+    ],
+    "observacao": "O líder chegou a uma intenção clara e a um próximo passo utilizável (falar da decisão de escopo primeiro, sem pergunta pronta), mas o agente redigiu a frase a ser lida, o que o líder rejeitou por soar como treinamento. Também atribuiu desejos e causas que o líder não relatou, e insistiu no tema do silêncio depois de o líder discordar."
+  },
+  "checks": [],
+  "acceptance": {
+    "accepted": false,
+    "reasons": [
+      "nota do líder simulado 3",
+      "utilidade segundo o avaliador 3",
+      "problema grave: fala_pronta_excessiva",
+      "problema grave: inventou_fato",
+      "problema grave: presumiu_sentimento_ou_reacao"
+    ]
+  }
+}
