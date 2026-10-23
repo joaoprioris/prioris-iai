@@ -1,0 +1,8 @@
+{"cenario":"base","G":20,"sims":2000,"t_unilateral":"4.6 [3.8;5.6]","inversao_de_sinais":"4.3 [3.5;5.2]"}
+{"cenario":"G10","G":10,"sims":2000,"t_unilateral":"6.9 [5.9;8.1]","inversao_de_sinais":"7.0 [6.0;8.2]"}
+{"cenario":"G6","G":6,"sims":2000,"t_unilateral":"6.4 [5.4;7.6]","inversao_de_sinais":"5.5 [4.5;6.5]"}
+{"cenario":"lam2","G":20,"sims":2000,"t_unilateral":"4.8 [3.9;5.8]","inversao_de_sinais":"5.2 [4.3;6.3]"}
+{"cenario":"ar_09","G":20,"sims":2000,"t_unilateral":"4.9 [4.0;5.9]","inversao_de_sinais":"5.2 [4.3;6.2]"}
+{"cenario":"cc_forte","G":20,"sims":2000,"t_unilateral":"5.5 [4.6;6.6]","inversao_de_sinais":"5.5 [4.6;6.6]"}
+{"cenario":"transitorio_inicial","G":20,"sims":2000,"t_unilateral":"9.2 [8.0;10.5]","inversao_de_sinais":"9.7 [8.4;11.0]"}
+{"poder_40x18_RR2":{"t":"78.0 [74.2;81.4]","inversao_de_sinais":"77.0 [73.1;80.5]"}}

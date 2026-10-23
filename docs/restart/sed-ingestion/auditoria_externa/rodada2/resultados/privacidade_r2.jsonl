@@ -1,0 +1,18 @@
+{"lam":4,"grupo_mes_liberado_pct":76.2,"dentre_liberados_N_igual_3_exato_pct":25.7,"todas_as_dividas_com_contagem_1_pct":40.4,"ao_menos_uma_divida_com_contagem_1_pct":98.5,"N_medio":4.8}
+{"lam":8,"grupo_mes_liberado_pct":98.6,"dentre_liberados_N_igual_3_exato_pct":2.9,"todas_as_dividas_com_contagem_1_pct":10.8,"ao_menos_uma_divida_com_contagem_1_pct":99,"N_medio":8.1}
+{"lam":16,"grupo_mes_liberado_pct":100,"dentre_liberados_N_igual_3_exato_pct":0,"todas_as_dividas_com_contagem_1_pct":0.2,"ao_menos_uma_divida_com_contagem_1_pct":98,"N_medio":16}
+{"mecanismo":"sem ruído","G":40,"T":18,"lam":8,"RR_pico":1,"sims":300,"rejeita":"5.7 [3.6;8.9]"}
+{"mecanismo":"sem ruído","G":40,"T":18,"lam":8,"RR_pico":2,"sims":300,"rejeita":"78.7 [73.7;82.9]"}
+{"mecanismo":"sem ruído","G":40,"T":18,"lam":8,"RR_pico":3,"sims":300,"rejeita":"98.7 [96.6;99.5]"}
+{"mecanismo":"Laplace b=1 (epsilon 1 por contagem)","G":40,"T":18,"lam":8,"RR_pico":1,"sims":300,"rejeita":"5.3 [3.3;8.5]"}
+{"mecanismo":"Laplace b=1 (epsilon 1 por contagem)","G":40,"T":18,"lam":8,"RR_pico":2,"sims":300,"rejeita":"28.0 [23.2;33.3]"}
+{"mecanismo":"Laplace b=1 (epsilon 1 por contagem)","G":40,"T":18,"lam":8,"RR_pico":3,"sims":300,"rejeita":"40.0 [34.6;45.6]"}
+{"mecanismo":"Laplace b=2","G":40,"T":18,"lam":8,"RR_pico":1,"sims":300,"rejeita":"6.3 [4.1;9.7]"}
+{"mecanismo":"Laplace b=2","G":40,"T":18,"lam":8,"RR_pico":2,"sims":300,"rejeita":"9.7 [6.8;13.5]"}
+{"mecanismo":"Laplace b=2","G":40,"T":18,"lam":8,"RR_pico":3,"sims":300,"rejeita":"11.3 [8.2;15.4]"}
+{"mecanismo":"arredondar para múltiplo de 3","G":40,"T":18,"lam":8,"RR_pico":1,"sims":300,"rejeita":"4.3 [2.5;7.3]"}
+{"mecanismo":"arredondar para múltiplo de 3","G":40,"T":18,"lam":8,"RR_pico":2,"sims":300,"rejeita":"49.7 [44.0;55.3]"}
+{"mecanismo":"arredondar para múltiplo de 3","G":40,"T":18,"lam":8,"RR_pico":3,"sims":300,"rejeita":"83.0 [78.3;86.8]"}
+{"mecanismo":"arredondar para múltiplo de 5","G":40,"T":18,"lam":8,"RR_pico":1,"sims":300,"rejeita":"5.3 [3.3;8.5]"}
+{"mecanismo":"arredondar para múltiplo de 5","G":40,"T":18,"lam":8,"RR_pico":2,"sims":300,"rejeita":"23.3 [18.9;28.4]"}
+{"mecanismo":"arredondar para múltiplo de 5","G":40,"T":18,"lam":8,"RR_pico":3,"sims":300,"rejeita":"45.3 [39.8;51.0]"}

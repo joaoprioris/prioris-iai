@@ -1,0 +1,6 @@
+{"cenario":"B_rampa_vol_sobe","G":20,"T":12,"lam":8,"sims":4000,"direcional":"5.6 [5.0;6.4]","so_defasagem":"5.3 [4.6;6.0]"}
+{"cenario":"B_rampa_vol_desce","G":20,"T":12,"lam":8,"sims":4000,"direcional":"5.3 [4.6;6.0]","so_defasagem":"5.2 [4.5;5.9]"}
+{"cenario":"B_ar_comeca_em_zero","G":20,"T":12,"lam":8,"sims":4000,"direcional":"6.8 [6.1;7.6]","so_defasagem":"0.3 [0.2;0.6]"}
+{"cenario":"B_fator_comeca_em_zero","G":20,"T":12,"lam":8,"sims":4000,"direcional":"3.4 [2.9;4.0]","so_defasagem":"74.3 [72.9;75.6]"}
+{"cenario":"B_transitorio_inicial_por_bloco","G":20,"T":12,"lam":8,"sims":4000,"direcional":"9.0 [8.2;9.9]","so_defasagem":"14.1 [13.0;15.2]"}
+{"cenario":"B_transitorio_inicial_forte_longo","G":20,"T":12,"lam":8,"sims":4000,"direcional":"19.1 [17.9;20.3]","so_defasagem":"59.8 [58.2;61.3]"}

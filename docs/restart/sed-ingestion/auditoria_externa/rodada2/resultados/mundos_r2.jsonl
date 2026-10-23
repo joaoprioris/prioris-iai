@@ -1,0 +1,2 @@
+{"tipo":"ciclo_de_grupo","mundos":15,"sims_por_mundo":1000,"taxa_media":12.7,"mediana":3.7,"maxima":57.6,"minima":0,"mundos_acima_de_10pct":5}
+{"tipo":"cc_atraso","mundos":15,"sims_por_mundo":1000,"taxa_media":8.3,"mediana":6.2,"maxima":20.9,"minima":1.5,"mundos_acima_de_10pct":4}

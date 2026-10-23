@@ -2,6 +2,8 @@
 
 Objetivo: decidir, com critério estatístico, quando a dívida A tende a se converter na dívida adjacente B, antes de mostrar qualquer coisa ao cliente. O resultado fica interno ao motor até haver confirmação.
 
+**Nota sobre os arquivos de resultado:** `fase2_fp.jsonl` traz a coluna `primario_participacao`, mas roda o estimador só de defasagem (ingênuo), não o direcional. Os números do direcional estão em `fase2_dir.jsonl`, `fase2_dir2.jsonl` e `fase2_controle.jsonl`. A simulação usa 3 SED como proxy de 3 participantes distintos.
+
 **Situação:** a versão 1 foi submetida a uma auditoria externa independente (`AUDITORIA_ESTATISTICA_EXTERNA.md`, média 4,2 de 10, veredito "viável só para fase exploratória"). Esta versão 2 incorpora as correções aprovadas pelo proprietário em 23/10/2026. Ela ainda não passou por uma segunda auditoria. Até passar, vale como método da **fase exploratória**, nunca como base para exibir adjacência ao cliente.
 
 ## 1. O que a auditoria derrubou na versão 1 e o que foi feito
@@ -81,7 +83,7 @@ Sob a hipótese nula (sem conversão), 20 grupos, 12 meses, 8 SED por grupo e m�
 Leitura:
 
 * O teste só de defasagem parece calibrado nos cenários da versão 1, mas **falha de 10% a 49% sob causa comum persistente**, o cenário mais plausível em dado real (dívidas vizinhas variam juntas por motivos comuns). Por isso o primário é o direcional.
-* O direcional ficou entre 3,9% e 7,0% em todos os cenários. A margem de erro de cada célula é de cerca de 1,5 ponto. Ele não é exatamente 5%, e pode ser levemente liberal. Essa folga fica registrada, e é uma das razões pelas quais a confirmação exige replicação entre clientes (seção 7).
+* O direcional ficou entre 3,9% e 7,5% em todos os cenários (o 7,5% está em `fase2_controle.jsonl`, cenário base). A margem de erro de cada célula é de cerca de 1,5 ponto. Ele não é exatamente 5%, e pode ser levemente liberal. Essa folga fica registrada, e é uma das razões pelas quais a confirmação exige replicação entre clientes (seção 7).
 * O intervalo de 95% do efeito cobre zero em 91% a 93% das simulações sob a nula (nominal 95%). Ele subcobre em cerca de 2 a 4 pontos. Até ser corrigido ou validado de outro modo, o intervalo é informativo e o critério usa o p valor.
 * A calibração da família de 3 testes por classe de prazo não foi refeita para o direcional.
 * **Limite:** os cenários de causa comum, tendência e persistência são hipóteses minhas, não dados da empresa. Não sei com que frequência ocorrem.
