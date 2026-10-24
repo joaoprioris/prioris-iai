@@ -1,0 +1,11 @@
+{"cenario":"base","G":20,"T_teste":18,"v3_doc":"5.3","tendencia_ambos":"5.4","tendencia_so_desfecho":"5.0","tendencia_so_exposicao":"5.5","janela_cheia":"6.8","descarte6":"6.0"}
+{"cenario":"transit_tau4_sd1_5","G":20,"T_teste":18,"v3_doc":"10.0","tendencia_ambos":"5.1","tendencia_so_desfecho":"5.4","tendencia_so_exposicao":"4.9","janela_cheia":"11.8","descarte6":"8.0"}
+{"cenario":"transit_tau6_sd1_5","G":20,"T_teste":18,"v3_doc":"13.4","tendencia_ambos":"5.0","tendencia_so_desfecho":"4.5","tendencia_so_exposicao":"5.1","janela_cheia":"18.1","descarte6":"9.1"}
+{"cenario":"escalonado_tau4_sd1_5","G":20,"T_teste":18,"v3_doc":"10.9","tendencia_ambos":"2.9","tendencia_so_desfecho":"2.6","tendencia_so_exposicao":"3.8","janela_cheia":"13.9","descarte6":"10.6"}
+{"cenario":"ciclo_periodo6 (12 mundos)","G":20,"T_teste":18,"v3_doc":"13.4","tendencia_ambos":"14.5","tendencia_so_desfecho":"14.4","tendencia_so_exposicao":"14.8","janela_cheia":"10.3","descarte6":"12.9"}
+{"cenario":"ciclo_periodo4 (12 mundos)","G":20,"T_teste":18,"v3_doc":"9.1","tendencia_ambos":"10.4","tendencia_so_desfecho":"10.3","tendencia_so_exposicao":"10.4","janela_cheia":"13.6","descarte6":"8.2"}
+{"cenario":"cc_atraso (12 mundos)","G":20,"T_teste":18,"v3_doc":"7.8","tendencia_ambos":"7.3","tendencia_so_desfecho":"7.2","tendencia_so_exposicao":"7.0","janela_cheia":"13.9","descarte6":"7.3"}
+{"cenario":"tendencia_grupo_opostos","G":20,"T_teste":18,"v3_doc":"3.6","tendencia_ambos":"4.0","tendencia_so_desfecho":"4.4","tendencia_so_exposicao":"3.8","janela_cheia":"5.8","descarte6":"3.3"}
+{"poder":"rampa_RR2","G":40,"T_teste":12,"v3_doc":"49.3","tendencia_ambos":"21.5","tendencia_so_desfecho":"24.0","tendencia_so_exposicao":"23.8","janela_cheia":"31.3","descarte6":"29.0"}
+{"poder":"rampa_RR3","G":40,"T_teste":12,"v3_doc":"81.3","tendencia_ambos":"42.8","tendencia_so_desfecho":"46.5","tendencia_so_exposicao":"43.5","janela_cheia":"59.3","descarte6":"59.8"}
+{"poder":"aditivo_0_10","G":40,"T_teste":12,"v3_doc":"39.0","tendencia_ambos":"28.8","tendencia_so_desfecho":"31.0","tendencia_so_exposicao":"29.0","janela_cheia":"17.3","descarte6":"30.3"}

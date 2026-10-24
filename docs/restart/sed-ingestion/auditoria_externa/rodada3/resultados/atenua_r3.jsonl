@@ -1,0 +1,16 @@
+{"caso":"base lam8, janela do estimador","injetado":0.05,"beta_medio":0.0102,"razao":0.2,"dp":0.0077}
+{"caso":"base lam8, janela do estimador","injetado":0.1,"beta_medio":0.0186,"razao":0.19,"dp":0.0074}
+{"caso":"base lam8, janela do estimador","injetado":0.2,"beta_medio":0.0301,"razao":0.15,"dp":0.0087}
+{"caso":"base lam8, janela do estimador","injetado":0.4,"beta_medio":0.045,"razao":0.11,"dp":0.0083}
+{"caso":"lam 4","injetado":0.1,"beta_medio":0.02,"razao":0.2,"dp":0.0077}
+{"caso":"lam 4","injetado":0.2,"beta_medio":0.031,"razao":0.16,"dp":0.0076}
+{"caso":"lam 16","injetado":0.1,"beta_medio":0.0191,"razao":0.19,"dp":0.0076}
+{"caso":"lam 16","injetado":0.2,"beta_medio":0.031,"razao":0.15,"dp":0.007}
+{"caso":"A persistente (AR 0,8)","injetado":0.1,"beta_medio":0.0181,"razao":0.18,"dp":0.0079}
+{"caso":"A persistente (AR 0,8)","injetado":0.2,"beta_medio":0.0319,"razao":0.16,"dp":0.0079}
+{"caso":"efeito só em lags 1 a 2","injetado":0.1,"beta_medio":0.0069,"razao":0.07,"dp":0.0078}
+{"caso":"efeito só em lags 1 a 2","injetado":0.2,"beta_medio":0.0134,"razao":0.07,"dp":0.0081}
+{"caso":"efeito só em lags 4 a 6","injetado":0.1,"beta_medio":0.0143,"razao":0.14,"dp":0.007}
+{"caso":"efeito só em lags 4 a 6","injetado":0.2,"beta_medio":0.0247,"razao":0.12,"dp":0.0078}
+{"caso":"participações desiguais (skew 0,6)","injetado":0.1,"beta_medio":0.0205,"razao":0.2,"dp":0.0074}
+{"caso":"participações desiguais (skew 0,6)","injetado":0.2,"beta_medio":0.0332,"razao":0.17,"dp":0.0085}

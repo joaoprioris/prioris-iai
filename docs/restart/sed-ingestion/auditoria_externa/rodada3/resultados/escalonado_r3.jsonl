@@ -1,0 +1,4 @@
+{"cenario":"escalonado_sem_transitorio","G":20,"T_total":21,"sims":1500,"descarte_calendario_3":"6.6 [5.5;8.0]","descarte_por_grupo_3_a_partir_da_entrada":"6.1 [5.0;7.5]","descarte_por_grupo_6":"6.6 [5.5;8.0]"}
+{"cenario":"escalonado_tau2","G":20,"T_total":21,"sims":1500,"descarte_calendario_3":"6.3 [5.2;7.7]","descarte_por_grupo_3_a_partir_da_entrada":"5.4 [4.4;6.7]","descarte_por_grupo_6":"5.4 [4.4;6.7]"}
+{"cenario":"escalonado_tau4_sd1_5","G":20,"T_total":21,"sims":1500,"descarte_calendario_3":"9.8 [8.4;11.4]","descarte_por_grupo_3_a_partir_da_entrada":"10.3 [8.8;11.9]","descarte_por_grupo_6":"6.9 [5.8;8.3]"}
+{"cenario":"escalonado_tau6_sd1","G":20,"T_total":21,"sims":1500,"descarte_calendario_3":"9.6 [8.2;11.2]","descarte_por_grupo_3_a_partir_da_entrada":"9.0 [7.7;10.6]","descarte_por_grupo_6":"7.1 [5.9;8.5]"}

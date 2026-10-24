@@ -1,0 +1,9 @@
+custo do descarte: 15 meses de calendário, G=40, rampa RR2/RR3, 8 SED
+RR 2 sem descarte (15 meses de teste)                     64.6 [60.3;68.7]
+RR 2 descarte 3 (12 meses de teste), exposição só depois  48.0 [43.7;52.4]
+RR 2 descarte 3 só do desfecho, exposição livre           69.0 [64.8;72.9]
+RR 2 sem descarte, 12 meses de calendário                 57.6 [53.2;61.9]
+RR 3 sem descarte (15 meses de teste)                     95.2 [93.0;96.8]
+RR 3 descarte 3 (12 meses de teste), exposição só depois  83.6 [80.1;86.6]
+RR 3 descarte 3 só do desfecho, exposição livre           96.8 [94.9;98.0]
+RR 3 sem descarte, 12 meses de calendário                 87.6 [84.4;90.2]

@@ -1,0 +1,6 @@
+{"dgp":"nula","liberacao":"piso proxy 5 SED","G":40,"rejeita_tratando_mes_suprimido_como_zero_v3":"5.6 [3.9;8.0]","rejeita_tratando_como_ausente":"6.2 [4.4;8.7]"}
+{"dgp":"nula","liberacao":"piso proxy 7 SED","G":40,"rejeita_tratando_mes_suprimido_como_zero_v3":"4.0 [2.6;6.1]","rejeita_tratando_como_ausente":"3.8 [2.4;5.9]"}
+{"dgp":"aditivo 0,10","liberacao":"piso proxy 5 SED","G":40,"rejeita_tratando_mes_suprimido_como_zero_v3":"59.6 [55.2;63.8]","rejeita_tratando_como_ausente":"63.0 [58.7;67.1]"}
+{"dgp":"aditivo 0,10","liberacao":"piso proxy 7 SED","G":40,"rejeita_tratando_mes_suprimido_como_zero_v3":"32.2 [28.3;36.4]","rejeita_tratando_como_ausente":"39.0 [34.8;43.3]"}
+{"dgp":"rampa RR2 (nucleo)","liberacao":"piso proxy 5 SED","G":40,"rejeita_tratando_mes_suprimido_como_zero_v3":"75.0 [71.0;78.6]","rejeita_tratando_como_ausente":"79.2 [75.4;82.5]"}
+{"dgp":"rampa RR2 (nucleo)","liberacao":"piso proxy 7 SED","G":40,"rejeita_tratando_mes_suprimido_como_zero_v3":"56.4 [52.0;60.7]","rejeita_tratando_como_ausente":"66.6 [62.4;70.6]"}

@@ -1,0 +1,3 @@
+pares da matriz cujo recíproco está FORA da matriz (reciproco no controle): 16  | pares de controle cujo recíproco é par da matriz: 16 de 60
+nula_base correlação entre t primário e t controle: -0.55
+ciclo_grupo_periodo6 (um mundo por vez, 8 mundos) correlação entre t primário e t controle: -0.60

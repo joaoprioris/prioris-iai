@@ -1,0 +1,3 @@
+{"modo":"mesmas_fases_nos_3_clientes","mundos":12,"sims_total":1800,"Stouffer_p05":"19.9 [18.1;21.8]","nivel3_estatistico_passa":"14.1 [12.5;15.7]"}
+{"modo":"fases_independentes_por_cliente","mundos":12,"sims_total":1800,"Stouffer_p05":"15.7 [14.1;17.5]","nivel3_estatistico_passa":"10.9 [9.6;12.5]"}
+{"modo":"so_1_cliente_com_ciclo","mundos":12,"sims_total":1800,"Stouffer_p05":"7.9 [6.7;9.2]","nivel3_estatistico_passa":"5.6 [4.6;6.8]"}

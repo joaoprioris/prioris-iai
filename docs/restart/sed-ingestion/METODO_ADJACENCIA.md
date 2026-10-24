@@ -4,7 +4,7 @@ Objetivo: decidir, com critério estatístico, quando a dívida A tende a ser se
 
 **O que o método pode afirmar:** "A precede B de forma consistente, em mais de um cliente". Ele não afirma "A causa B" nem "A se converte em B". Com contagens de SED apenas, não dá para separar conversão de duas dívidas que respondem ao mesmo evento com atrasos diferentes (seção 5). A palavra "conversão" fica restrita à hipótese de negócio.
 
-**Situação:** a versão 1 recebeu média 4,2 de 10 na auditoria externa (`AUDITORIA_ESTATISTICA_EXTERNA.md`). A versão 2 recebeu 5,4 (`AUDITORIA_ESTATISTICA_EXTERNA_RODADA2.md`), com veredito "viável só para fase exploratória". Esta versão 3 incorpora as correções aprovadas em 24/10/2026. Ela ainda não passou por terceira auditoria. Vale como método da **fase exploratória** e nunca como base para exibir adjacência ao cliente.
+**Situação:** a auditoria externa deu média 4,2 de 10 à versão 1 (`AUDITORIA_ESTATISTICA_EXTERNA.md`), 5,4 à versão 2 (rodada 2) e 5,9 à versão 3 (`AUDITORIA_ESTATISTICA_EXTERNA_RODADA3.md`), sempre com o mesmo veredito: "viável só para fase exploratória". Esta versão registra também as ressalvas da rodada 3, na seção 11. Vale como método da **fase exploratória** e nunca como base para exibir adjacência ao cliente.
 
 **Nota sobre os arquivos de resultado:** `fase2_fp.jsonl` traz a coluna `primario_participacao`, mas roda o estimador só de defasagem (ingênuo), não o direcional. A simulação usa um número mínimo de SED por grupo e mês como proxy do número de participantes distintos (um SED por participante, o melhor caso).
 
@@ -212,3 +212,18 @@ Chance de nível 1 no cliente de referência: 5% a 6,5% sob a nula, 33% a 48% so
 | `lib/review/sim/fase3_atenuacao.mjs` | Relação entre beta estimado e efeito injetado |
 | `docs/restart/sed-ingestion/fase2_*`, `fase3_*` | Resultados brutos |
 | `lib/review/sim/power.mjs`, `power_global.mjs`, `power2.mjs` | Versões anteriores, para histórico |
+
+## 11. Ressalvas da rodada 3 da auditoria (24/10/2026)
+
+O veredito da rodada 3 foi o mesmo: viável como instrumento exploratório interno, não para confirmação. Os pontos abaixo corrigem ou qualificam o texto acima.
+
+1. **O descarte de 3 meses tem custo não declarado antes.** Ele resolve o transitório rápido (7,5% para 5,7%), mas não o lento (tau de 6 a 10 meses: 9,9% a 15,7%) nem o início escalonado dos grupos (9% a 11%). E custa poder: com 15 meses de calendário, 40 grupos e RR 2,0, o poder é 65% usando todos os meses e 48% com descarte. A decisão de descartar deve ser revista na fase 1, com o padrão real de início.
+2. **Efeito mínimo fora da tabela de probabilidade.** As probabilidades da seção 7 não aplicam o corte em beta. Com o corte, o nível 3 cai de 64% para 42% no cenário medido. Tratar a tabela da seção 7 como teto. O beta é 7% a 20% do efeito injetado, côncavo e com desvio de cerca de 40%, então traduzir o efeito mínimo em beta exige o volume real.
+3. **Ciclo comum a vários clientes.** Três clientes com o mesmo calendário "confirmam" o viés em 14,1% das vezes. Replicar em clientes não prova independência do ciclo.
+4. **A corroboração herda o viés.** Com a pesquisa refletindo o estado latente do ciclo, o falso positivo conjunto é 11,7% contra 14,1% só no primário. Uma pesquisa independente do ciclo daria 1,0%, mas corroboraria o efeito real em só 2,2%. A corroboração, como está, não é proteção comprovada; vale como informação adicional, e uma variação exógena de A seria melhor.
+5. **O controle negativo não protege contra falso positivo.** Ele tem correlação de menos 0,55 a menos 0,60 com o primário e não barrou nenhum falso positivo nos testes. Só dispara com efeito fora da matriz (3% a 7%). Serve para detectar matriz incompleta, não como defesa.
+6. **Volume liberado.** O proxy de 5 SED por grupo e mês ignora a dominância e superestima os dados liberados. Entre 0% e 40% de meses perdidos há cerca de 40 pontos de poder em jogo (81% contra 59% com 20% perdidos). Tratar o mês suprimido como ausente, e não como zero, melhora o poder em 3 a 10 pontos sem custo no falso positivo: adotar na fase 2.
+7. **Privacidade.** Sobra o conjunto de 5 pessoas com contagens 1 ou 2. O banco não impõe a agregação entre grupos nem o mínimo de 10 grupos por cliente. O teste não cobre o limite exato de 50%, o privilégio mínimo do papel nem o isolamento com dado nos dois lados.
+8. **Divergência de números.** O cenário "autocorrelação começando em zero" aparece com 4,9% e com 8,8% em arquivos diferentes (tamanhos de amostra e configurações diferentes). Usar a faixa de 4,9% a 8,8%. A afirmação de que a janela cheia piora o ciclo vale só para o período 4 e para o atraso; no período 6 ela melhora.
+9. **O poder de 41% do degrau na rodada 2 era artefato do início do programa:** 46% sem descarte, 10% com descarte de 3.
+10. **Condições para o nível 3, segundo a auditoria:** diagnóstico de ausência de ciclo de grupo, atraso comum e transitório lento (ou variação exógena de A); poder recalculado com o volume real liberado pela regra do banco; efeito mínimo dentro da tabela; corroboração insensível ao ciclo; mês suprimido como ausente; agregação mínima de 10 grupos imposta no banco.
