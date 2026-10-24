@@ -1,0 +1,6 @@
+FP % com G=20, T de teste = 18 ; b = meses de descarte (fase 1) gerados a mais
+base	b0=5.3	b2=5.1	b3=4.9	b4=5.8	b6=6.3
+transitorio_tau2	b0=9.1	b2=6.3	b3=5.8	b4=5.6	b6=5.8
+transitorio_tau4_forte	b0=18.1	b2=10.5	b3=9.0	b4=8.8	b6=6.8
+ar_zero	b0=5.6	b2=6.3	b3=4.9	b4=4.6	b6=5.4
+tendencia_grupo_opostos	b0=5.3	b2=4.1	b3=4.3	b4=4.5	b6=3.3

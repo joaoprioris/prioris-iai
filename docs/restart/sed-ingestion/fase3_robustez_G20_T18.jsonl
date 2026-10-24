@@ -1,0 +1,8 @@
+{"cenario":"base","G":20,"T":18,"v2":"4.5","b2":"5.0","b3":"5.5","b2_det":"5.0","b2_cheia":"5.5","b3_det_cheia":"4.0"}
+{"cenario":"transitorio_tau2","G":20,"T":18,"v2":"7.5","b2":"5.5","b3":"4.8","b2_det":"4.5","b2_cheia":"4.8","b3_det_cheia":"6.0"}
+{"cenario":"transitorio_forte_tau4","G":20,"T":18,"v2":"17.5","b2":"10.0","b3":"9.0","b2_det":"3.5","b2_cheia":"14.2","b3_det_cheia":"4.0"}
+{"cenario":"ar_comeca_em_zero","G":20,"T":18,"v2":"6.5","b2":"6.3","b3":"8.8","b2_det":"4.5","b2_cheia":"7.2","b3_det_cheia":"4.5"}
+{"cenario":"ciclo_grupo_periodo6 (12 mundos)","G":20,"T":18,"v2":"media 15.1 max 85.5","b2":"media 14.1 max 76.0","b3":"media 13.7 max 74.5","b2_det":"media 15.8 max 87.0","b2_cheia":"media 10.0 max 31.5","b3_det_cheia":"media 13.1 max 41.5"}
+{"cenario":"ciclo_grupo_periodo4 (12 mundos)","G":20,"T":18,"v2":"media 9.4 max 34.0","b2":"media 9.0 max 31.5","b3":"media 8.4 max 36.0","b2_det":"media 9.0 max 38.0","b2_cheia":"media 13.8 max 35.0","b3_det_cheia":"media 16.0 max 43.0"}
+{"cenario":"cc_atraso (12 mundos)","G":20,"T":18,"v2":"media 6.9 max 14.0","b2":"media 6.8 max 11.0","b3":"media 7.4 max 12.0","b2_det":"media 7.0 max 14.5","b2_cheia":"media 13.5 max 40.0","b3_det_cheia":"media 15.5 max 43.5"}
+{"cenario":"tendencia_grupo_sinais_opostos","G":20,"T":18,"v2":"7.8","b2":"6.0","b3":"6.0","b2_det":"6.0","b2_cheia":"5.8","b3_det_cheia":"5.3"}

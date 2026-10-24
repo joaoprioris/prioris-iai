@@ -187,9 +187,12 @@ $$;
 REVOKE ALL ON FUNCTION prioris_review.adjacency_release() FROM PUBLIC;
 
 -- Contagem por dívida principal, agregada por grupo e ciclo, para a análise INTERNA da adjacência (fase exploratória).
--- A supressão vale para o grupo no ciclo: no mínimo 3 participantes distintos no total do grupo. Dentro dele as contagens
--- por dívida saem completas, porque a análise precisa da participação de cada dívida no grupo. Só o papel do motor executa
--- e o resultado nunca é apresentado ao cliente nem sai do motor por grupo (apenas estatísticas agregadas entre grupos).
+-- Supressão do grupo no ciclo, antes de liberar qualquer contagem:
+--   piso: no mínimo 5 participantes distintos no total do grupo (decisão do proprietário, após a auditoria externa);
+--   dominância: nenhum participante pode responder por mais de 50% dos SED do grupo no ciclo.
+-- Dentro do grupo liberado as contagens por dívida saem completas, porque a análise precisa da participação de cada dívida.
+-- Só o papel review_engine executa (nunca o que serve o painel). Os resultados por grupo não saem do motor: só estatísticas
+-- agregadas entre grupos, e apenas com no mínimo 10 grupos por cliente (regra de aplicação, não imposta aqui).
 CREATE FUNCTION prioris_review.group_cycle_release()
 RETURNS TABLE (group_id int, cycle_start date, debt_principal text, events bigint)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
@@ -198,9 +201,12 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
     FROM prioris_review.sed_events e
     JOIN prioris_review.cycles c ON c.client_id = e.client_id AND c.cycle_start = e.cycle_start
     WHERE e.client_id = current_setting('app.tenant', true) AND c.closed
+  ), por_pessoa AS (
+    SELECT group_id, cycle_start, contributor_token, count(*) AS n FROM base GROUP BY 1, 2, 3
   ), ok AS (
-    SELECT b.group_id, b.cycle_start FROM base b
-    GROUP BY b.group_id, b.cycle_start HAVING count(DISTINCT b.contributor_token) >= 3
+    SELECT group_id, cycle_start FROM por_pessoa
+    GROUP BY group_id, cycle_start
+    HAVING count(*) >= 5 AND max(n) * 2 <= sum(n)
   )
   SELECT b.group_id, b.cycle_start, b.debt_principal, count(*)
   FROM base b JOIN ok USING (group_id, cycle_start)

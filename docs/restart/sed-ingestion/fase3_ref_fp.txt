@@ -1,0 +1,7 @@
+FP % (G=20, T de teste=18, descarte 3): sem referência (t) | com referência de controles
+base	t=4.0 (max 4)	ref=13.0 (max 13)
+transitorio_tau2	t=5.0 (max 5)	ref=22.0 (max 22)
+ciclo_grupo_periodo6	t=14.9 (max 90)	ref=13.9 (max 93)
+ciclo_grupo_periodo4	t=8.4 (max 33)	ref=19.5 (max 58)
+cc_atraso	t=6.6 (max 14)	ref=19.9 (max 27)
+causa_comum_forte	t=3.5 (max 4)	ref=28.5 (max 28)

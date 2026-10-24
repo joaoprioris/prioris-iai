@@ -1,0 +1,6 @@
+{"G":40,"T":18,"injetado":0.05,"beta_medio":0.0109,"razao_estimado_sobre_injetado":0.22,"dp_entre_simulacoes":0.008}
+{"G":40,"T":18,"injetado":0.1,"beta_medio":0.0189,"razao_estimado_sobre_injetado":0.19,"dp_entre_simulacoes":0.0078}
+{"G":40,"T":18,"injetado":0.2,"beta_medio":0.0316,"razao_estimado_sobre_injetado":0.16,"dp_entre_simulacoes":0.0077}
+{"G":60,"T":12,"injetado":0.05,"beta_medio":0.0087,"razao_estimado_sobre_injetado":0.17,"dp_entre_simulacoes":0.0066}
+{"G":60,"T":12,"injetado":0.1,"beta_medio":0.0172,"razao_estimado_sobre_injetado":0.17,"dp_entre_simulacoes":0.0077}
+{"G":60,"T":12,"injetado":0.2,"beta_medio":0.0266,"razao_estimado_sobre_injetado":0.13,"dp_entre_simulacoes":0.0085}

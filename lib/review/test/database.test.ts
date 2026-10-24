@@ -195,7 +195,7 @@ describe("ciclos e publicação", { skip: skip() }, () => {
   });
 
   it("adjacência: publicada só ao motor, com a mesma supressão, e nunca sem adjacente", async () => {
-    const client = await db!.client("review_report");
+    const client = await db!.client("review_engine");
     try {
       await client.query("BEGIN");
       await client.query("SELECT set_config('app.tenant', $1, true)", ["cli_a"]);
@@ -214,40 +214,45 @@ describe("ciclos e publicação", { skip: skip() }, () => {
     await worker.end();
   });
 
-  it("liberação por grupo e ciclo: 3 participantes no grupo bastam, mesmo com 1 por dívida, e 2 continuam suprimidos", async () => {
+  it("liberação por grupo e ciclo: piso de 5 participantes e dominância de até 50%, só para o papel do motor", async () => {
     await superuser(async (c) => {
-      await c.query("INSERT INTO prioris_review.groups VALUES ('cli_a',3,'Financeiro'),('cli_a',4,'Jurídico')");
+      await c.query("INSERT INTO prioris_review.groups VALUES ('cli_a',3,'Financeiro'),('cli_a',4,'Jurídico'),('cli_a',5,'Compras')");
       await c.query("UPDATE prioris_review.cycles SET closed=false WHERE client_id='cli_a' AND cycle_start=$1", [date(closedMonth)]);
     });
-    const debts = ["evitacao_conflito", "comunicacao_ambigua", "confianca_erosionada"];
-    for (const [i, debt] of debts.entries()) await persist(envelope(sedPayload({ event_id: `g3-${i}`, contributor_token: token(30 + i), group_id: 3, debt_principal: debt, debt_adjacent: null }, inClosed(11))), connect);
-    for (const i of [0, 1]) await persist(envelope(sedPayload({ event_id: `g4-${i}`, contributor_token: token(40 + i), group_id: 4, debt_principal: "evitacao_conflito" }, inClosed(11))), connect);
+    const debts = ["evitacao_conflito", "comunicacao_ambigua", "confianca_erosionada", "decisao_postergada", "aprendizado_bloqueado"];
+    let k = 0;
+    const add = async (group: number, who: number, debt: string) =>
+      persist(envelope(sedPayload({ event_id: `gc-${k++}`, contributor_token: token(who), group_id: group, debt_principal: debt, debt_adjacent: null }, inClosed(11))), connect);
+    for (const [i, debt] of debts.entries()) await add(3, 30 + i, debt); // 5 participantes, 1 SED cada: liberado
+    for (const i of [0, 1, 2, 3]) await add(4, 40 + i, debts[i]); // 4 participantes: abaixo do piso
+    for (const i of [0, 1, 2, 3, 4]) await add(5, 50 + i, debts[i]); // 5 participantes, mas um deles passa de 50%
+    for (let i = 0; i < 6; i++) await add(5, 50, debts[0]);
     await closeCycle("cli_a", closedMonth);
     assert.ok(!(await release("cli_a", "sed_release")).some((r) => r.group_id === 3), "a liberação por célula suprime o grupo 3");
-    const client = await db!.client("review_report");
-    try {
-      await client.query("BEGIN");
-      await client.query("SELECT set_config('app.tenant', $1, true)", ["cli_a"]);
-      const rows = (await client.query("SELECT * FROM prioris_review.group_cycle_release()")).rows;
-      await client.query("COMMIT");
-      assert.deepEqual(rows.filter((r) => r.group_id === 3).map((r) => r.debt_principal).sort(), [...debts].sort());
-      assert.ok(rows.filter((r) => r.group_id === 3).every((r) => Number(r.events) === 1));
-      assert.ok(!rows.some((r) => r.group_id === 4), "grupo com 2 participantes continua suprimido");
-    } finally {
-      await client.end();
-    }
-    const other = await db!.client("review_report");
-    try {
-      await other.query("BEGIN");
-      await other.query("SELECT set_config('app.tenant', $1, true)", ["cli_b"]);
-      assert.equal((await other.query("SELECT * FROM prioris_review.group_cycle_release()")).rows.length, 0);
-      await other.query("COMMIT");
-    } finally {
+    const engine = async (tenant: string) => {
+      const client = await db!.client("review_engine");
+      try {
+        await client.query("BEGIN");
+        await client.query("SELECT set_config('app.tenant', $1, true)", [tenant]);
+        const rows = (await client.query("SELECT * FROM prioris_review.group_cycle_release()")).rows;
+        await client.query("COMMIT");
+        return rows;
+      } finally {
+        await client.end();
+      }
+    };
+    const rows = await engine("cli_a");
+    assert.deepEqual(rows.filter((r) => r.group_id === 3).map((r) => r.debt_principal).sort(), [...debts].sort());
+    assert.ok(rows.filter((r) => r.group_id === 3).every((r) => Number(r.events) === 1));
+    assert.ok(!rows.some((r) => r.group_id === 4), "4 participantes ficam abaixo do piso de 5");
+    assert.ok(!rows.some((r) => r.group_id === 5), "participante com mais de 50% dos SED suprime o grupo");
+    assert.equal((await engine("cli_b")).length, 0);
+    for (const role of ["review_ingest", "review_report"]) {
+      const other = await db!.client(role);
+      await assert.rejects(other.query("SELECT * FROM prioris_review.group_cycle_release()"), (e: { code?: string }) => e.code === "42501");
+      await assert.rejects(other.query("SELECT * FROM prioris_review.adjacency_release()"), (e: { code?: string }) => e.code === "42501");
       await other.end();
     }
-    const worker = await ingest();
-    await assert.rejects(worker.query("SELECT * FROM prioris_review.group_cycle_release()"), (e: { code?: string }) => e.code === "42501");
-    await worker.end();
   });
 
   it("resposta da pesquisa publica a média por participante só com 3 respondentes", async () => {
